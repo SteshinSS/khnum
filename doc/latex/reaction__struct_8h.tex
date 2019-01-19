@@ -1,0 +1,94 @@
+\hypertarget{reaction__struct_8h}{}\section{Utilities/reaction\+\_\+struct.h File Reference}
+\label{reaction__struct_8h}\index{Utilities/reaction\_struct.h@{Utilities/reaction\_struct.h}}
+
+
+contain struct \mbox{\hyperlink{struct_reaction}{Reaction}}  
+
+
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$vector$>$}\newline
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{struct_substrate}{Substrate}}
+\item 
+struct \mbox{\hyperlink{struct_chemical_equation}{Chemical\+Equation}}
+\item 
+struct \mbox{\hyperlink{struct_reaction}{Reaction}}
+\end{DoxyCompactItemize}
+\subsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{reaction__struct_8h_a76e0b5c1ca08c0b24ecd662e0ee20dee}\label{reaction__struct_8h_a76e0b5c1ca08c0b24ecd662e0ee20dee}} 
+using {\bfseries Atom\+Representation} = std\+::string
+\item 
+\mbox{\Hypertarget{reaction__struct_8h_a12e515420ff8266cfb8a127965528c14}\label{reaction__struct_8h_a12e515420ff8266cfb8a127965528c14}} 
+using {\bfseries Substrate\+Coefficient} = std\+::string
+\item 
+\mbox{\Hypertarget{reaction__struct_8h_a45d3146bfc80e39bf24ada4abef8835b}\label{reaction__struct_8h_a45d3146bfc80e39bf24ada4abef8835b}} 
+using {\bfseries Chemical\+Equation\+Side} = std\+::vector$<$ \mbox{\hyperlink{struct_substrate}{Substrate}} $>$
+\item 
+\mbox{\Hypertarget{reaction__struct_8h_ab3eee0087229bd875fbeb8a3640376f5}\label{reaction__struct_8h_ab3eee0087229bd875fbeb8a3640376f5}} 
+using {\bfseries Rate} = double
+\item 
+\mbox{\Hypertarget{reaction__struct_8h_ad3c7048a67bdf9b089d2408458c95710}\label{reaction__struct_8h_ad3c7048a67bdf9b089d2408458c95710}} 
+using {\bfseries Basis} = std\+::string
+\item 
+\mbox{\Hypertarget{reaction__struct_8h_a6eb91683a67353b25d378383f22ee710}\label{reaction__struct_8h_a6eb91683a67353b25d378383f22ee710}} 
+using {\bfseries Deviation} = double
+\item 
+\mbox{\Hypertarget{reaction__struct_8h_a28f4cef834727fc04e7e9bc4cb215087}\label{reaction__struct_8h_a28f4cef834727fc04e7e9bc4cb215087}} 
+using {\bfseries Bound} = double
+\end{DoxyCompactItemize}
+\subsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \mbox{\hyperlink{reaction__struct_8h_a360e20f142dbd097b0d0d0620111b30b}{Reaction\+Type}} \{ \newline
+\mbox{\hyperlink{reaction__struct_8h_a360e20f142dbd097b0d0d0620111b30ba4db0fbab476c79c4efa105ecf395a265}{Reaction\+Type\+::\+Irreversible}}, 
+\mbox{\hyperlink{reaction__struct_8h_a360e20f142dbd097b0d0d0620111b30ba67d2f6740a8eaebf4d5c6f79be8da481}{Reaction\+Type\+::\+Forward}}, 
+\mbox{\hyperlink{reaction__struct_8h_a360e20f142dbd097b0d0d0620111b30bab3263eb38f8903efc271cc7a760da510}{Reaction\+Type\+::\+Backward}}, 
+\mbox{\hyperlink{reaction__struct_8h_a360e20f142dbd097b0d0d0620111b30bab61301fb90f056314c89ebf706caba30}{Reaction\+Type\+::\+Isotopomer\+Balance}}, 
+\newline
+\mbox{\hyperlink{reaction__struct_8h_a360e20f142dbd097b0d0d0620111b30baf1106b3d7dc939b889b508e0797be38c}{Reaction\+Type\+::\+Metabolite\+Balance}}
+ \}
+\begin{DoxyCompactList}\small\item\em see Flux\+Pyt User Guide page 3 \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+contain struct \mbox{\hyperlink{struct_reaction}{Reaction}} 
+
+
+
+\subsection{Enumeration Type Documentation}
+\mbox{\Hypertarget{reaction__struct_8h_a360e20f142dbd097b0d0d0620111b30b}\label{reaction__struct_8h_a360e20f142dbd097b0d0d0620111b30b}} 
+\index{reaction\_struct.h@{reaction\_struct.h}!ReactionType@{ReactionType}}
+\index{ReactionType@{ReactionType}!reaction\_struct.h@{reaction\_struct.h}}
+\subsubsection{\texorpdfstring{ReactionType}{ReactionType}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{reaction__struct_8h_a360e20f142dbd097b0d0d0620111b30b}{Reaction\+Type}}\hspace{0.3cm}{\ttfamily [strong]}}
+
+
+
+see Flux\+Pyt User Guide page 3 
+
+\begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{Irreversible@{Irreversible}!reaction\_struct.h@{reaction\_struct.h}}\index{reaction\_struct.h@{reaction\_struct.h}!Irreversible@{Irreversible}}}\mbox{\Hypertarget{reaction__struct_8h_a360e20f142dbd097b0d0d0620111b30ba4db0fbab476c79c4efa105ecf395a265}\label{reaction__struct_8h_a360e20f142dbd097b0d0d0620111b30ba4db0fbab476c79c4efa105ecf395a265}} 
+Irreversible&Irreversible reaction used for both metabolite and isotopomer balance (F) \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{Forward@{Forward}!reaction\_struct.h@{reaction\_struct.h}}\index{reaction\_struct.h@{reaction\_struct.h}!Forward@{Forward}}}\mbox{\Hypertarget{reaction__struct_8h_a360e20f142dbd097b0d0d0620111b30ba67d2f6740a8eaebf4d5c6f79be8da481}\label{reaction__struct_8h_a360e20f142dbd097b0d0d0620111b30ba67d2f6740a8eaebf4d5c6f79be8da481}} 
+Forward&Forward reaction of reversible one (FR) \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{Backward@{Backward}!reaction\_struct.h@{reaction\_struct.h}}\index{reaction\_struct.h@{reaction\_struct.h}!Backward@{Backward}}}\mbox{\Hypertarget{reaction__struct_8h_a360e20f142dbd097b0d0d0620111b30bab3263eb38f8903efc271cc7a760da510}\label{reaction__struct_8h_a360e20f142dbd097b0d0d0620111b30bab3263eb38f8903efc271cc7a760da510}} 
+Backward&Backward reaction of reversible one (R) \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{IsotopomerBalance@{IsotopomerBalance}!reaction\_struct.h@{reaction\_struct.h}}\index{reaction\_struct.h@{reaction\_struct.h}!IsotopomerBalance@{IsotopomerBalance}}}\mbox{\Hypertarget{reaction__struct_8h_a360e20f142dbd097b0d0d0620111b30bab61301fb90f056314c89ebf706caba30}\label{reaction__struct_8h_a360e20f142dbd097b0d0d0620111b30bab61301fb90f056314c89ebf706caba30}} 
+Isotopomer\+Balance&\mbox{\hyperlink{struct_reaction}{Reaction}} used for isotopomer balancing only (S) \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{MetaboliteBalance@{MetaboliteBalance}!reaction\_struct.h@{reaction\_struct.h}}\index{reaction\_struct.h@{reaction\_struct.h}!MetaboliteBalance@{MetaboliteBalance}}}\mbox{\Hypertarget{reaction__struct_8h_a360e20f142dbd097b0d0d0620111b30baf1106b3d7dc939b889b508e0797be38c}\label{reaction__struct_8h_a360e20f142dbd097b0d0d0620111b30baf1106b3d7dc939b889b508e0797be38c}} 
+Metabolite\+Balance&Irreversible reaction which is not used for only metabolite balance (B) \\
+\hline
+
+\end{DoxyEnumFields}

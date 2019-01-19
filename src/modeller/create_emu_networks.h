@@ -1,0 +1,13 @@
+#ifndef CFLEX_CREATE_EMU_NETWORKS_H
+#define CFLEX_CREATE_EMU_NETWORKS_H
+
+#include "../utilities/EMU.h"
+#include "../utilities/MID.h"
+
+#include <vector>
+
+std::vector<EMUNetwork> CreateEMUNetworks(const std::vector<EMUReaction> &reactions,
+                                          const std::vector<EMU> &input_emu_list,
+                                          const std::vector<EMU> &measured_isotopes);
+
+#endif //CFLEX_CREATE_EMU_NETWORKS_H
