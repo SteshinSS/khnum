@@ -8,6 +8,7 @@
 #include <queue>
 #include <exception>
 #include <set>
+#include <algorithm>
 #include <iostream>
 std::vector<EMUReaction> CreateAllEMUReactions(const std::vector<Reaction> &reactions,
                                                const std::vector<EMU> &observable_emus) {

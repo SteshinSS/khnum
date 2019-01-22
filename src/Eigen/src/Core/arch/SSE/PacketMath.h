@@ -258,8 +258,8 @@ template<> EIGEN_STRONG_INLINE Packet4i pmin<Packet4i>(const Packet4i& a, const 
   return _mm_min_epi32(a,b);
 #else
   // after some bench, this version *is* faster than a scalar implementation
-  Packet4i atom_states = _mm_cmplt_epi32(a,b);
-  return _mm_or_si128(_mm_and_si128(atom_states,a),_mm_andnot_si128(atom_states,b));
+  Packet4i mask = _mm_cmplt_epi32(a,b);
+  return _mm_or_si128(_mm_and_si128(mask,a),_mm_andnot_si128(mask,b));
 #endif
 }
 
@@ -271,8 +271,8 @@ template<> EIGEN_STRONG_INLINE Packet4i pmax<Packet4i>(const Packet4i& a, const 
   return _mm_max_epi32(a,b);
 #else
   // after some bench, this version *is* faster than a scalar implementation
-  Packet4i atom_states = _mm_cmpgt_epi32(a,b);
-  return _mm_or_si128(_mm_and_si128(atom_states,a),_mm_andnot_si128(atom_states,b));
+  Packet4i mask = _mm_cmpgt_epi32(a,b);
+  return _mm_or_si128(_mm_and_si128(mask,a),_mm_andnot_si128(mask,b));
 #endif
 }
 
@@ -853,8 +853,8 @@ template<> EIGEN_STRONG_INLINE Packet4f pinsertlast(const Packet4f& a, float b)
 #ifdef EIGEN_VECTORIZE_SSE4_1
   return _mm_blend_ps(a,pset1<Packet4f>(b),(1<<3));
 #else
-  const Packet4f atom_states = _mm_castsi128_ps(_mm_setr_epi32(0x0,0x0,0x0,0xFFFFFFFF));
-  return _mm_or_ps(_mm_andnot_ps(atom_states, a), _mm_and_ps(atom_states, pset1<Packet4f>(b)));
+  const Packet4f mask = _mm_castsi128_ps(_mm_setr_epi32(0x0,0x0,0x0,0xFFFFFFFF));
+  return _mm_or_ps(_mm_andnot_ps(mask, a), _mm_and_ps(mask, pset1<Packet4f>(b)));
 #endif
 }
 
@@ -863,8 +863,8 @@ template<> EIGEN_STRONG_INLINE Packet2d pinsertlast(const Packet2d& a, double b)
 #ifdef EIGEN_VECTORIZE_SSE4_1
   return _mm_blend_pd(a,pset1<Packet2d>(b),(1<<1));
 #else
-  const Packet2d atom_states = _mm_castsi128_pd(_mm_setr_epi32(0x0,0x0,0xFFFFFFFF,0xFFFFFFFF));
-  return _mm_or_pd(_mm_andnot_pd(atom_states, a), _mm_and_pd(atom_states, pset1<Packet2d>(b)));
+  const Packet2d mask = _mm_castsi128_pd(_mm_setr_epi32(0x0,0x0,0xFFFFFFFF,0xFFFFFFFF));
+  return _mm_or_pd(_mm_andnot_pd(mask, a), _mm_and_pd(mask, pset1<Packet2d>(b)));
 #endif
 }
 

@@ -406,7 +406,7 @@ EIGEN_STRONG_INLINE EIGEN_DEVICE_FUNC float half_to_float(__half_raw h) {
 
 #else
   const float32_bits magic = { 113 << 23 };
-  const unsigned int shifted_exp = 0x7c00 << 13; // exponent atom_states after shift
+  const unsigned int shifted_exp = 0x7c00 << 13; // exponent mask after shift
   float32_bits o;
 
   o.u = (h.x & 0x7fff) << 13;             // exponent/mantissa bits

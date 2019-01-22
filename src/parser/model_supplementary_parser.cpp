@@ -117,8 +117,7 @@ std::vector<std::string> ParseEachLine(const std::string &file_path) {
 
     std::ifstream input(file_path);
     std::string next_line;
-    while (getline(input, next_line, '\r')) {
-        next_line.erase(std::remove(next_line.begin(), next_line.end(), '\n'), next_line.end());
+    while (getline(input, next_line)) {
         lines.emplace_back(next_line);
     }
 

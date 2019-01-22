@@ -1,4 +1,4 @@
-#include "Interface/cli.h"
+#include "interface/cli.h"
 #include <iostream>
 
 int main() {

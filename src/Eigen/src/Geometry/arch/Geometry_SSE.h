@@ -116,7 +116,7 @@ struct quat_product<Architecture::SSE, Derived, OtherDerived, double>
   EIGEN_UNUSED_VARIABLE(mask)
   pstoret<double,Packet2d,ResAlignment>(&res.x(), _mm_addsub_pd(t1, preverse(t2)));
 #else
-  pstoret<double,Packet2d,ResAlignment>(&res.x(), padd(t1, pxor(atom_states,preverse(t2))));
+  pstoret<double,Packet2d,ResAlignment>(&res.x(), padd(t1, pxor(mask,preverse(t2))));
 #endif
   
   /*
@@ -130,7 +130,7 @@ struct quat_product<Architecture::SSE, Derived, OtherDerived, double>
   EIGEN_UNUSED_VARIABLE(mask)
   pstoret<double,Packet2d,ResAlignment>(&res.z(), preverse(_mm_addsub_pd(preverse(t1), t2)));
 #else
-  pstoret<double,Packet2d,ResAlignment>(&res.z(), psub(t1, pxor(atom_states,preverse(t2))));
+  pstoret<double,Packet2d,ResAlignment>(&res.z(), psub(t1, pxor(mask,preverse(t2))));
 #endif
 
   return res;

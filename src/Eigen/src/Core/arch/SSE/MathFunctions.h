@@ -141,9 +141,9 @@ Packet4f pexp<Packet4f>(const Packet4f& _x)
   emm0 = _mm_cvttps_epi32(fx);
   tmp  = _mm_cvtepi32_ps(emm0);
   /* if greater, substract 1 */
-  Packet4f atom_states = _mm_cmpgt_ps(tmp, fx);
-  atom_states = _mm_and_ps(atom_states, p4f_1);
-  fx = psub(tmp, atom_states);
+  Packet4f mask = _mm_cmpgt_ps(tmp, fx);
+  mask = _mm_and_ps(mask, p4f_1);
+  fx = psub(tmp, mask);
 #endif
 
   tmp = pmul(fx, p4f_cephes_exp_C1);
@@ -209,9 +209,9 @@ Packet2d pexp<Packet2d>(const Packet2d& _x)
   emm0 = _mm_cvttpd_epi32(fx);
   tmp  = _mm_cvtepi32_pd(emm0);
   /* if greater, substract 1 */
-  Packet2d atom_states = _mm_cmpgt_pd(tmp, fx);
-  atom_states = _mm_and_pd(atom_states, p2d_1);
-  fx = psub(tmp, atom_states);
+  Packet2d mask = _mm_cmpgt_pd(tmp, fx);
+  mask = _mm_and_pd(mask, p2d_1);
+  fx = psub(tmp, mask);
 #endif
 
   tmp = pmul(fx, p2d_cephes_exp_C1);
@@ -303,7 +303,7 @@ Packet4f psin<Packet4f>(const Packet4f& _x)
   /* get the swap sign flag */
   emm0 = _mm_and_si128(emm2, p4i_4);
   emm0 = _mm_slli_epi32(emm0, 29);
-  /* get the polynom selection atom_states
+  /* get the polynom selection mask
      there is one polynom for 0 <= x <= Pi/4
      and another one for Pi/4<x<=Pi/2
 
@@ -398,7 +398,7 @@ Packet4f pcos<Packet4f>(const Packet4f& _x)
   /* get the swap sign flag */
   emm0 = _mm_andnot_si128(emm2, p4i_4);
   emm0 = _mm_slli_epi32(emm0, 29);
-  /* get the polynom selection atom_states */
+  /* get the polynom selection mask */
   emm2 = _mm_and_si128(emm2, p4i_2);
   emm2 = _mm_cmpeq_epi32(emm2, _mm_setzero_si128());
 

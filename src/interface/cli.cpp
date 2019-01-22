@@ -5,6 +5,7 @@
 #include "../utilities/EMU.h"
 #include "../modeller/create_emu_reactions.h"
 #include "../modeller/create_stoichiometry_matrix.h"
+#include "../modeller/create_emu_networks.h"
 #include "../math/math_utilites.h"
 #include "../math/flux_balance_analysis.h"
 #include "../utilities/debug_utilites.h"
@@ -43,6 +44,9 @@ void RunCli() {
         // Calculate MID vector of every input emu from the input_emu_list
         std::vector<EMUandMID> input_substrates_mids = CalculateInputMid(input_substrates, input_emu_list);
 
+        // ../modeller/create_emu_networks.h
+        // Create EMU networks. See Antoniewicz 2007
+        std::vector<EMUNetwork> emu_networks = CreateEMUNetworks(all_emu_reactions, input_emu_list, measured_isotopes);
 
 
 

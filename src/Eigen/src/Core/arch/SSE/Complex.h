@@ -75,10 +75,10 @@ template<> EIGEN_STRONG_INLINE Packet2cf pmul<Packet2cf>(const Packet2cf& a, con
 //                                  _mm_mul_ps(vec4f_swizzle1(a.v, 1, 1, 3, 3),
 //                                             vec4f_swizzle1(b.v, 1, 0, 3, 2))));
   #else
-  const __m128 atom_states = _mm_castsi128_ps(_mm_setr_epi32(0x80000000,0x00000000,0x80000000,0x00000000));
+  const __m128 mask = _mm_castsi128_ps(_mm_setr_epi32(0x80000000,0x00000000,0x80000000,0x00000000));
   return Packet2cf(_mm_add_ps(_mm_mul_ps(vec4f_swizzle1(a.v, 0, 0, 2, 2), b.v),
                               _mm_xor_ps(_mm_mul_ps(vec4f_swizzle1(a.v, 1, 1, 3, 3),
-                                                    vec4f_swizzle1(b.v, 1, 0, 3, 2)), atom_states)));
+                                                    vec4f_swizzle1(b.v, 1, 0, 3, 2)), mask)));
   #endif
 }
 
@@ -185,8 +185,8 @@ template<> struct conj_helper<Packet2cf, Packet2cf, false,true>
     #ifdef EIGEN_VECTORIZE_SSE3
     return internal::pmul(a, pconj(b));
     #else
-    const __m128 atom_states = _mm_castsi128_ps(_mm_setr_epi32(0x00000000,0x80000000,0x00000000,0x80000000));
-    return Packet2cf(_mm_add_ps(_mm_xor_ps(_mm_mul_ps(vec4f_swizzle1(a.v, 0, 0, 2, 2), b.v), atom_states),
+    const __m128 mask = _mm_castsi128_ps(_mm_setr_epi32(0x00000000,0x80000000,0x00000000,0x80000000));
+    return Packet2cf(_mm_add_ps(_mm_xor_ps(_mm_mul_ps(vec4f_swizzle1(a.v, 0, 0, 2, 2), b.v), mask),
                                 _mm_mul_ps(vec4f_swizzle1(a.v, 1, 1, 3, 3),
                                            vec4f_swizzle1(b.v, 1, 0, 3, 2))));
     #endif
@@ -203,10 +203,10 @@ template<> struct conj_helper<Packet2cf, Packet2cf, true,false>
     #ifdef EIGEN_VECTORIZE_SSE3
     return internal::pmul(pconj(a), b);
     #else
-    const __m128 atom_states = _mm_castsi128_ps(_mm_setr_epi32(0x00000000,0x80000000,0x00000000,0x80000000));
+    const __m128 mask = _mm_castsi128_ps(_mm_setr_epi32(0x00000000,0x80000000,0x00000000,0x80000000));
     return Packet2cf(_mm_add_ps(_mm_mul_ps(vec4f_swizzle1(a.v, 0, 0, 2, 2), b.v),
                                 _mm_xor_ps(_mm_mul_ps(vec4f_swizzle1(a.v, 1, 1, 3, 3),
-                                                      vec4f_swizzle1(b.v, 1, 0, 3, 2)), atom_states)));
+                                                      vec4f_swizzle1(b.v, 1, 0, 3, 2)), mask)));
     #endif
   }
 };
@@ -221,8 +221,8 @@ template<> struct conj_helper<Packet2cf, Packet2cf, true,true>
     #ifdef EIGEN_VECTORIZE_SSE3
     return pconj(internal::pmul(a, b));
     #else
-    const __m128 atom_states = _mm_castsi128_ps(_mm_setr_epi32(0x00000000,0x80000000,0x00000000,0x80000000));
-    return Packet2cf(_mm_sub_ps(_mm_xor_ps(_mm_mul_ps(vec4f_swizzle1(a.v, 0, 0, 2, 2), b.v), atom_states),
+    const __m128 mask = _mm_castsi128_ps(_mm_setr_epi32(0x00000000,0x80000000,0x00000000,0x80000000));
+    return Packet2cf(_mm_sub_ps(_mm_xor_ps(_mm_mul_ps(vec4f_swizzle1(a.v, 0, 0, 2, 2), b.v), mask),
                                 _mm_mul_ps(vec4f_swizzle1(a.v, 1, 1, 3, 3),
                                            vec4f_swizzle1(b.v, 1, 0, 3, 2))));
     #endif
@@ -298,10 +298,10 @@ template<> EIGEN_STRONG_INLINE Packet1cd pmul<Packet1cd>(const Packet1cd& a, con
                                  _mm_mul_pd(vec2d_swizzle1(a.v, 1, 1),
                                             vec2d_swizzle1(b.v, 1, 0))));
   #else
-  const __m128d atom_states = _mm_castsi128_pd(_mm_set_epi32(0x0,0x0,0x80000000,0x0));
+  const __m128d mask = _mm_castsi128_pd(_mm_set_epi32(0x0,0x0,0x80000000,0x0));
   return Packet1cd(_mm_add_pd(_mm_mul_pd(vec2d_swizzle1(a.v, 0, 0), b.v),
                               _mm_xor_pd(_mm_mul_pd(vec2d_swizzle1(a.v, 1, 1),
-                                                    vec2d_swizzle1(b.v, 1, 0)), atom_states)));
+                                                    vec2d_swizzle1(b.v, 1, 0)), mask)));
   #endif
 }
 
@@ -370,8 +370,8 @@ template<> struct conj_helper<Packet1cd, Packet1cd, false,true>
     #ifdef EIGEN_VECTORIZE_SSE3
     return internal::pmul(a, pconj(b));
     #else
-    const __m128d atom_states = _mm_castsi128_pd(_mm_set_epi32(0x80000000,0x0,0x0,0x0));
-    return Packet1cd(_mm_add_pd(_mm_xor_pd(_mm_mul_pd(vec2d_swizzle1(a.v, 0, 0), b.v), atom_states),
+    const __m128d mask = _mm_castsi128_pd(_mm_set_epi32(0x80000000,0x0,0x0,0x0));
+    return Packet1cd(_mm_add_pd(_mm_xor_pd(_mm_mul_pd(vec2d_swizzle1(a.v, 0, 0), b.v), mask),
                                 _mm_mul_pd(vec2d_swizzle1(a.v, 1, 1),
                                            vec2d_swizzle1(b.v, 1, 0))));
     #endif
@@ -388,10 +388,10 @@ template<> struct conj_helper<Packet1cd, Packet1cd, true,false>
     #ifdef EIGEN_VECTORIZE_SSE3
     return internal::pmul(pconj(a), b);
     #else
-    const __m128d atom_states = _mm_castsi128_pd(_mm_set_epi32(0x80000000,0x0,0x0,0x0));
+    const __m128d mask = _mm_castsi128_pd(_mm_set_epi32(0x80000000,0x0,0x0,0x0));
     return Packet1cd(_mm_add_pd(_mm_mul_pd(vec2d_swizzle1(a.v, 0, 0), b.v),
                                 _mm_xor_pd(_mm_mul_pd(vec2d_swizzle1(a.v, 1, 1),
-                                                      vec2d_swizzle1(b.v, 1, 0)), atom_states)));
+                                                      vec2d_swizzle1(b.v, 1, 0)), mask)));
     #endif
   }
 };
@@ -406,8 +406,8 @@ template<> struct conj_helper<Packet1cd, Packet1cd, true,true>
     #ifdef EIGEN_VECTORIZE_SSE3
     return pconj(internal::pmul(a, b));
     #else
-    const __m128d atom_states = _mm_castsi128_pd(_mm_set_epi32(0x80000000,0x0,0x0,0x0));
-    return Packet1cd(_mm_sub_pd(_mm_xor_pd(_mm_mul_pd(vec2d_swizzle1(a.v, 0, 0), b.v), atom_states),
+    const __m128d mask = _mm_castsi128_pd(_mm_set_epi32(0x80000000,0x0,0x0,0x0));
+    return Packet1cd(_mm_sub_pd(_mm_xor_pd(_mm_mul_pd(vec2d_swizzle1(a.v, 0, 0), b.v), mask),
                                 _mm_mul_pd(vec2d_swizzle1(a.v, 1, 1),
                                            vec2d_swizzle1(b.v, 1, 0))));
     #endif
