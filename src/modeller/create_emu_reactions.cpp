@@ -15,7 +15,7 @@ std::vector<EMUReaction> CreateAllEMUReactions(const std::vector<Reaction> &reac
     std::vector<EMUReaction> all_emu_reactions;
     std::queue<EMU> emu_to_check; // contains all EMUs for finding their synthesis reactions
     std::set<EMU> already_checked_emu; // contains checked EMUs
-    for (auto const &emu : observable_emus) { // initializing queue
+    for (const EMU &emu : observable_emus) { // initializing queue
         emu_to_check.push(emu);
     }
 
@@ -28,9 +28,9 @@ std::vector<EMUReaction> CreateAllEMUReactions(const std::vector<Reaction> &reac
             // find all reactions which synthesize the next_emu
             std::vector<Reaction> synthesis_reactions = GetSynthesisReactions(reactions, next_emu);
 
-            for (Reaction const &reaction : synthesis_reactions) {
+            for (const Reaction &reaction : synthesis_reactions) {
                 std::vector<EMUReaction> new_emu_reactions = CreateNewEMUReactions(reaction, next_emu);
-                for (EMUReaction const &emu_reaction : new_emu_reactions) {
+                for (const EMUReaction &emu_reaction : new_emu_reactions) {
                     all_emu_reactions.push_back(emu_reaction);
                     AddNewEMUInQueue(&emu_to_check, already_checked_emu, emu_reaction.left);
                 }
@@ -44,10 +44,10 @@ std::vector<EMUReaction> CreateAllEMUReactions(const std::vector<Reaction> &reac
 std::vector<Reaction> GetSynthesisReactions(const std::vector<Reaction> &reactions,
                                             const EMU &emu) {
     std::vector<Reaction> synthesis_reactions;
-    for (Reaction const &reaction : reactions) {
+    for (const Reaction &reaction : reactions) {
         if (reaction.type != ReactionType::MetaboliteBalance) {
             bool is_reaction_produce_emu = false;
-            for (Substrate const &substrate : reaction.chemical_equation.right) {
+            for (const Substrate &substrate : reaction.chemical_equation.right) {
                 if (substrate.name == emu.name) {
                     is_reaction_produce_emu = true;
                     break;
@@ -75,7 +75,7 @@ std::vector<EMUReaction> CreateAllEMUReactions(const Reaction &reaction,
                                                const EMU &produced_emu) {
     std::vector<EMUReaction> all_new_emu_reactions;
     // find all occurrences of produced_emu in the reaction
-    for (Substrate const &substrate : reaction.chemical_equation.right) {
+    for (const Substrate &substrate : reaction.chemical_equation.right) {
         if (substrate.name == produced_emu.name) {
             all_new_emu_reactions.push_back(CreateOneEMUReaction(reaction, substrate, produced_emu));
         }
@@ -109,7 +109,7 @@ EMUReaction CreateOneEMUReaction(const Reaction &reaction,
 
             // finding precursor substrate that produces this atom
             bool is_atom_found = false;
-            for (Substrate const &precursor : reaction.chemical_equation.left) {
+            for (const Substrate &precursor : reaction.chemical_equation.left) {
                 int substrate_atom_position = precursor.formula.find(atom_name);
                 if (substrate_atom_position != std::string::npos) {
                     is_atom_found = true;
@@ -150,7 +150,7 @@ EMUReaction CreateOneEMUReaction(const Reaction &reaction,
 
 std::vector<EMUReaction> SelectUniqueEMUReactions(const std::vector<EMUReaction> &all_new_emu_reactions) {
     std::vector<EMUReaction> unique_new_emu_reactions;
-    for (EMUReaction const &reaction : all_new_emu_reactions) {
+    for (const EMUReaction &reaction : all_new_emu_reactions) {
         auto reaction_position = std::find(unique_new_emu_reactions.begin(),
                                            unique_new_emu_reactions.end(), reaction);
         if (reaction_position == unique_new_emu_reactions.end()) {

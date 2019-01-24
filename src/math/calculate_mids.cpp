@@ -36,6 +36,9 @@ std::vector<EMUandMID> SolveOneNetwork(const std::vector<Flux> &fluxes,
             } else {
                 unknown_emus.push_back(reaction.left[0].emu);
             }
+        } else {
+            EMU new_convolve;
+
         }
 
     }

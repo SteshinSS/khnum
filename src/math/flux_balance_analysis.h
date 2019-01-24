@@ -21,28 +21,28 @@ struct FluxVariability {
 
 std::vector<Flux> EstablishInitialFluxes(const Matrix &stoichiometry_matrix,
                                          const std::vector<Reaction> &reactions,
-                                         const std::vector<std::string> included_metabolites);
+                                         const std::vector<std::string> &included_metabolites);
 
 std::vector<FluxVariability> EstablishAllFluxRanges(const Matrix &stoichiometry_matrix,
                                                     const std::vector<Reaction> &reactions,
-                                                    const std::vector<std::string> included_metabolites);
+                                                    const std::vector<std::string> &included_metabolites);
 
 
 FluxVariability EstablishFluxRange(int reaction_index,
                                    const Matrix &stoichiometry_matrix,
                                    const std::vector<Reaction> &reactions,
-                                   const std::vector<std::string> included_metabolites);
+                                   const std::vector<std::string> &included_metabolites);
 
 Flux EstablishExtremeFlux(int reaction_index,
                           const Matrix &stoichiometry_matrix,
                           const std::vector<Reaction> &reactions,
-                          const std::vector<std::string> included_metabolites,
+                          const std::vector<std::string> &included_metabolites,
                           bool maximize);
 
 void CreateLinearProblem(LinearProblem &linear_problem,
                          const Matrix &stoichiometry_matrix,
                          const std::vector<Reaction> &reactions,
-                         const std::vector<std::string> included_metabolites);
+                         const std::vector<std::string> &included_metabolites);
 
 void PrepareMatrixForGLPK(const Matrix &matrix,
                           LinearProblem &linear_problem);

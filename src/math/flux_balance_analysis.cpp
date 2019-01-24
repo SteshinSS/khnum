@@ -12,7 +12,7 @@
 // should think twice about Class LinearProblem design
 std::vector<Flux> EstablishInitialFluxes(const Matrix &stoichiometry_matrix,
                                          const std::vector<Reaction> &reactions,
-                                         const std::vector<std::string> included_metabolites) {
+                                         const std::vector<std::string> &included_metabolites) {
     glp_term_out(GLP_OFF); //disable terminal output
     LinearProblem initialize_fluxes(stoichiometry_matrix.size());
     CreateLinearProblem(initialize_fluxes, stoichiometry_matrix, reactions, included_metabolites);
@@ -20,7 +20,7 @@ std::vector<Flux> EstablishInitialFluxes(const Matrix &stoichiometry_matrix,
     glp_set_obj_dir(initialize_fluxes, GLP_MIN);
 
     int current_reaction_index = 1;
-    for (auto const &reaction : reactions) {
+    for (const Reaction &reaction : reactions) {
         if (reaction.type != ReactionType::IsotopomerBalance) {
             glp_set_obj_coef(initialize_fluxes, current_reaction_index, 1.0);
         }
@@ -37,10 +37,10 @@ std::vector<Flux> EstablishInitialFluxes(const Matrix &stoichiometry_matrix,
 
 std::vector<FluxVariability> EstablishAllFluxRanges(const Matrix &stoichiometry_matrix,
                                                     const std::vector<Reaction> &reactions,
-                                                    const std::vector<std::string> included_metabolites) {
+                                                    const std::vector<std::string> &included_metabolites) {
     std::vector<FluxVariability> flux_ranges;
     int current_reaction_index = 1;
-    for (auto const &reaction : reactions) {
+    for (const Reaction &reaction : reactions) {
         if (reaction.type != ReactionType::IsotopomerBalance) {
             flux_ranges.emplace_back(EstablishFluxRange(current_reaction_index, stoichiometry_matrix,
                                                         reactions, included_metabolites));
@@ -54,7 +54,7 @@ std::vector<FluxVariability> EstablishAllFluxRanges(const Matrix &stoichiometry_
 FluxVariability EstablishFluxRange(int reaction_index,
                                    const Matrix &stoichiometry_matrix,
                                    const std::vector<Reaction> &reactions,
-                                   const std::vector<std::string> included_metabolites) {
+                                   const std::vector<std::string> &included_metabolites) {
     Flux lower_bound = EstablishExtremeFlux(reaction_index, stoichiometry_matrix,
                                             reactions, included_metabolites, false);
 
@@ -71,7 +71,7 @@ FluxVariability EstablishFluxRange(int reaction_index,
 Flux EstablishExtremeFlux(int reaction_index,
                           const Matrix &stoichiometry_matrix,
                           const std::vector<Reaction> &reactions,
-                          const std::vector<std::string> included_metabolites,
+                          const std::vector<std::string> &included_metabolites,
                           bool maximize) {
     glp_term_out(GLP_OFF);
     LinearProblem bound(stoichiometry_matrix.size());
@@ -81,7 +81,7 @@ Flux EstablishExtremeFlux(int reaction_index,
     glp_set_obj_dir(bound, objective_direction);
 
     int current_reaction_index = 1;
-    for (auto const &reaction : reactions) {
+    for (const auto &reaction : reactions) {
         if (reaction.type != ReactionType::IsotopomerBalance) {
             glp_set_obj_coef(bound, current_reaction_index, 0.0);
         }
@@ -97,7 +97,7 @@ Flux EstablishExtremeFlux(int reaction_index,
 //
 void CreateLinearProblem(LinearProblem &linear_problem, const Matrix &stoichiometry_matrix,
                          const std::vector<Reaction> &reactions,
-                         const std::vector<std::string> included_metabolites) {
+                         const std::vector<std::string> &included_metabolites) {
     PrepareMatrixForGLPK(stoichiometry_matrix, linear_problem);
 
     glp_add_rows(linear_problem, stoichiometry_matrix.rows());
@@ -112,7 +112,7 @@ void CreateLinearProblem(LinearProblem &linear_problem, const Matrix &stoichiome
 
     // adding bounds
     int current_reaction_index = 1;
-    for (auto const &reaction : reactions) {
+    for (const Reaction &reaction : reactions) {
         if (reaction.type != ReactionType::IsotopomerBalance) {
             glp_set_col_name(linear_problem, current_reaction_index, reaction.name.c_str());
 

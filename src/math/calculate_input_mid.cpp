@@ -9,7 +9,7 @@
 std::vector<EMUandMID> CalculateInputMid(const std::vector<InputSubstrate> &input_substrates,
                                          const std::vector<EMU> &input_emus) {
     std::vector<EMUandMID> input_mids;
-    for (const EMU input_emu : input_emus) {
+    for (const EMU &input_emu : input_emus) {
         // find input substrate with such name
         auto input_substrate_iterator = std::find_if(input_substrates.begin(),
                                                      input_substrates.end(),
@@ -46,7 +46,7 @@ EMUandMID CalculateOneMid(const InputSubstrate &input_substrate,
     MID new_mid(emu_size + 1, 0.0);
     for (int mass_shift = 0; mass_shift < emu_size + 1; ++mass_shift) {
         double fraction = 0.0;
-        for (const auto mixture : input_substrate.mixtures) {
+        for (const auto &mixture : input_substrate.mixtures) {
             // fraction of this input mixture of such mass shift
             double mixture_fraction = 0.0;
 
