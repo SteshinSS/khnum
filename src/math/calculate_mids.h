@@ -7,14 +7,15 @@
 #include "../utilities/reaction_struct.h"
 
 #include <vector>
+#include <map>
 
-std::vector<EMUandMID> CalculateMids(const std::vector<Flux> &fluxes,
+std::vector<EMUandMID> CalculateMids(const std::map<std::string, Flux> &fluxes,
                                      const std::vector<EMUNetwork> &networks,
                                      const std::vector<EMUandMID> &input_substrates_mids,
                                      const std::vector<EMU> &measured_isotopes);
 
 
-std::vector<EMUandMID> SolveOneNetwork(const std::vector<Flux> &fluxes,
+std::vector<EMUandMID> SolveOneNetwork(const std::map<std::string, Flux> &fluxes,
                                        const EMUNetwork &network,
                                        const std::vector<EMUandMID> &known_mids,
                                        int current_size);

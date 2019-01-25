@@ -65,10 +65,10 @@ void RunCli() {
 
         // ../math/flux_balance_analysis.h
         // Run preliminary FBA for calculate initial fluxes
-        std::vector<Flux> initial_fluxes = EstablishInitialFluxes(
+        std::map<std::string, Flux> initial_fluxes = EstablishInitialFluxes(
             stoichiometry_matrix, reactions, included_metabolites);
 
-        std::vector<FluxVariability> flux_ranges = EstablishAllFluxRanges(
+        std::map<std::string, FluxVariability>  flux_ranges = EstablishAllFluxRanges(
             stoichiometry_matrix, reactions, included_metabolites);
 
         SolveOneNetwork(initial_fluxes, emu_networks[0], input_substrates_mids, 1);

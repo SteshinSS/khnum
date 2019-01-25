@@ -7,10 +7,11 @@
 #include <vector>
 #include <string>
 #include <cmath>
+#include <map>
 
 // should think about functions parameters
 // should think twice about Class LinearProblem design
-std::vector<Flux> EstablishInitialFluxes(const Matrix &stoichiometry_matrix,
+std::map<std::string, Flux> EstablishInitialFluxes(const Matrix &stoichiometry_matrix,
                                          const std::vector<Reaction> &reactions,
                                          const std::vector<std::string> &included_metabolites) {
     glp_term_out(GLP_OFF); //disable terminal output
@@ -27,23 +28,24 @@ std::vector<Flux> EstablishInitialFluxes(const Matrix &stoichiometry_matrix,
     }
 
     glp_simplex(initialize_fluxes, NULL);
-    std::vector<Flux> initial_fluxes;
+    std::map<std::string, Flux> initial_fluxes;
     for (int i = 1; i < stoichiometry_matrix.cols(); ++i) {
-        initial_fluxes.push_back(glp_get_col_prim(initialize_fluxes, i));
+        std::string reaction_name = glp_get_col_name(initialize_fluxes, i);
+        initial_fluxes[reaction_name] = (glp_get_col_prim(initialize_fluxes, i));
     }
 
     return initial_fluxes;
 }
 
-std::vector<FluxVariability> EstablishAllFluxRanges(const Matrix &stoichiometry_matrix,
+std::map<std::string, FluxVariability>  EstablishAllFluxRanges(const Matrix &stoichiometry_matrix,
                                                     const std::vector<Reaction> &reactions,
                                                     const std::vector<std::string> &included_metabolites) {
-    std::vector<FluxVariability> flux_ranges;
+    std::map<std::string, FluxVariability> flux_ranges;
     int current_reaction_index = 1;
     for (const Reaction &reaction : reactions) {
         if (reaction.type != ReactionType::IsotopomerBalance) {
-            flux_ranges.emplace_back(EstablishFluxRange(current_reaction_index, stoichiometry_matrix,
-                                                        reactions, included_metabolites));
+            flux_ranges[reaction.name] = EstablishFluxRange(current_reaction_index, stoichiometry_matrix,
+                                                        reactions, included_metabolites);
             ++current_reaction_index;
         }
     }

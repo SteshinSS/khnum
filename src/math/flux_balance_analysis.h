@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <string>
+#include <map>
 
 // Contains FBA-calculated flux ranges
 // probably should rename, so it won't confuse with input bounds
@@ -19,11 +20,11 @@ struct FluxVariability {
   Flux upper_bound;
 };
 
-std::vector<Flux> EstablishInitialFluxes(const Matrix &stoichiometry_matrix,
+std::map<std::string, Flux> EstablishInitialFluxes(const Matrix &stoichiometry_matrix,
                                          const std::vector<Reaction> &reactions,
                                          const std::vector<std::string> &included_metabolites);
 
-std::vector<FluxVariability> EstablishAllFluxRanges(const Matrix &stoichiometry_matrix,
+std::map<std::string, FluxVariability> EstablishAllFluxRanges(const Matrix &stoichiometry_matrix,
                                                     const std::vector<Reaction> &reactions,
                                                     const std::vector<std::string> &included_metabolites);
 
