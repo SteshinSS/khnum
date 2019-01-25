@@ -14,6 +14,8 @@
 std::map<std::string, Flux> EstablishInitialFluxes(const Matrix &stoichiometry_matrix,
                                          const std::vector<Reaction> &reactions,
                                          const std::vector<std::string> &included_metabolites) {
+    std::map<std::string, Flux> initial_fluxes;
+
     glp_term_out(GLP_OFF); //disable terminal output
     LinearProblem initialize_fluxes(stoichiometry_matrix.size());
     CreateLinearProblem(initialize_fluxes, stoichiometry_matrix, reactions, included_metabolites);
@@ -24,11 +26,13 @@ std::map<std::string, Flux> EstablishInitialFluxes(const Matrix &stoichiometry_m
     for (const Reaction &reaction : reactions) {
         if (reaction.type != ReactionType::IsotopomerBalance) {
             glp_set_obj_coef(initialize_fluxes, current_reaction_index, 1.0);
+        } else {
+            initial_fluxes[reaction.name] = reaction.rate;
         }
     }
 
     glp_simplex(initialize_fluxes, NULL);
-    std::map<std::string, Flux> initial_fluxes;
+
     for (int i = 1; i < stoichiometry_matrix.cols(); ++i) {
         std::string reaction_name = glp_get_col_name(initialize_fluxes, i);
         initial_fluxes[reaction_name] = (glp_get_col_prim(initialize_fluxes, i));

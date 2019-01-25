@@ -61,11 +61,16 @@ std::vector<EMUandMID> SolveOneNetwork(const std::map<std::string, Flux> &fluxes
         }
     }
 
-    // make unique for known and unknown emus
+    // delete repeated emus
+    std::sort(known_emus.begin(), known_emus.end());
+    known_emus.erase(std::unique(known_emus.begin(), known_emus.end()), known_emus.end());
 
-    Matrix A(unknown_emus.size(), unknown_emus.size());
+    std::sort(unknown_emus.begin(), unknown_emus.end());
+    unknown_emus.erase(std::unique(unknown_emus.begin(), unknown_emus.end()), unknown_emus.end());
+
+    Matrix A = Matrix::Zero(unknown_emus.size(), unknown_emus.size());
     // Matrix X(unknown_emus.size(), current_size + 1);
-    Matrix B(unknown_emus.size(), known_emus.size());
+    Matrix B = Matrix::Zero(unknown_emus.size(), known_emus.size());
     Matrix Y(known_emus.size(), current_size + 1);
 
     // form Y
@@ -75,8 +80,79 @@ std::vector<EMUandMID> SolveOneNetwork(const std::map<std::string, Flux> &fluxes
         }
     }
 
-    std::cerr << Y;
+    // form A and B
 
+    for (const EMUReaction &reaction : network) {
+        if (reaction.left.size() == 1) {
+            if (!IsEMUKnown(reaction.left[0].emu, known_emus)) {
+                // they are both unknown
+                int position_of_substrate = FindUnknownEMUsPosition(reaction.left[0].emu, unknown_emus);
+                int position_of_product = FindUnknownEMUsPosition(reaction.right.emu, unknown_emus);
+                A(position_of_product, position_of_product) += (-reaction.right.coefficient) * fluxes.at(reaction.name);
+
+                // Why does it multiple by product coefficient? Shouldn't it be substrate coefficient?
+                A(position_of_product, position_of_substrate) += reaction.right.coefficient * fluxes.at(reaction.name);
+            } else {
+                // Product is unknown, Substrate is known
+
+                int position_of_substrate = FindKnownEMUsPosition(reaction.left[0].emu, known_emus);
+                int position_of_product = FindUnknownEMUsPosition(reaction.right.emu, unknown_emus);
+
+                A(position_of_product, position_of_product) += (-reaction.right.coefficient) * fluxes.at(reaction.name);
+
+                B(position_of_product, position_of_substrate) +=
+                        (-reaction.left[0].coefficient) * fluxes.at(reaction.name);
+            }
+        }
+    }
+
+    std::cerr << Y << "\n \n \n";
+
+    std::cerr << A << "\n \n \n";
+
+    std::cerr << B << "\n \n \n";
+
+    Matrix BY = B * Y;
+
+    Matrix X = A.colPivHouseholderQr().solve(BY);
+
+    std::cerr << X;
+}
+
+
+bool IsEMUKnown(const EMU &emu,
+                const std::vector<EMUandMID> known_emus) {
+    auto position = find_if(known_emus.begin(),
+                            known_emus.end(),
+                            [&emu](const EMUandMID &known_mid) {
+                                return known_mid.emu == emu;
+                            });
+
+    if (position == known_emus.end()) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+int FindUnknownEMUsPosition(const EMU &emu,
+                          const std::vector<EMU> unknown_emus) {
+    auto position = find(unknown_emus.begin(),
+                         unknown_emus.end(),
+                         emu);
+
+    return position - unknown_emus.begin();
+}
+
+int FindKnownEMUsPosition(const EMU &emu,
+        const std::vector<EMUandMID> known_emus) {
+    auto position = find_if(known_emus.begin(),
+                            known_emus.end(),
+                            [&emu](const EMUandMID &known_mid) {
+                                return known_mid.emu == emu;
+                            });
+
+    return position - known_emus.begin();
 }
 
 EMUandMID ConvolveEMU(const EMUReactionSide &convolve_reaction,

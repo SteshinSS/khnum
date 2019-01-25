@@ -20,6 +20,18 @@ std::vector<EMUandMID> SolveOneNetwork(const std::map<std::string, Flux> &fluxes
                                        const std::vector<EMUandMID> &known_mids,
                                        int current_size);
 
+
+bool IsEMUKnown(const EMU &emu,
+                const std::vector<EMUandMID> known_emus);
+
+
+int FindUnknownEMUsPosition(const EMU &emu,
+                            const std::vector<EMU> unknown_emus);
+
+
+int FindKnownEMUsPosition(const EMU &emu,
+                          const std::vector<EMUandMID> known_emus);
+
 const MID * GetMID(const EMU &emu,
                 const std::vector<EMUandMID> &known_mids);
 

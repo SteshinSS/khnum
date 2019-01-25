@@ -14,5 +14,7 @@ struct EMUandMID {
 
 
 MID operator*(const MID &lhs, const MID &rhs);
+bool operator==(const EMUandMID &lhs, const EMUandMID &rhs);
 
+bool operator<(const EMUandMID &lhs, const EMUandMID &rhs);
 #endif //CFLEX_MID_H

@@ -1,6 +1,7 @@
 #include "MID.h"
 
 #include <algorithm>
+#include <tuple>
 
 MID operator*(const MID &lhs, const MID &rhs) {
     MID convolve_result(lhs.size() + rhs.size() - 1, 0.0);
@@ -14,4 +15,13 @@ MID operator*(const MID &lhs, const MID &rhs) {
     }
 
     return convolve_result;
+}
+
+
+bool operator==(const EMUandMID &lhs, const EMUandMID &rhs) {
+    return std::tie(lhs.emu, lhs.mid) == std::tie(rhs.emu, rhs.mid);
+}
+
+bool operator<(const EMUandMID &lhs, const EMUandMID &rhs) {
+    return std::tie(lhs.emu, lhs.mid) < std::tie(rhs.emu, rhs.mid);
 }
