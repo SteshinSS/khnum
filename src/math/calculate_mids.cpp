@@ -17,16 +17,23 @@ std::vector<EMUandMID> CalculateMids(const std::map<std::string, Flux> &fluxes,
                                      std::vector<EMUandMID> known_mids,
                                      const std::vector<EMU> &measured_isotopes) {
     for (const EMUNetwork &network : networks) {
-        int current_size = 0;
-        for (const bool state : network[0].right.emu.atom_states) {
-            current_size += static_cast<int>(state);
-        }
-
-        SolveOneNetwork(fluxes, network, known_mids, current_size);
+        SolveOneNetwork(fluxes, network, known_mids);
     }
 
-    // calculated MIDs of measured isotopes
-    std::vector<EMUandMID> calculated_mids;
+    return SelectMeasuredMID(known_mids, measured_isotopes);
+}
+
+int FindNetworkSize(const EMUNetwork &network) {
+    int current_size = 0;
+    for (const bool state : network[0].right.emu.atom_states) {
+        current_size += static_cast<int>(state);
+    }
+    return current_size;
+}
+
+std::vector<EMUandMID> SelectMeasuredMID(const std::vector<EMUandMID> &known_mids,
+                                         const std::vector<EMU> &measured_isotopes) {
+    std::vector<EMUandMID> measured_mids;
 
     for (const EMU &measured_isotope : measured_isotopes) {
         auto position = find_if(known_mids.begin(),
@@ -36,64 +43,32 @@ std::vector<EMUandMID> CalculateMids(const std::map<std::string, Flux> &fluxes,
                                 });
 
         if (position != known_mids.end()) {
-            calculated_mids.push_back(*position);
+            measured_mids.push_back(*position);
         } else {
             throw std::runtime_error("There is measured isotope which haven't computed through metabolic network");
         }
     }
 
-    return calculated_mids;
+    return measured_mids;
 }
 
 void SolveOneNetwork(const std::map<std::string, Flux> &fluxes,
                      const EMUNetwork &network,
-                     std::vector<EMUandMID> &known_mids,
-                     int current_size) {
+                     std::vector<EMUandMID> &known_mids) {
+    const int current_size = FindNetworkSize(network);
+
     // Solve AX = BY equation
     // See Antoniewitcz 2007
 
-    // unknown_emus for X
+    // EMUs which MIDs are unknown
+    // for X matrix
     std::vector<EMU> unknown_emus;
 
-    // known_emus for Y
+    // EMUs which MIDs are known
+    // for Y matrix
     std::vector<EMUandMID> known_emus;
 
-    // creates list of all emus of known and unknown mids
-    for (const EMUReaction &reaction : network) {
-        // checking the left side
-        if (reaction.left.size() == 1) {
-            const MID *mid = GetMID(reaction.left[0].emu, known_mids);
-            if (mid) {
-                EMUandMID new_known;
-                new_known.emu = reaction.left[0].emu;
-                new_known.mid = *mid;
-                known_emus.push_back(new_known);
-            } else {
-                unknown_emus.push_back(reaction.left[0].emu);
-            }
-        } else {
-            EMUandMID convolution = ConvolveEMU(reaction.left, known_mids);
-            known_emus.push_back(convolution);
-        }
-
-        // checking the right side
-        const MID *mid = GetMID(reaction.right.emu, known_emus);
-        if (mid) {
-            EMUandMID new_known;
-            new_known.emu = reaction.right.emu;
-            new_known.mid = *mid;
-            known_emus.push_back(new_known);
-        } else {
-            unknown_emus.push_back(reaction.right.emu);
-        }
-    }
-
-    // delete repeated emus
-    std::sort(known_emus.begin(), known_emus.end());
-    known_emus.erase(std::unique(known_emus.begin(), known_emus.end()), known_emus.end());
-
-    std::sort(unknown_emus.begin(), unknown_emus.end());
-    unknown_emus.erase(std::unique(unknown_emus.begin(), unknown_emus.end()), unknown_emus.end());
+    FillEMULists(unknown_emus, known_emus, network, known_mids);
 
     Matrix A = Matrix::Zero(unknown_emus.size(), unknown_emus.size());
     // Matrix X(unknown_emus.size(), current_size + 1);
@@ -153,6 +128,52 @@ void SolveOneNetwork(const std::map<std::string, Flux> &fluxes,
 
         known_mids.push_back(new_known_emu);
     }
+
+    return;
+}
+
+void FillEMULists(std::vector<EMU> &unknown_emus,
+                  std::vector<EMUandMID> known_emus,
+                  const EMUNetwork &network,
+                  const std::vector<EMUandMID> &known_mids) {
+
+    // Fills known_emus and unknown_emus
+    for (const EMUReaction &reaction : network) {
+
+        // checking the left side
+        if (reaction.left.size() == 1) {
+            const MID *mid = GetMID(reaction.left[0].emu, known_mids);
+            if (mid) {
+                EMUandMID new_known;
+                new_known.emu = reaction.left[0].emu;
+                new_known.mid = *mid;
+                known_emus.push_back(new_known);
+            } else {
+                unknown_emus.push_back(reaction.left[0].emu);
+            }
+        } else {
+            EMUandMID convolution = ConvolveEMU(reaction.left, known_mids);
+            known_emus.push_back(convolution);
+        }
+
+        // checking the right side
+        const MID *mid = GetMID(reaction.right.emu, known_emus);
+        if (mid) {
+            EMUandMID new_known;
+            new_known.emu = reaction.right.emu;
+            new_known.mid = *mid;
+            known_emus.push_back(new_known);
+        } else {
+            unknown_emus.push_back(reaction.right.emu);
+        }
+    }
+
+    // delete repeated emus
+    std::sort(known_emus.begin(), known_emus.end());
+    known_emus.erase(std::unique(known_emus.begin(), known_emus.end()), known_emus.end());
+
+    std::sort(unknown_emus.begin(), unknown_emus.end());
+    unknown_emus.erase(std::unique(unknown_emus.begin(), unknown_emus.end()), unknown_emus.end());
 
     return;
 }
