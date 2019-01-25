@@ -14,7 +14,14 @@ std::vector<EMUandMID> CalculateMids(const std::vector<Flux> &fluxes,
                                      const std::vector<EMU> &measured_isotopes);
 
 
-bool IsMIDKnown(const EMU &emu,
+std::vector<EMUandMID> SolveOneNetwork(const std::vector<Flux> &fluxes,
+                                       const EMUNetwork &network,
+                                       const std::vector<EMUandMID> &known_mids,
+                                       int current_size);
+
+const MID * GetMID(const EMU &emu,
                 const std::vector<EMUandMID> &known_mids);
 
+EMUandMID ConvolveEMU(const EMUReactionSide &convolve_reaction,
+                      const std::vector<EMUandMID> &known_mids);
 #endif //CFLEX_CALCULATE_MIDS_H

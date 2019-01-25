@@ -12,4 +12,7 @@ struct EMUandMID {
   MID mid;
 };
 
+
+MID operator*(const MID &lhs, const MID &rhs);
+
 #endif //CFLEX_MID_H

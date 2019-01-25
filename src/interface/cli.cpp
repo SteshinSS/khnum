@@ -13,6 +13,7 @@
 #include "../modeller/create_emu_list.h"
 #include "../math/calculate_input_mid.h"
 #include "../utilities/MID.h"
+#include "../math/calculate_mids.h"
 
 #include <iostream>
 #include <fstream>
@@ -70,6 +71,7 @@ void RunCli() {
         std::vector<FluxVariability> flux_ranges = EstablishAllFluxRanges(
             stoichiometry_matrix, reactions, included_metabolites);
 
+        SolveOneNetwork(initial_fluxes, emu_networks[0], input_substrates_mids, 1);
 
 
     } catch (std::runtime_error &error) {
