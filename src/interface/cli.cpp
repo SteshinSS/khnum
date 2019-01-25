@@ -71,8 +71,7 @@ void RunCli() {
         std::map<std::string, FluxVariability>  flux_ranges = EstablishAllFluxRanges(
             stoichiometry_matrix, reactions, included_metabolites);
 
-        SolveOneNetwork(initial_fluxes, emu_networks[0], input_substrates_mids, 1);
-
+        std::vector<EMUandMID> answer = CalculateMids(initial_fluxes, emu_networks, input_substrates_mids, measured_isotopes);
 
     } catch (std::runtime_error &error) {
         std::cerr << error.what() << std::endl;

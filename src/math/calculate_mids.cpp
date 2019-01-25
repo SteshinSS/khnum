@@ -13,14 +13,23 @@
 
 std::vector<EMUandMID> CalculateMids(const std::map<std::string, Flux> &fluxes,
                                      const std::vector<EMUNetwork> &networks,
-                                     const std::vector<EMUandMID> &input_substrates_mids,
+                                     std::vector<EMUandMID> known_mids,
                                      const std::vector<EMU> &measured_isotopes) {
+    for (const EMUNetwork &network : networks) {
+        int current_size = 0;
+        for (const bool state : network[0].right.emu.atom_states) {
+            current_size += static_cast<int>(state);
+        }
 
+        SolveOneNetwork(fluxes, network, known_mids, current_size);
+    }
+
+    return known_mids;
 }
 
-std::vector<EMUandMID> SolveOneNetwork(const std::map<std::string, Flux> &fluxes,
+void SolveOneNetwork(const std::map<std::string, Flux> &fluxes,
                                        const EMUNetwork &network,
-                                       const std::vector<EMUandMID> &known_mids,
+                                       std::vector<EMUandMID> &known_mids,
                                        int current_size) {
     // Solve AX = BY equation
     // See Antoniewitcz 2007
@@ -106,17 +115,20 @@ std::vector<EMUandMID> SolveOneNetwork(const std::map<std::string, Flux> &fluxes
         }
     }
 
-    std::cerr << Y << "\n \n \n";
-
-    std::cerr << A << "\n \n \n";
-
-    std::cerr << B << "\n \n \n";
-
     Matrix BY = B * Y;
-
     Matrix X = A.colPivHouseholderQr().solve(BY);
+    
+    for (int previously_unknown_index = 0; previously_unknown_index < unknown_emus.size(); ++previously_unknown_index) {
+        EMUandMID new_known_emu;
+        new_known_emu.emu = unknown_emus[previously_unknown_index];
+        for (int mass_shift = 0; mass_shift < current_size + 1; ++mass_shift) {
+            new_known_emu.mid.push_back(X(previously_unknown_index, mass_shift));
+        }
 
-    std::cerr << X;
+        known_mids.push_back(new_known_emu);
+    }
+
+    return;
 }
 
 

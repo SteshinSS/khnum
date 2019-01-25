@@ -11,13 +11,13 @@
 
 std::vector<EMUandMID> CalculateMids(const std::map<std::string, Flux> &fluxes,
                                      const std::vector<EMUNetwork> &networks,
-                                     const std::vector<EMUandMID> &input_substrates_mids,
+                                     std::vector<EMUandMID> known_mids,
                                      const std::vector<EMU> &measured_isotopes);
 
 
-std::vector<EMUandMID> SolveOneNetwork(const std::map<std::string, Flux> &fluxes,
+void SolveOneNetwork(const std::map<std::string, Flux> &fluxes,
                                        const EMUNetwork &network,
-                                       const std::vector<EMUandMID> &known_mids,
+                                       std::vector<EMUandMID> &known_mids,
                                        int current_size);
 
 
