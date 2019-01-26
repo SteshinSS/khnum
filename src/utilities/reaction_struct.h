@@ -62,4 +62,9 @@ struct Reaction {
 // probably better to move into a separate header
 using Flux = double;
 
+struct FluxVariability {
+    Flux lower_bound;
+    Flux upper_bound;
+};
+
 #endif

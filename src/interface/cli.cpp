@@ -21,6 +21,8 @@
 #include <vector>
 #include <string>
 
+#include <gsl/gsl_sf_bessel.h>
+
 void RunCli() {
     try {
 
@@ -75,6 +77,7 @@ void RunCli() {
         std::vector<EMUandMID> answer = CalculateMids(initial_fluxes,
                                                       emu_networks, input_substrates_mids, measured_isotopes);
 
+        std::map<std::string, Flux> fluxes =
     } catch (std::runtime_error &error) {
         std::cerr << error.what() << std::endl;
     }
