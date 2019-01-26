@@ -58,7 +58,7 @@ void RunCli() {
         // ../parser/model_supplementary_parser.h
         std::vector<std::string> excluded_metabolites = ParseExcludedMetabolites("../model/excluded_metabolites.txt");
         std::vector<std::string> included_metabolites = CreateIncludedMetaboliteList(
-            full_metabolite_list, excluded_metabolites);
+                full_metabolite_list, excluded_metabolites);
 
         // ../modeller/create_stoichiometry_matrix.h
         Matrix stoichiometry_matrix = CreateStoichiometryMatrix(reactions, included_metabolites);
@@ -66,12 +66,14 @@ void RunCli() {
         // ../math/flux_balance_analysis.h
         // Run preliminary FBA for calculate initial fluxes
         std::map<std::string, Flux> initial_fluxes = EstablishInitialFluxes(
-            stoichiometry_matrix, reactions, included_metabolites);
+                stoichiometry_matrix, reactions, included_metabolites);
 
-        std::map<std::string, FluxVariability>  flux_ranges = EstablishAllFluxRanges(
-            stoichiometry_matrix, reactions, included_metabolites);
+        std::map<std::string, FluxVariability> flux_ranges = EstablishAllFluxRanges(
+                stoichiometry_matrix, reactions, included_metabolites);
 
-        std::vector<EMUandMID> answer = CalculateMids(initial_fluxes, emu_networks, input_substrates_mids, measured_isotopes);
+
+        std::vector<EMUandMID> answer = CalculateMids(initial_fluxes,
+                                                      emu_networks, input_substrates_mids, measured_isotopes);
 
     } catch (std::runtime_error &error) {
         std::cerr << error.what() << std::endl;
