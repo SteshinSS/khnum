@@ -14,6 +14,7 @@
 #include "../math/calculate_input_mid.h"
 #include "../utilities/MID.h"
 #include "../math/calculate_mids.h"
+#include "../math/metabolic_flux_analysis.h"
 
 #include <iostream>
 #include <fstream>
@@ -21,10 +22,10 @@
 #include <vector>
 #include <string>
 
-#include <gsl/gsl_sf_bessel.h>
 
 void RunCli() {
     try {
+
 
         // ../parser/model_parser.h
         std::vector<Reaction> reactions = ParseReactions("../model/model.csv");
@@ -73,11 +74,10 @@ void RunCli() {
         std::map<std::string, FluxVariability> flux_ranges = EstablishAllFluxRanges(
                 stoichiometry_matrix, reactions, included_metabolites);
 
+        std::map<std::string, Flux> answer = EstimateFluxes(emu_networks,
+                                                            initial_fluxes,
+                                                            flux_ranges);
 
-        std::vector<EMUandMID> answer = CalculateMids(initial_fluxes,
-                                                      emu_networks, input_substrates_mids, measured_isotopes);
-
-        std::map<std::string, Flux> fluxes =
     } catch (std::runtime_error &error) {
         std::cerr << error.what() << std::endl;
     }

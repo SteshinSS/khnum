@@ -5,6 +5,8 @@
 #include "../utilities/EMU.h"
 #include "../utilities/MID.h"
 
+#include "../alglib/optimization.h"
+
 #include <vector>
 #include <string>
 #include <map>
@@ -13,5 +15,9 @@ std::map<std::string, Flux> EstimateFluxes(const std::vector<EMUNetwork> &networ
                                            const std::map<std::string, Flux> &initial_fluxes,
                                            const std::map<std::string, FluxVariability> &flux_ranges);
 
+
+void CalculateResidual(const alglib::real_1d_array &free_fluxes,
+                       alglib::real_1d_array &residuals,
+                       void *ptr);
 
 #endif //CFLEX_METABOLIC_FLUX_ANALYSIS_H
