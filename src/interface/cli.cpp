@@ -16,6 +16,7 @@
 #include "../math/calculate_mids.h"
 #include "../math/metabolic_flux_analysis.h"
 #include "../modeller/sort_reactions.h"
+#include "../utilities/objective_parameters.h"
 
 #include <iostream>
 #include <fstream>
@@ -81,9 +82,24 @@ void RunCli() {
         std::map<std::string, FluxVariability> flux_ranges = EstablishAllFluxRanges(
                 stoichiometry_matrix, reactions, included_metabolites);
 
-        std::map<std::string, Flux> answer = EstimateFluxes(emu_networks,
+        ObjectiveParameters parameters;
+        parameters.measured_isotopes = &measured_emus;
+        parameters.networks = &emu_networks;
+        parameters.reactions = &reactions;
+        parameters.input_mids = &input_substrates_mids;
+        parameters.measurements = &measurements;
+        parameters.nullspace = nullptr;
+
+        std::map<std::string, Flux> answer = EstimateFluxes(&parameters,
                                                             initial_fluxes,
-                                                            flux_ranges);
+                                                            flux_ranges,
+                                                            stoichiometry_matrix,
+                                                            reactions);
+
+        for (const Reaction &reaction : reactions) {
+            std::cerr << reaction.name << " " << answer[reaction.name] << std::endl;
+        }
+
 
     } catch (std::runtime_error &error) {
         std::cerr << error.what() << std::endl;

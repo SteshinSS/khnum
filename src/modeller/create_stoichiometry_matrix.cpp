@@ -20,14 +20,16 @@ Matrix CreateStoichiometryMatrix(const std::vector<Reaction> &reactions,
     }
     Matrix stoichiometry_matrix(metabolite_number, reaction_number);
 
-    for (int reaction = 0; reaction < reaction_number; ++reaction) {
+    int stoichiometry_reaction_number = 0;
+    for (int reaction = 0; reaction < reactions.size(); ++reaction) {
         if (reactions[reaction].type != ReactionType::IsotopomerBalance) {
             for (int metabolite = 0; metabolite < metabolite_number; ++metabolite) {
                 std::string current_metabolite_name = metabolite_list.at(metabolite);
-                stoichiometry_matrix(metabolite, reaction) = GetTotalCoefficient(
+                stoichiometry_matrix(metabolite, stoichiometry_reaction_number) = GetTotalCoefficient(
                     reactions.at(reaction).chemical_equation,
                     current_metabolite_name);
             }
+            ++stoichiometry_reaction_number;
         }
     }
 

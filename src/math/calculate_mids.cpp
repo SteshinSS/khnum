@@ -12,7 +12,7 @@
 #include <exception>
 
 
-std::vector<EMUandMID> CalculateMids(const std::vector<Flux> &fluxes,
+std::vector<EMUandMID> CalculateMids(const std::map<std::string, Flux> &fluxes,
                                      const std::vector<EMUNetwork> &networks,
                                      std::vector<EMUandMID> known_mids,
                                      const std::vector<EMU> &measured_isotopes) {

@@ -51,6 +51,11 @@ std::map<std::string, FluxVariability>  EstablishAllFluxRanges(const Matrix &sto
             flux_ranges[reaction.name] = EstablishFluxRange(current_reaction_index, stoichiometry_matrix,
                                                         reactions, included_metabolites);
             ++current_reaction_index;
+        } else {
+            FluxVariability new_variability;
+            new_variability.lower_bound = reaction.lower_bound;
+            new_variability.upper_bound = reaction.upper_bound;
+            flux_ranges[reaction.name] = new_variability;
         }
     }
 
