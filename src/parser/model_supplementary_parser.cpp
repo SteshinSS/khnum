@@ -41,24 +41,28 @@ std::vector<EMU> ParseMeasuredIsotopes(const std::string &measured_isotopes_path
     return measured_isotopes;
 }
 
-std::vector<EMUandMID> ParseMeasurments(const std::string &measurements_path,
+std::vector<Measurement> ParseMeasurments(const std::string &measurements_path,
                                         const std::vector<EMU> &measured_isotopes) {
-    std::vector<EMUandMID> measurements;
+    std::vector<Measurement> measurements;
     std::ifstream input(measurements_path);
     // skip table head-line
     input.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
     std::string raw_line;
     for (const EMU &isotope : measured_isotopes) {
-        EMUandMID new_isotope;
-        new_isotope.emu = isotope;
+        Measurement new_measurement;
+        new_measurement.emu = isotope;
         for (int mass_shift = 0; mass_shift < isotope.atom_states.size() + 1; ++mass_shift) {
             getline(input, raw_line);
             std::stringstream line(raw_line);
-            double fraction = std::stod(GetCell(line));
-            new_isotope.mid.push_back(fraction);
+
+            double value = std::stod(GetCell(line));
+            new_measurement.mid.push_back(value);
+
+            double error = std::stod(GetCell(line));
+            new_measurement.errors.push_back(error);
         }
-        measurements.push_back(new_isotope);
+        measurements.push_back(new_measurement);
     }
 
     return measurements;

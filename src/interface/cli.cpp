@@ -38,7 +38,7 @@ void RunCli() {
         std::vector<EMU> measured_emus = ParseMeasuredIsotopes("../model/measured_isotopes.txt");
 
         // ../parser/model_supplementary_parser.h
-        std::vector<EMUandMID> measurements = ParseMeasurments("../model/measurements.csv", measured_emus);
+        std::vector<Measurement> measurements = ParseMeasurments("../model/measurements.csv", measured_emus);
 
         // ../modeller/create_emu_reactions.h
         // Creates all elementary reaction in term of EMU
@@ -80,11 +80,11 @@ void RunCli() {
 
         std::map<std::string, FluxVariability> flux_ranges = EstablishAllFluxRanges(
                 stoichiometry_matrix, reactions, included_metabolites);
-/*
+
         std::map<std::string, Flux> answer = EstimateFluxes(emu_networks,
                                                             initial_fluxes,
                                                             flux_ranges);
-*/
+
     } catch (std::runtime_error &error) {
         std::cerr << error.what() << std::endl;
     }

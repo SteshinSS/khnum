@@ -13,18 +13,19 @@
 #include <vector>
 #include <string>
 #include <map>
-/*
+
 struct ObjectiveParameters {
     Matrix *nullspace;
     std::vector<EMUNetwork> *networks;
     std::vector<EMUandMID> *input_mids;
     std::vector<EMU> *measured_isotopes;
-
+    std::vector<double> *errors;
+    std::vector<EMUandMID> *measurements;
 };
 
-std::map<std::string, Flux> EstimateFluxes(const std::vector<EMUNetwork> &networks,
-                                           const std::map<std::string, Flux> &initial_fluxes,
-                                           const std::map<std::string, FluxVariability> &flux_ranges,
+std::vector<Flux> EstimateFluxes(const std::vector<EMUNetwork> &networks,
+                                           const std::vector<Flux> &initial_fluxes,
+                                           const std::vector<FluxVariability> &flux_ranges,
                                            const Matrix &stoichiometry_matrix) {
     // find nullspace
     Eigen::FullPivLU<Matrix> lu_decomposition(stoichiometry_matrix);
@@ -41,10 +42,15 @@ std::map<std::string, Flux> EstimateFluxes(const std::vector<EMUNetwork> &networ
     }
 
 
-    // objective function
-
 
     // optimization step
+    double epsx = 0.000000001;
+    alglib::ae_int_t maxits = 0;
+    alglib::minlmstate state;
+    alglib::minlmreport report;
+
+    int total_residuals = 0;
+
 }
 
 void CalculateResidual(const alglib::real_1d_array &free_fluxes,
@@ -60,13 +66,29 @@ void CalculateResidual(const alglib::real_1d_array &free_fluxes,
 
     Matrix all_fluxes = nullspace * free_fluxes_eigen;
 
+    std::vector<Flux> vector_fluxes;
+    for (int i = 0; i < all_fluxes.rows(); ++i) {
+        vector_fluxes.push_back(all_fluxes(i, 0));
+    }
 
-    std::vector<EMUandMID> simulated_mids = CalculateMids(all_fluxes,
+
+
+    std::vector<EMUandMID> simulated_mids = CalculateMids(vector_fluxes,
                                                           *(parameters->networks),
-                                                          *(parameters->known_mids),
+                                                          *(parameters->input_mids),
                                                           *(parameters->measured_isotopes));
 
+    int total_residuals = 0;
+    for (int isotope = 0; isotope < simulated_mids.size(); ++isotope) {
+        for (int mass_shift = 0; mass_shift < simulated_mids[isotope].mid.size(); ++mass_shift) {
+            residuals[total_residuals] = simulated_mids[isotope].mid[mass_shift];
+            residuals[total_residuals] -= (*(parameters->measurements))[isotope].mid[mass_shift];
+            residuals[total_residuals] /= (*(parameters->errors))[total_residuals];
+            ++total_residuals;
+        }
+    }
 
-} */
+
+}
 
 

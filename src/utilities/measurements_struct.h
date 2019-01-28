@@ -1,12 +1,17 @@
 #ifndef CFLEX_MEASUREMENTS_STRUCT_H
 #define CFLEX_MEASUREMENTS_STRUCT_H
 
-using MeasurementValue = double;
-using MeasurementError = double;
+#include "../utilities/EMU.h"
+#include "../utilities/MID.h"
+
+#include <vector>
+
+using Errors = std::vector<double>;
 
 struct Measurement {
-  MeasurementValue value;
-  MeasurementError error;
+    EMU emu;
+    MID mid;
+    Errors errors;
 };
 
 #endif //CFLEX_MEASUREMENTS_STRUCT_H
