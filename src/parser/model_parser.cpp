@@ -178,7 +178,7 @@ ReactionType ParseReactionType(const std::string &type) {
 }
 
 std::tuple<Basis, bool> ParseBasis(const std::string &basis) {
-    if (basis == "X" or basis == "x") {
+    if (basis == "X" || basis == "x") {
         return {std::numeric_limits<double>::quiet_NaN(), true};
     } else if (basis.empty()) {
         return {std::numeric_limits<double>::quiet_NaN(), false};

@@ -13,7 +13,7 @@
 #include <vector>
 #include <string>
 #include <map>
-
+/*
 struct ObjectiveParameters {
     Matrix *nullspace;
     std::vector<EMUNetwork> *networks;
@@ -61,13 +61,12 @@ void CalculateResidual(const alglib::real_1d_array &free_fluxes,
     Matrix all_fluxes = nullspace * free_fluxes_eigen;
 
 
-
     std::vector<EMUandMID> simulated_mids = CalculateMids(all_fluxes,
                                                           *(parameters->networks),
                                                           *(parameters->known_mids),
                                                           *(parameters->measured_isotopes));
 
 
-}
+} */
 
 

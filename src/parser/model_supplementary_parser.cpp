@@ -2,6 +2,7 @@
 #include "parser_utilities.h"
 #include "../utilities/measurements_struct.h"
 #include "../utilities/EMU.h"
+#include "../utilities/MID.h"
 #include <vector>
 #include <algorithm>
 #include <string>
@@ -40,21 +41,24 @@ std::vector<EMU> ParseMeasuredIsotopes(const std::string &measured_isotopes_path
     return measured_isotopes;
 }
 
-std::vector<Measurement> ParseMeasurments(const std::string &measurements_path) {
-    std::vector<Measurement> measurements;
-
+std::vector<EMUandMID> ParseMeasurments(const std::string &measurements_path,
+                                        const std::vector<EMU> &measured_isotopes) {
+    std::vector<EMUandMID> measurements;
     std::ifstream input(measurements_path);
     // skip table head-line
     input.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
     std::string raw_line;
-    while (getline(input, raw_line)) {
-        std::stringstream line(raw_line);
-        Measurement new_measurement;
-        new_measurement.value = std::stod(GetCell(line));
-        new_measurement.error = std::stod(GetCell(line));
-        measurements.emplace_back(new_measurement);
-        getline(input, raw_line);
+    for (const EMU &isotope : measured_isotopes) {
+        EMUandMID new_isotope;
+        new_isotope.emu = isotope;
+        for (int mass_shift = 0; mass_shift < isotope.atom_states.size() + 1; ++mass_shift) {
+            getline(input, raw_line);
+            std::stringstream line(raw_line);
+            double fraction = std::stod(GetCell(line));
+            new_isotope.mid.push_back(fraction);
+        }
+        measurements.push_back(new_isotope);
     }
 
     return measurements;
@@ -76,7 +80,7 @@ std::vector<InputSubstrate> ParseInputSubstrates(const std::string &input_substr
         auto input_substrate_iterator = std::find_if(input_substrates.begin(),
                                                      input_substrates.end(),
                                                      [&input_substrate_name](InputSubstrate &input_substrate) {
-                                                       return input_substrate.name == input_substrate_name;
+                                                         return input_substrate.name == input_substrate_name;
                                                      });
 
         if (input_substrate_iterator == input_substrates.end()) {

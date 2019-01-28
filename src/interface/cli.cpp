@@ -15,6 +15,7 @@
 #include "../utilities/MID.h"
 #include "../math/calculate_mids.h"
 #include "../math/metabolic_flux_analysis.h"
+#include "../modeller/sort_reactions.h"
 
 #include <iostream>
 #include <fstream>
@@ -30,12 +31,18 @@ void RunCli() {
         // ../parser/model_parser.h
         std::vector<Reaction> reactions = ParseReactions("../model/model.csv");
 
+        // ../modeller/sort_reactions.h
+        reactions = SortReactions(reactions);
+
         // ../parser/model_supplementary_parser.h
-        std::vector<EMU> measured_isotopes = ParseMeasuredIsotopes("../model/measured_isotopes.txt");
+        std::vector<EMU> measured_emus = ParseMeasuredIsotopes("../model/measured_isotopes.txt");
+
+        // ../parser/model_supplementary_parser.h
+        std::vector<EMUandMID> measurements = ParseMeasurments("../model/measurements.csv", measured_emus);
 
         // ../modeller/create_emu_reactions.h
         // Creates all elementary reaction in term of EMU
-        std::vector<EMUReaction> all_emu_reactions = CreateAllEMUReactions(reactions, measured_isotopes);
+        std::vector<EMUReaction> all_emu_reactions = CreateAllEMUReactions(reactions, measured_emus);
 
         // ../parser/model_supllemetary_parser.h
         std::vector<InputSubstrate> input_substrates = ParseInputSubstrates("../model/substrate_input.csv");
@@ -50,7 +57,7 @@ void RunCli() {
 
         // ../modeller/create_emu_networks.h
         // Create EMU networks. See Antoniewicz 2007
-        std::vector<EMUNetwork> emu_networks = CreateEMUNetworks(all_emu_reactions, input_emu_list, measured_isotopes);
+        std::vector<EMUNetwork> emu_networks = CreateEMUNetworks(all_emu_reactions, input_emu_list, measured_emus);
 
 
 
@@ -73,11 +80,11 @@ void RunCli() {
 
         std::map<std::string, FluxVariability> flux_ranges = EstablishAllFluxRanges(
                 stoichiometry_matrix, reactions, included_metabolites);
-
+/*
         std::map<std::string, Flux> answer = EstimateFluxes(emu_networks,
                                                             initial_fluxes,
                                                             flux_ranges);
-
+*/
     } catch (std::runtime_error &error) {
         std::cerr << error.what() << std::endl;
     }
