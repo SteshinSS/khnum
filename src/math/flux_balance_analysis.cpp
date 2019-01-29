@@ -33,7 +33,7 @@ std::map<std::string, Flux> EstablishInitialFluxes(const Matrix &stoichiometry_m
 
     glp_simplex(initialize_fluxes, NULL);
 
-    for (int i = 1; i < stoichiometry_matrix.cols(); ++i) {
+    for (int i = 1; i <= stoichiometry_matrix.cols(); ++i) {
         std::string reaction_name = glp_get_col_name(initialize_fluxes, i);
         initial_fluxes[reaction_name] = (glp_get_col_prim(initialize_fluxes, i));
     }

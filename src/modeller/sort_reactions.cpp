@@ -14,7 +14,13 @@
 
 std::vector<Reaction> SortReactions(std::vector<Reaction> reactions) {
     std::sort(reactions.begin(), reactions.end(), [](const Reaction &lhs, const Reaction &rhs) {
-        return GetPriority(lhs) < GetPriority(rhs);
+        int lhs_priority = GetPriority(lhs);
+        int rhs_priority = GetPriority(rhs);
+        if (lhs_priority == rhs_priority) {
+            return lhs.name < rhs.name;
+        } else {
+            return lhs_priority < rhs_priority;
+        }
     });
 
     return reactions;

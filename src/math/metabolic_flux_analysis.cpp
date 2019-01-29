@@ -14,6 +14,7 @@
 #include <string>
 #include <map>
 #include <iostream>
+#include <random>
 
 
 std::map<std::string, Flux> EstimateFluxes(ObjectiveParameters *parameters,
@@ -26,6 +27,8 @@ std::map<std::string, Flux> EstimateFluxes(ObjectiveParameters *parameters,
     Matrix nullspace = lu_decomposition.kernel();
     parameters->nullspace = &nullspace;
 
+    std::cerr << nullspace << std::endl;
+
     // find free fluxes
     const int fluxes_total = stoichiometry_matrix.cols();
     const int nullity = fluxes_total - lu_decomposition.rank();
@@ -37,17 +40,25 @@ std::map<std::string, Flux> EstimateFluxes(ObjectiveParameters *parameters,
     lower_bounds.setlength(nullity);
     upper_bounds.setlength(nullity);
 
+    std::random_device rd;
+    std::mt19937 e2(rd());
+    std::uniform_real_distribution<> dist6(0.0, 1.0);
+
     const int reaction_total = reactions.size();
     for (int i = 0; i < nullity; ++i) {
-        free_fluxes[i] = initial_fluxes.at(reactions[reaction_total - 1 - nullity + i].name);
-        lower_bounds[i] = (flux_ranges.at(reactions[reaction_total  - 1 - nullity + i].name)).lower_bound;
-        upper_bounds[i] = (flux_ranges.at(reactions[reaction_total - 1 - nullity + i].name)).upper_bound;
+
+        lower_bounds[i] = (flux_ranges.at(reactions[reaction_total - nullity + i].name)).lower_bound;
+        upper_bounds[i] = (flux_ranges.at(reactions[reaction_total - nullity + i].name)).upper_bound;
+        free_fluxes[i] = lower_bounds[i] + dist6(e2) * (upper_bounds[i] - lower_bounds[i]);
+
+        std::cerr << reactions[reaction_total - nullity + i].name << " " << free_fluxes[i] << " LOW: " <<
+            lower_bounds[i] << " UP:" << upper_bounds[i] << std::endl;
     }
 
 
 
     // optimization step
-    double epsx = 0.000000001;
+    double epsx = 0.00000000001;
     alglib::ae_int_t maxits = 0;
     alglib::minlmstate state;
     alglib::minlmreport report;
@@ -57,12 +68,13 @@ std::map<std::string, Flux> EstimateFluxes(ObjectiveParameters *parameters,
         measurements_count += measurement.mid.size();
     }
 
-    alglib::minlmcreatev(measurements_count, free_fluxes, 0.00001, state);
+    alglib::minlmcreatev(measurements_count, free_fluxes, 0.00000001, state);
     alglib::minlmsetcond(state, epsx, maxits);
     alglib::minlmsetbc(state, lower_bounds, upper_bounds);
 
     alglib::minlmoptimize(state, CalculateResidual, NULL, parameters);
     alglib::minlmresults(state, free_fluxes, report);
+    std::cerr << report.terminationtype << " " << report.iterationscount << std::endl;
 
     Eigen::VectorXd free_fluxes_eigen(free_fluxes.length());
     for (int i = 0; i < free_fluxes.length(); ++i) {

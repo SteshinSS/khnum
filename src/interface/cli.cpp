@@ -82,6 +82,7 @@ void RunCli() {
         std::map<std::string, FluxVariability> flux_ranges = EstablishAllFluxRanges(
                 stoichiometry_matrix, reactions, included_metabolites);
 
+
         ObjectiveParameters parameters;
         parameters.measured_isotopes = &measured_emus;
         parameters.networks = &emu_networks;
