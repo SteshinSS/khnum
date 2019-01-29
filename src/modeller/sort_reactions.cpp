@@ -34,7 +34,7 @@ int GetPriority(const Reaction &reaction) {
         } else if (reaction.type == ReactionType::Irreversible) {
             priority = 2;
         } else if (reaction.type == ReactionType::Backward) {
-            priority = 6;
+            priority = 1;
         } else if (reaction.type == ReactionType::MetaboliteBalance) {
             priority = 3;
         } else if (reaction.type == ReactionType::IsotopomerBalance) {

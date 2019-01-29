@@ -12,16 +12,56 @@
 #include <vector>
 #include <string>
 #include <map>
-
+#include <random>
 
 std::map<std::string, Flux> EstimateFluxes(ObjectiveParameters *parameters,
-                                           const std::map<std::string, Flux> &initial_fluxes,
                                            const std::map<std::string, FluxVariability> &flux_ranges,
                                            const Matrix &stoichiometry_matrix,
-                                           const std::vector<Reaction> &reactions);
+                                           const std::vector<Reaction> &reactions,
+                                           const int iteration_total);
 
 void CalculateResidual(const alglib::real_1d_array &free_fluxes,
                        alglib::real_1d_array &residuals,
                        void *ptr);
+
+
+double SimulateAndGetSSR(alglib::real_1d_array &free_fluxes,
+                         alglib::real_1d_array lower_bounds,
+                         alglib::real_1d_array upper_bounds);
+
+
+void FillBoundVectors(alglib::real_1d_array &lower_bounds,
+                      alglib::real_1d_array &upper_bounds,
+                      const std::map<std::string, FluxVariability> &flux_ranges,
+                      const std::vector<Reaction> &reactions,
+                      const int nullity);
+
+
+void GenerateInitialPoints(alglib::real_1d_array &free_fluxes,
+                           const alglib::real_1d_array &lower_bounds,
+                           const alglib::real_1d_array &upper_bounds,
+                           const std::vector<Reaction> &reactions,
+                           const int nullity,
+                           std::mt19937 &random_source);
+
+
+int GetMeasurementsCount(ObjectiveParameters *parameters);
+
+
+std::map<std::string, Flux> CalculateAllFluxesFromFree(const alglib::real_1d_array &free_fluxes,
+                                                       const Matrix &nullspace,
+                                                       const std::vector<Reaction> &reactions);
+
+std::map<std::string, Flux> CalculateAllFluxesFromFree(const alglib::real_1d_array &free_fluxes,
+                                                       const Matrix &nullspace,
+                                                       const std::vector<Reaction> &reactions);
+
+
+void Fillf0Array(alglib::real_1d_array &residuals,
+                 const std::vector<EMUandMID> &simulated_mids,
+                 const ObjectiveParameters &parameters);
+
+
+double GetSSR(const alglib::real_1d_array &residuals, int measurements_count);
 
 #endif //CFLEX_METABOLIC_FLUX_ANALYSIS_H

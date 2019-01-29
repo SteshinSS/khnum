@@ -76,13 +76,13 @@ void RunCli() {
 
         // ../math/flux_balance_analysis.h
         // Run preliminary FBA for calculate initial fluxes
-        std::map<std::string, Flux> initial_fluxes = EstablishInitialFluxes(
-                stoichiometry_matrix, reactions, included_metabolites);
+        // std::map<std::string, Flux> initial_fluxes = EstablishInitialFluxes(
+        //        stoichiometry_matrix, reactions, included_metabolites);
 
         std::map<std::string, FluxVariability> flux_ranges = EstablishAllFluxRanges(
                 stoichiometry_matrix, reactions, included_metabolites);
 
-
+        // Pack parameters
         ObjectiveParameters parameters;
         parameters.measured_isotopes = &measured_emus;
         parameters.networks = &emu_networks;
@@ -92,10 +92,10 @@ void RunCli() {
         parameters.nullspace = nullptr;
 
         std::map<std::string, Flux> answer = EstimateFluxes(&parameters,
-                                                            initial_fluxes,
                                                             flux_ranges,
                                                             stoichiometry_matrix,
-                                                            reactions);
+                                                            reactions,
+                                                            10);
 
         for (const Reaction &reaction : reactions) {
             std::cerr << reaction.name << " " << answer[reaction.name] << std::endl;
