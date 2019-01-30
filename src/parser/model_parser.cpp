@@ -59,14 +59,14 @@ ChemicalEquation ParseChemicalEquation(std::stringstream &line) {
         const std::string left_side_substrate_equation = substrate_equation.substr(0, substrate_delimiter_position);
         const std::string left_side_atom_equation = atom_equation.substr(0, atom_delimiter_position);
         ChemicalEquationSide left = FillEquationSide(
-            left_side_substrate_equation, left_side_atom_equation);
+                left_side_substrate_equation, left_side_atom_equation);
 
         const std::string right_side_substrate_equation = substrate_equation.substr(substrate_delimiter_position + 2);
         const std::string right_side_atom_equation = atom_equation.empty() ? "" :
                                                      atom_equation.substr(atom_delimiter_position + 2);
 
         ChemicalEquationSide right = FillEquationSide(
-            right_side_substrate_equation, right_side_atom_equation);
+                right_side_substrate_equation, right_side_atom_equation);
 
         return ChemicalEquation{left, right};
     } else {
@@ -129,7 +129,7 @@ void ParseAtomEquationSide(ChemicalEquationSide *equation_side, const std::strin
         std::stringstream equation{atom_equation};
         std::string token;
         getline(equation, token, ' ');
-        ChemicalEquationSide::iterator current_substance = equation_side->begin();
+        auto current_substance = equation_side->begin();
         while (!token.empty()) {
             if (token != substrate_delimiter && !std::isdigit(token[0])) {
                 current_substance->formula = token;

@@ -127,7 +127,7 @@ EMUReaction CreateOneEMUReaction(const Reaction &reaction,
                     } else {
                         EMUSubstrate new_precursor;
                         new_precursor.emu.name = precursor.name;
-                        new_precursor.emu.atom_states = std::vector<bool>(precursor.formula.size(), false);
+                        new_precursor.emu.atom_states = AtomStates(precursor.formula.size(), false);
                         new_precursor.emu.atom_states[substrate_atom_position] = true;
                         new_precursor.coefficient = precursor.coefficient;
                         left.push_back(new_precursor);
@@ -156,7 +156,7 @@ std::vector<EMUReaction> SelectUniqueEMUReactions(const std::vector<EMUReaction>
         if (reaction_position == unique_new_emu_reactions.end()) {
             unique_new_emu_reactions.push_back(reaction);
         } else {
-            reaction_position->right.coefficient += reaction.right.coefficient;
+            (reaction_position->right).coefficient += reaction.right.coefficient;
         }
     }
 

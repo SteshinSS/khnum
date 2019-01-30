@@ -7,7 +7,7 @@
 
 #include "../utilities/EMU.h"
 
-const std::string empty_string = "";
+const std::string empty_string;
 
 void ShowEMU(const EMU &emu, const std::string &what = empty_string);
 

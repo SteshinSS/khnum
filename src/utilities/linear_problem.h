@@ -7,7 +7,7 @@
 // should remake
 class LinearProblem {
  public:
-  LinearProblem(int size) {
+    explicit LinearProblem(int size) {
       _linear_problem = glp_create_prob();
 
       // see glpk Reference Manual pg. 11

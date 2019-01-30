@@ -85,7 +85,6 @@ void SolveOneNetwork(const std::vector<Flux> &fluxes,
     Matrix X = A.colPivHouseholderQr().solve(BY);
 
     AppendNewMIDs(X,unknown_emus, known_mids, current_size);
-    return;
 }
 
 void FillEMULists(std::vector<EMU> &unknown_emus,
@@ -130,8 +129,6 @@ void FillEMULists(std::vector<EMU> &unknown_emus,
 
     std::sort(unknown_emus.begin(), unknown_emus.end());
     unknown_emus.erase(std::unique(unknown_emus.begin(), unknown_emus.end()), unknown_emus.end());
-
-    return;
 }
 
 
@@ -182,7 +179,6 @@ void FormABMatrices(Matrix &A, Matrix &B,
         }
 
     }
-    return;
 }
 
 
@@ -212,11 +208,7 @@ bool IsEMUKnown(const EMU &emu,
                                 return known_mid.emu == emu;
                             });
 
-    if (position == known_emus.end()) {
-        return false;
-    } else {
-        return true;
-    }
+    return position != known_emus.end();
 }
 
 int FindUnknownEMUsPosition(const EMU &emu,

@@ -132,7 +132,6 @@ void CalculateResidual(const alglib::real_1d_array &free_fluxes,
                                                           *(parameters.measured_isotopes));
 
     Fillf0Array(residuals, simulated_mids, parameters);
-    return;
 }
 
 
@@ -148,8 +147,6 @@ void FillBoundVectors(alglib::real_1d_array &lower_bounds,
         upper_bounds[i] = (flux_ranges.at(reactions[reaction_total - nullity + i].id)).upper_bound;
 
     }
-
-    return;
 }
 
 void GenerateInitialPoints(alglib::real_1d_array &free_fluxes,
@@ -159,15 +156,12 @@ void GenerateInitialPoints(alglib::real_1d_array &free_fluxes,
                            const int nullity,
                            std::mt19937 &random_source) {
 
-    const int reaction_total = reactions.size();
     std::uniform_real_distribution<> get_random_point(0.0, 1.0);
 
     for (int i = 0; i < nullity; ++i) {
         free_fluxes[i] = lower_bounds[i] + get_random_point(random_source) * (upper_bounds[i] - lower_bounds[i]);
 
     }
-
-    return;
 }
 
 int GetMeasurementsCount(ObjectiveParameters *parameters) {

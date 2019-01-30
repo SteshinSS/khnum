@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-using AtomStates = std::vector<bool>; // there are other available options as vector<char>
+using AtomStates = std::vector<char>; // there are other available options as vector<char>
 
 using EMUcoefficient = double;
 

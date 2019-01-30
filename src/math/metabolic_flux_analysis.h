@@ -24,11 +24,6 @@ void CalculateResidual(const alglib::real_1d_array &free_fluxes,
                        void *ptr);
 
 
-double SimulateAndGetSSR(alglib::real_1d_array &free_fluxes,
-                         alglib::real_1d_array lower_bounds,
-                         alglib::real_1d_array upper_bounds);
-
-
 void FillBoundVectors(alglib::real_1d_array &lower_bounds,
                       alglib::real_1d_array &upper_bounds,
                       const std::vector<FluxVariability> &flux_ranges,
