@@ -8,9 +8,8 @@
 #include "../math/math_utilites.h"
 
 #include <vector>
-#include <map>
 
-std::vector<EMUandMID> CalculateMids(const std::map<std::string, Flux> &fluxes,
+std::vector<EMUandMID> CalculateMids(const std::vector<Flux> &fluxes,
                                      const std::vector<EMUNetwork> &networks,
                                      std::vector<EMUandMID> known_mids,
                                      const std::vector<EMU> &measured_isotopes);
@@ -22,7 +21,7 @@ int FindNetworkSize(const EMUNetwork &network);
 std::vector<EMUandMID> SelectMeasuredMID(const std::vector<EMUandMID> &known_mids,
                                          const std::vector<EMU> &measured_isotopes);
 
-void SolveOneNetwork(const std::map<std::string, Flux> &fluxes,
+void SolveOneNetwork(const std::vector<Flux> &fluxes,
                      const EMUNetwork &network,
                      std::vector<EMUandMID> &known_mids);
 
@@ -42,7 +41,7 @@ void FormABMatrices(Matrix &A, Matrix &B,
                     const EMUNetwork &network,
                     const std::vector<EMUandMID> &known_emus,
                     const std::vector<EMU> &unknown_emus,
-                    const std::map<std::string, Flux> &fluxes,
+                    const std::vector<Flux> &fluxes,
                     const std::vector<EMUandMID> &known_mids);
 
 

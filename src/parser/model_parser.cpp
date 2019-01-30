@@ -17,10 +17,13 @@ std::vector<Reaction> ParseReactions(const std::string &model_path) {
 
     std::string raw_line;
     getline(model_file, raw_line);
+    int reaction_id = 0;
     while (!raw_line.empty()) {
         std::stringstream line(raw_line);
         Reaction new_reaction;
         FillReaction(&new_reaction, line);
+        new_reaction.id = reaction_id;
+        ++reaction_id;
         reactions.emplace_back(new_reaction);
         if (model_file.eof()) {
             break;

@@ -32,7 +32,7 @@ bool operator!=(EMUSubstrate const &lhs, EMUSubstrate const &rhs);
 using EMUReactionSide = std::vector<EMUSubstrate>;
 
 struct EMUReaction {
-    std::string name; // name of the full reaction
+    int id;
     EMUReactionSide left;
     EMUSubstrate right;
 };

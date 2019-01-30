@@ -24,7 +24,7 @@ bool operator!=(EMUSubstrate const &lhs, EMUSubstrate const &rhs) {
 
 
 bool operator==(const EMUReaction &lhs, const EMUReaction &rhs) {
-    if (lhs.name != rhs.name) {
+    if (lhs.id != rhs.id) {
         return false;
     } else {
         if (lhs.right != rhs.right) {

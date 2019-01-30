@@ -8,11 +8,10 @@
 #include <vector>
 #include <algorithm>
 #include <iostream>
-#include <map>
 #include <exception>
 
 
-std::vector<EMUandMID> CalculateMids(const std::map<std::string, Flux> &fluxes,
+std::vector<EMUandMID> CalculateMids(const std::vector<Flux>  &fluxes,
                                      const std::vector<EMUNetwork> &networks,
                                      std::vector<EMUandMID> known_mids,
                                      const std::vector<EMU> &measured_isotopes) {
@@ -56,7 +55,7 @@ std::vector<EMUandMID> SelectMeasuredMID(const std::vector<EMUandMID> &known_mid
 }
 
 
-void SolveOneNetwork(const std::map<std::string, Flux> &fluxes,
+void SolveOneNetwork(const std::vector<Flux> &fluxes,
                      const EMUNetwork &network,
                      std::vector<EMUandMID> &known_mids) {
 
@@ -150,7 +149,7 @@ void FormABMatrices(Matrix &A, Matrix &B,
                     const EMUNetwork &network,
                     const std::vector<EMUandMID> &known_emus,
                     const std::vector<EMU> &unknown_emus,
-                    const std::map<std::string, Flux> &fluxes,
+                    const std::vector<Flux> &fluxes,
                     const std::vector<EMUandMID> &known_mids) {
     for (const EMUReaction &reaction : network) {
         EMUSubstrate substrate;
@@ -166,20 +165,20 @@ void FormABMatrices(Matrix &A, Matrix &B,
             // they are both unknown
             int position_of_substrate = FindUnknownEMUsPosition(substrate.emu, unknown_emus);
             int position_of_product = FindUnknownEMUsPosition(reaction.right.emu, unknown_emus);
-            A(position_of_product, position_of_product) += (-reaction.right.coefficient) * fluxes.at(reaction.name);
+            A(position_of_product, position_of_product) += (-reaction.right.coefficient) * fluxes.at(reaction.id);
 
             // Why does it multiple by product coefficient? Shouldn't it be substrate coefficient?
-            A(position_of_product, position_of_substrate) += reaction.right.coefficient * fluxes.at(reaction.name);
+            A(position_of_product, position_of_substrate) += reaction.right.coefficient * fluxes.at(reaction.id);
         } else {
             // Product is unknown, Substrate is known
 
             int position_of_substrate = FindKnownEMUsPosition(substrate.emu, known_emus);
             int position_of_product = FindUnknownEMUsPosition(reaction.right.emu, unknown_emus);
 
-            A(position_of_product, position_of_product) += (-reaction.right.coefficient) * fluxes.at(reaction.name);
+            A(position_of_product, position_of_product) += (-reaction.right.coefficient) * fluxes.at(reaction.id);
 
             B(position_of_product, position_of_substrate) +=
-                    (-substrate.coefficient) * fluxes.at(reaction.name);
+                    (-substrate.coefficient) * fluxes.at(reaction.id);
         }
 
     }

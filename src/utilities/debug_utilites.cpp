@@ -12,7 +12,7 @@ void ShowEMU(const EMU &emu, const std::string &what) {
 
 
 void ShowEMUReaction(const EMUReaction &emu_reaction, const std::string &what) {
-    std::cerr << emu_reaction.name << std::endl;
+    std::cerr << emu_reaction.id << std::endl;
     for (int i = 0; i + 1 < emu_reaction.left.size(); ++i) {
         std::cerr << emu_reaction.left[i].coefficient << " ";
         ShowEMU(emu_reaction.left[i].emu);

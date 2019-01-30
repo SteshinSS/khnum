@@ -12,16 +12,15 @@
 
 #include <vector>
 #include <string>
-#include <map>
 #include <iostream>
 #include <random>
 #include <limits>
 
-std::map<std::string, Flux> EstimateFluxes(ObjectiveParameters *parameters,
-                                           const std::map<std::string, FluxVariability> &flux_ranges,
-                                           const Matrix &stoichiometry_matrix,
-                                           const std::vector<Reaction> &reactions,
-                                           const int iteration_total) {
+std::vector<Flux> EstimateFluxes(ObjectiveParameters *parameters,
+                                 const std::vector<FluxVariability> &flux_ranges,
+                                 const Matrix &stoichiometry_matrix,
+                                 const std::vector<Reaction> &reactions,
+                                 const int iteration_total) {
     // find nullspace
     Eigen::FullPivLU<Matrix> lu_decomposition(stoichiometry_matrix);
     Matrix nullspace = lu_decomposition.kernel();
@@ -51,7 +50,6 @@ std::map<std::string, Flux> EstimateFluxes(ObjectiveParameters *parameters,
     GenerateInitialPoints(free_fluxes, lower_bounds, upper_bounds, reactions, nullity, random_source);
 
 
-
     alglib::ae_int_t maxits = 0;
     alglib::minlmstate state;
     alglib::minlmreport report;
@@ -65,14 +63,14 @@ std::map<std::string, Flux> EstimateFluxes(ObjectiveParameters *parameters,
     alglib::real_1d_array best_free_fluxes;
     alglib::minlmresults(state, best_free_fluxes, report);
 
-    std::map<std::string, Flux> best_all_fluxes = CalculateAllFluxesFromFree(
+    std::vector<Flux> best_all_fluxes = CalculateAllFluxesFromFree(
             free_fluxes, nullspace, *(parameters->reactions));
 
 
     std::vector<EMUandMID> best_simulated_mids = CalculateMids(best_all_fluxes,
-                                                          *(parameters->networks),
-                                                          *(parameters->input_mids),
-                                                          *(parameters->measured_isotopes));
+                                                               *(parameters->networks),
+                                                               *(parameters->input_mids),
+                                                               *(parameters->measured_isotopes));
 
     alglib::real_1d_array best_residuals;
     best_residuals.setlength(measurements_count);
@@ -91,14 +89,14 @@ std::map<std::string, Flux> EstimateFluxes(ObjectiveParameters *parameters,
         alglib::minlmresults(state, new_free_fluxes, report);
 
         // check which results are better
-        std::map<std::string, Flux> new_all_fluxes = CalculateAllFluxesFromFree(
+        std::vector<Flux> new_all_fluxes = CalculateAllFluxesFromFree(
                 free_fluxes, nullspace, *(parameters->reactions));
 
 
         std::vector<EMUandMID> new_simulated_mids = CalculateMids(new_all_fluxes,
-                                                                   *(parameters->networks),
-                                                                   *(parameters->input_mids),
-                                                                   *(parameters->measured_isotopes));
+                                                                  *(parameters->networks),
+                                                                  *(parameters->input_mids),
+                                                                  *(parameters->measured_isotopes));
 
         alglib::real_1d_array new_residuals;
         new_residuals.setlength(measurements_count);
@@ -107,7 +105,7 @@ std::map<std::string, Flux> EstimateFluxes(ObjectiveParameters *parameters,
 
         double new_ssr = GetSSR(new_residuals, measurements_count);
 
-        std::cerr << iteration << " iteration. SSR: " << new_ssr << std::endl;
+        std::cerr << iteration << " iteration. SSR: " << new_ssr << " steps: " << report.iterationscount << std::endl;
 
         if (new_ssr < best_ssr) {
             best_ssr = new_ssr;
@@ -124,7 +122,7 @@ void CalculateResidual(const alglib::real_1d_array &free_fluxes,
     ObjectiveParameters &parameters = *(static_cast<ObjectiveParameters *>(ptr));
     Matrix nullspace = *(parameters.nullspace);
 
-    std::map<std::string, Flux> calculated_fluxes = CalculateAllFluxesFromFree(
+    std::vector<Flux> calculated_fluxes = CalculateAllFluxesFromFree(
             free_fluxes, nullspace, *(parameters.reactions));
 
 
@@ -140,14 +138,14 @@ void CalculateResidual(const alglib::real_1d_array &free_fluxes,
 
 void FillBoundVectors(alglib::real_1d_array &lower_bounds,
                       alglib::real_1d_array &upper_bounds,
-                      const std::map<std::string, FluxVariability> &flux_ranges,
+                      const std::vector<FluxVariability> &flux_ranges,
                       const std::vector<Reaction> &reactions,
                       const int nullity) {
     const int reaction_total = reactions.size();
 
     for (int i = 0; i < nullity; ++i) {
-        lower_bounds[i] = (flux_ranges.at(reactions[reaction_total - nullity + i].name)).lower_bound;
-        upper_bounds[i] = (flux_ranges.at(reactions[reaction_total - nullity + i].name)).upper_bound;
+        lower_bounds[i] = (flux_ranges.at(reactions[reaction_total - nullity + i].id)).lower_bound;
+        upper_bounds[i] = (flux_ranges.at(reactions[reaction_total - nullity + i].id)).upper_bound;
 
     }
 
@@ -181,9 +179,9 @@ int GetMeasurementsCount(ObjectiveParameters *parameters) {
     return measurements_count;
 }
 
-std::map<std::string, Flux> CalculateAllFluxesFromFree(const alglib::real_1d_array &free_fluxes,
-                                                       const Matrix &nullspace,
-                                                       const std::vector<Reaction> &reactions) {
+std::vector<Flux> CalculateAllFluxesFromFree(const alglib::real_1d_array &free_fluxes,
+                                             const Matrix &nullspace,
+                                             const std::vector<Reaction> &reactions) {
     Eigen::VectorXd free_fluxes_eigen(free_fluxes.length());
     for (int i = 0; i < free_fluxes.length(); ++i) {
         free_fluxes_eigen[i] = free_fluxes[i];
@@ -191,13 +189,13 @@ std::map<std::string, Flux> CalculateAllFluxesFromFree(const alglib::real_1d_arr
 
     Matrix all_fluxes_matrix = nullspace * free_fluxes_eigen;
 
-    std::map<std::string, Flux> all_fluxes;
+    std::vector<Flux> all_fluxes(reactions.size());
     for (int i = 0; i < all_fluxes_matrix.rows(); ++i) {
-        all_fluxes[reactions.at(i).name] = all_fluxes_matrix(i, 0);
+        all_fluxes[reactions.at(i).id] = all_fluxes_matrix(i, 0);
     }
 
     for (int i = all_fluxes_matrix.rows(); i < reactions.size(); ++i) {
-        all_fluxes[reactions.at(i).name] = free_fluxes_eigen(i - all_fluxes_matrix.rows());
+        all_fluxes[reactions.at(i).id] = free_fluxes_eigen(i - all_fluxes_matrix.rows());
     }
 
     return all_fluxes;

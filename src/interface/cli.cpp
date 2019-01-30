@@ -79,7 +79,7 @@ void RunCli() {
         // std::map<std::string, Flux> initial_fluxes = EstablishInitialFluxes(
         //        stoichiometry_matrix, reactions, included_metabolites);
 
-        std::map<std::string, FluxVariability> flux_ranges = EstablishAllFluxRanges(
+        std::vector<FluxVariability> flux_ranges = EstablishAllFluxRanges(
                 stoichiometry_matrix, reactions, included_metabolites);
 
         // Pack parameters
@@ -91,14 +91,14 @@ void RunCli() {
         parameters.measurements = &measurements;
         parameters.nullspace = nullptr;
 
-        std::map<std::string, Flux> answer = EstimateFluxes(&parameters,
+        std::vector<Flux> answer = EstimateFluxes(&parameters,
                                                             flux_ranges,
                                                             stoichiometry_matrix,
                                                             reactions,
                                                             10);
 
         for (const Reaction &reaction : reactions) {
-            std::cerr << reaction.name << " " << answer[reaction.name] << std::endl;
+            std::cerr << reaction.name << " " << answer[reaction.id] << std::endl;
         }
 
 

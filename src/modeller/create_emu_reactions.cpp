@@ -87,7 +87,7 @@ EMUReaction CreateOneEMUReaction(const Reaction &reaction,
                                  const Substrate &produced_emu_substrate,
                                  const EMU &produced_emu) {
     EMUReaction result_reaction;
-    result_reaction.name = reaction.name;
+    result_reaction.id = reaction.id;
 
     // form right side
     EMUSubstrate product;

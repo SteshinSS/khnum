@@ -21,7 +21,7 @@ std::map<std::string, Flux> EstablishInitialFluxes(const Matrix &stoichiometry_m
                                          const std::vector<Reaction> &reactions,
                                          const std::vector<std::string> &included_metabolites);
 
-std::map<std::string, FluxVariability> EstablishAllFluxRanges(const Matrix &stoichiometry_matrix,
+std::vector<FluxVariability> EstablishAllFluxRanges(const Matrix &stoichiometry_matrix,
                                                     const std::vector<Reaction> &reactions,
                                                     const std::vector<std::string> &included_metabolites);
 

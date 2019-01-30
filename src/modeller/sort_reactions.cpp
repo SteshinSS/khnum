@@ -17,7 +17,7 @@ std::vector<Reaction> SortReactions(std::vector<Reaction> reactions) {
         int lhs_priority = GetPriority(lhs);
         int rhs_priority = GetPriority(rhs);
         if (lhs_priority == rhs_priority) {
-            return lhs.name < rhs.name;
+            return lhs.id < rhs.id;
         } else {
             return lhs_priority < rhs_priority;
         }
@@ -34,7 +34,7 @@ int GetPriority(const Reaction &reaction) {
         } else if (reaction.type == ReactionType::Irreversible) {
             priority = 2;
         } else if (reaction.type == ReactionType::Backward) {
-            priority = 1;
+            priority = 6;
         } else if (reaction.type == ReactionType::MetaboliteBalance) {
             priority = 3;
         } else if (reaction.type == ReactionType::IsotopomerBalance) {

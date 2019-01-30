@@ -41,21 +41,21 @@ std::map<std::string, Flux> EstablishInitialFluxes(const Matrix &stoichiometry_m
     return initial_fluxes;
 }
 
-std::map<std::string, FluxVariability>  EstablishAllFluxRanges(const Matrix &stoichiometry_matrix,
+std::vector<FluxVariability> EstablishAllFluxRanges(const Matrix &stoichiometry_matrix,
                                                     const std::vector<Reaction> &reactions,
                                                     const std::vector<std::string> &included_metabolites) {
-    std::map<std::string, FluxVariability> flux_ranges;
+    std::vector<FluxVariability> flux_ranges(reactions.size());
     int current_reaction_index = 1;
     for (const Reaction &reaction : reactions) {
         if (reaction.type != ReactionType::IsotopomerBalance) {
-            flux_ranges[reaction.name] = EstablishFluxRange(current_reaction_index, stoichiometry_matrix,
+            flux_ranges[reaction.id] = EstablishFluxRange(current_reaction_index, stoichiometry_matrix,
                                                         reactions, included_metabolites);
             ++current_reaction_index;
         } else {
             FluxVariability new_variability;
             new_variability.lower_bound = reaction.lower_bound;
             new_variability.upper_bound = reaction.upper_bound;
-            flux_ranges[reaction.name] = new_variability;
+            flux_ranges[reaction.id] = new_variability;
         }
     }
 
