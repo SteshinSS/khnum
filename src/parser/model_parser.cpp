@@ -42,11 +42,10 @@ void FillReaction(Reaction *reaction, std::stringstream &line) {
     reaction->type = ParseReactionType(GetCell(line));
     auto [new_basis, is_basis_x] = ParseBasis(GetCell(line));
     reaction->basis = new_basis;
-    reaction->is_basis_x = is_basis_x;
+    reaction->is_set_free = is_basis_x;
     reaction->deviation = ParseDeviation(GetCell(line));
     reaction->lower_bound = ParseLowerBound(GetCell(line));
     reaction->upper_bound = ParseUpperBound(GetCell(line));
-    reaction->is_prime_basis = ParsePrimeBasis(line);
 }
 
 ChemicalEquation ParseChemicalEquation(std::stringstream &line) {
@@ -187,7 +186,7 @@ std::tuple<Basis, bool> ParseBasis(const std::string &basis) {
         return {std::numeric_limits<double>::quiet_NaN(), false};
     }
     else {
-        return {std::stod(basis), false};
+        return {std::stod(basis), true};
     }
 }
 
@@ -204,20 +203,5 @@ Deviation ParseDeviation(const std::string &deviation) {
         return std::numeric_limits<double>::quiet_NaN();  // no deviation
     } else {
         return std::stod(deviation);
-    }
-}
-
-bool ParsePrimeBasis(std::stringstream &line) {
-    std::string last_cell;
-    getline(line, last_cell, '\r');
-    if (last_cell.empty()) {
-        return false;
-    } else {
-        if (last_cell == "*") { // warning
-            return true;
-        } else {
-            throw std::runtime_error(
-                "There is reaction with strange last cell. Is asterisk(*) ok?");
-        }
     }
 }

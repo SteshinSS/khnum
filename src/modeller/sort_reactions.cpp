@@ -28,7 +28,7 @@ std::vector<Reaction> SortReactions(std::vector<Reaction> reactions) {
 
 int GetPriority(const Reaction &reaction) {
     int priority = -1;
-    if (std::isnan(reaction.basis) && !reaction.is_basis_x) {
+    if (std::isnan(reaction.basis) && !reaction.is_set_free) {
         if (reaction.type == ReactionType::Forward) {
             priority = 1;
         } else if (reaction.type == ReactionType::Irreversible) {
@@ -40,7 +40,7 @@ int GetPriority(const Reaction &reaction) {
         } else if (reaction.type == ReactionType::IsotopomerBalance) {
             priority = 0;
         }
-    } else if (reaction.is_basis_x) {
+    } else if (reaction.is_set_free) {
         priority = 4;
     } else {
         priority = 5;

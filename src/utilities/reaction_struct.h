@@ -56,8 +56,7 @@ struct Reaction {
     Deviation deviation;
     Bound lower_bound;
     Bound upper_bound;
-    bool is_prime_basis;
-    bool is_basis_x;
+    bool is_set_free;
 };
 
 // probably better to move into a separate header
