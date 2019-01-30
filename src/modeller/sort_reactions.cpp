@@ -34,16 +34,16 @@ int GetPriority(const Reaction &reaction) {
         } else if (reaction.type == ReactionType::Irreversible) {
             priority = 2;
         } else if (reaction.type == ReactionType::Backward) {
-            priority = 6;
+            priority = 4;
         } else if (reaction.type == ReactionType::MetaboliteBalance) {
             priority = 3;
         } else if (reaction.type == ReactionType::IsotopomerBalance) {
             priority = 0;
         }
     } else if (reaction.is_set_free) {
-        priority = 4;
-    } else {
         priority = 5;
+    } else {
+        priority = 6;
     }
 
     return priority;

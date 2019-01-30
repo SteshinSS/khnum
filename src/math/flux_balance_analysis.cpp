@@ -47,16 +47,24 @@ std::vector<FluxVariability> EstablishAllFluxRanges(const Matrix &stoichiometry_
     std::vector<FluxVariability> flux_ranges(reactions.size());
     int current_reaction_index = 1;
     for (const Reaction &reaction : reactions) {
-        if (reaction.type != ReactionType::IsotopomerBalance) {
-            flux_ranges[reaction.id] = EstablishFluxRange(current_reaction_index, stoichiometry_matrix,
-                                                        reactions, included_metabolites);
-            ++current_reaction_index;
+        if (std::isnan(reaction.basis)) {
+            if (reaction.type != ReactionType::IsotopomerBalance) {
+                flux_ranges[reaction.id] = EstablishFluxRange(current_reaction_index, stoichiometry_matrix,
+                                                              reactions, included_metabolites);
+                ++current_reaction_index;
+            } else {
+                FluxVariability new_variability;
+                new_variability.lower_bound = reaction.lower_bound;
+                new_variability.upper_bound = reaction.upper_bound;
+                flux_ranges[reaction.id] = new_variability;
+            }
         } else {
             FluxVariability new_variability;
-            new_variability.lower_bound = reaction.lower_bound;
-            new_variability.upper_bound = reaction.upper_bound;
+            new_variability.lower_bound = reaction.basis;
+            new_variability.upper_bound = reaction.basis;
             flux_ranges[reaction.id] = new_variability;
         }
+
     }
 
     return flux_ranges;

@@ -125,7 +125,6 @@ void CalculateResidual(const alglib::real_1d_array &free_fluxes,
     std::vector<Flux> calculated_fluxes = CalculateAllFluxesFromFree(
             free_fluxes, nullspace, *(parameters.reactions));
 
-
     std::vector<EMUandMID> simulated_mids = CalculateMids(calculated_fluxes,
                                                           *(parameters.networks),
                                                           *(parameters.input_mids),
@@ -145,7 +144,6 @@ void FillBoundVectors(alglib::real_1d_array &lower_bounds,
     for (int i = 0; i < nullity; ++i) {
         lower_bounds[i] = (flux_ranges.at(reactions[reaction_total - nullity + i].id)).lower_bound;
         upper_bounds[i] = (flux_ranges.at(reactions[reaction_total - nullity + i].id)).upper_bound;
-
     }
 }
 
@@ -160,8 +158,8 @@ void GenerateInitialPoints(alglib::real_1d_array &free_fluxes,
 
     for (int i = 0; i < nullity; ++i) {
         free_fluxes[i] = lower_bounds[i] + get_random_point(random_source) * (upper_bounds[i] - lower_bounds[i]);
-
     }
+
 }
 
 int GetMeasurementsCount(ObjectiveParameters *parameters) {
@@ -178,19 +176,21 @@ std::vector<Flux> CalculateAllFluxesFromFree(const alglib::real_1d_array &free_f
                                              const std::vector<Reaction> &reactions) {
     Eigen::VectorXd free_fluxes_eigen(free_fluxes.length());
     for (int i = 0; i < free_fluxes.length(); ++i) {
-        free_fluxes_eigen[i] = free_fluxes[i];
+        free_fluxes_eigen(i) = free_fluxes[i];
     }
 
     Matrix all_fluxes_matrix = nullspace * free_fluxes_eigen;
 
     std::vector<Flux> all_fluxes(reactions.size());
     for (int i = 0; i < all_fluxes_matrix.rows(); ++i) {
-        all_fluxes[reactions.at(i).id] = all_fluxes_matrix(i, 0);
+        all_fluxes[reactions.at(reactions.size() - all_fluxes_matrix.rows() + i).id] = all_fluxes_matrix(i, 0);
     }
 
-    for (int i = all_fluxes_matrix.rows(); i < reactions.size(); ++i) {
-        all_fluxes[reactions.at(i).id] = free_fluxes_eigen(i - all_fluxes_matrix.rows());
+    for (int i = 0; i < reactions.size() - all_fluxes_matrix.rows(); ++i) {
+        all_fluxes[reactions.at(i).id] = 1;
     }
+
+
 
     return all_fluxes;
 }

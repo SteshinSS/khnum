@@ -79,8 +79,27 @@ void RunCli() {
         // std::map<std::string, Flux> initial_fluxes = EstablishInitialFluxes(
         //        stoichiometry_matrix, reactions, included_metabolites);
 
-        std::vector<FluxVariability> flux_ranges = EstablishAllFluxRanges(
-                stoichiometry_matrix, reactions, included_metabolites);
+        // std::vector<FluxVariability> flux_ranges = EstablishAllFluxRanges(
+        //        stoichiometry_matrix, reactions, included_metabolites);
+
+        std::vector<FluxVariability> flux_ranges(reactions.size());
+        for (const Reaction &reaction : reactions) {
+            FluxVariability new_flux_variability;
+            if (std::isnan(reaction.basis)) {
+                new_flux_variability.upper_bound = reaction.upper_bound;
+                new_flux_variability.lower_bound = reaction.lower_bound;
+            } else {
+                if (std::isnan(reaction.deviation)) {
+                    new_flux_variability.upper_bound = reaction.basis;
+                    new_flux_variability.lower_bound = reaction.basis;
+                } else {
+                    new_flux_variability.upper_bound = reaction.basis + reaction.deviation;
+                    new_flux_variability.lower_bound = reaction.basis - reaction.deviation;
+                }
+            }
+            flux_ranges[reaction.id] = new_flux_variability;
+
+        }
 
         // Pack parameters
         ObjectiveParameters parameters;
