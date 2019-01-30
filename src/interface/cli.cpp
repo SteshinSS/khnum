@@ -92,10 +92,10 @@ void RunCli() {
         parameters.nullspace = nullptr;
 
         std::vector<Flux> answer = EstimateFluxes(&parameters,
-                                                            flux_ranges,
-                                                            stoichiometry_matrix,
-                                                            reactions,
-                                                            10);
+                                                  flux_ranges,
+                                                  stoichiometry_matrix,
+                                                  reactions,
+                                                  10);
 
         for (const Reaction &reaction : reactions) {
             std::cerr << reaction.name << " " << answer[reaction.id] << std::endl;
