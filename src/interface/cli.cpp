@@ -74,6 +74,8 @@ void RunCli() {
         // ../modeller/create_stoichiometry_matrix.h
         Matrix stoichiometry_matrix = CreateStoichiometryMatrix(reactions, included_metabolites);
 
+        std::cerr << stoichiometry_matrix << std::endl;
+
         // ../math/flux_balance_analysis.h
         // Run preliminary FBA for calculate initial fluxes
         // std::map<std::string, Flux> initial_fluxes = EstablishInitialFluxes(
@@ -82,23 +84,19 @@ void RunCli() {
         // std::vector<FluxVariability> flux_ranges = EstablishAllFluxRanges(
         //        stoichiometry_matrix, reactions, included_metabolites);
 
-        std::vector<FluxVariability> flux_ranges(reactions.size());
-        for (const Reaction &reaction : reactions) {
-            FluxVariability new_flux_variability;
+        for (Reaction &reaction : reactions) {
             if (std::isnan(reaction.basis)) {
-                new_flux_variability.upper_bound = reaction.upper_bound;
-                new_flux_variability.lower_bound = reaction.lower_bound;
+                reaction.computed_upper_bound = reaction.setted_upper_bound;
+                reaction.computed_lower_bound = reaction.setted_lower_bound;
             } else {
                 if (std::isnan(reaction.deviation)) {
-                    new_flux_variability.upper_bound = reaction.basis;
-                    new_flux_variability.lower_bound = reaction.basis;
+                    reaction.computed_upper_bound = reaction.basis;
+                    reaction.computed_lower_bound = reaction.basis;
                 } else {
-                    new_flux_variability.upper_bound = reaction.basis + reaction.deviation;
-                    new_flux_variability.lower_bound = reaction.basis - reaction.deviation;
+                    reaction.computed_upper_bound = reaction.basis + reaction.deviation;
+                    reaction.computed_lower_bound = reaction.basis - reaction.deviation;
                 }
             }
-            flux_ranges[reaction.id] = new_flux_variability;
-
         }
 
         // Pack parameters
@@ -111,7 +109,6 @@ void RunCli() {
         parameters.nullspace = nullptr;
 
         std::vector<Flux> answer = EstimateFluxes(&parameters,
-                                                  flux_ranges,
                                                   stoichiometry_matrix,
                                                   reactions,
                                                   10);

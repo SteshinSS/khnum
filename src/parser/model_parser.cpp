@@ -44,8 +44,8 @@ void FillReaction(Reaction *reaction, std::stringstream &line) {
     reaction->basis = new_basis;
     reaction->is_set_free = is_basis_x;
     reaction->deviation = ParseDeviation(GetCell(line));
-    reaction->lower_bound = ParseLowerBound(GetCell(line));
-    reaction->upper_bound = ParseUpperBound(GetCell(line));
+    reaction->setted_lower_bound = ParseLowerBound(GetCell(line));
+    reaction->setted_upper_bound = ParseUpperBound(GetCell(line));
 }
 
 ChemicalEquation ParseChemicalEquation(std::stringstream &line) {
@@ -190,11 +190,11 @@ std::tuple<Basis, bool> ParseBasis(const std::string &basis) {
     }
 }
 
-Bound ParseLowerBound(const std::string &lower_bound) {
+Flux ParseLowerBound(const std::string &lower_bound) {
     return std::stod(lower_bound);
 }
 
-Bound ParseUpperBound(const std::string &upper_bound) {
+Flux ParseUpperBound(const std::string &upper_bound) {
     return std::stod(upper_bound);
 }
 

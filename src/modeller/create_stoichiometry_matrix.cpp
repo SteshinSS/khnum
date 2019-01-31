@@ -4,6 +4,7 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
 #include <exception>
 
 Matrix CreateStoichiometryMatrix(const std::vector<Reaction> &reactions,
@@ -18,7 +19,7 @@ Matrix CreateStoichiometryMatrix(const std::vector<Reaction> &reactions,
             ++reaction_number;
         }
     }
-    Matrix stoichiometry_matrix(metabolite_number, reaction_number);
+    Matrix stoichiometry_matrix = Matrix::Zero(metabolite_number, reaction_number);
 
     int stoichiometry_reaction_number = 0;
     for (const Reaction &reaction : reactions) {

@@ -42,9 +42,7 @@ enum class ReactionType {
 
 using Basis = double;
 using Deviation = double;
-using Bound = double;
-
-
+using Flux = double;
 
 struct Reaction {
     int id;
@@ -54,17 +52,13 @@ struct Reaction {
     ReactionType type;
     Basis basis;
     Deviation deviation;
-    Bound lower_bound;
-    Bound upper_bound;
     bool is_set_free;
+    Flux setted_lower_bound;
+    Flux setted_upper_bound;
+    Flux computed_lower_bound;
+    Flux computed_upper_bound;
 };
 
-// probably better to move into a separate header
-using Flux = double;
 
-struct FluxVariability {
-    Flux lower_bound;
-    Flux upper_bound;
-};
 
 #endif

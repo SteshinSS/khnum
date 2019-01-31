@@ -8,7 +8,7 @@
 #include <string>
 #include <cmath>
 #include <map>
-
+/*
 // should think about functions parameters
 // should think twice about Class LinearProblem design
 std::map<std::string, Flux> EstablishInitialFluxes(const Matrix &stoichiometry_matrix,
@@ -54,8 +54,8 @@ std::vector<FluxVariability> EstablishAllFluxRanges(const Matrix &stoichiometry_
                 ++current_reaction_index;
             } else {
                 FluxVariability new_variability;
-                new_variability.lower_bound = reaction.lower_bound;
-                new_variability.upper_bound = reaction.upper_bound;
+                new_variability.lower_bound = reaction.setted_lower_bound;
+                new_variability.upper_bound = reaction.setted_upper_bound;
                 flux_ranges[reaction.id] = new_variability;
             }
         } else {
@@ -137,7 +137,7 @@ void CreateLinearProblem(LinearProblem &linear_problem, const Matrix &stoichiome
 
             if (std::isnan(reaction.basis)) {
                 glp_set_col_bnds(linear_problem, current_reaction_index, GLP_DB,
-                                 reaction.lower_bound, reaction.upper_bound);
+                                 reaction.setted_lower_bound, reaction.setted_upper_bound);
             } else {
                 double shift{0.0};
                 auto glp_parameter = GLP_FX; // because GLP_DB not work, when LB = UB
@@ -173,3 +173,4 @@ void PrepareMatrixForGLPK(const Matrix &matrix,
         }
     }
 }
+ */

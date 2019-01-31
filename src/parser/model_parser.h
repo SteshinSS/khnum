@@ -17,8 +17,8 @@ Rate ParseRate(const std::string &rate);
 ReactionType ParseReactionType(const std::string &type);
 std::tuple<Basis, bool> ParseBasis(const std::string &basis);
 Deviation ParseDeviation(const std::string &deviation);
-Bound ParseLowerBound(const std::string &lower_bound);
-Bound ParseUpperBound(const std::string &upper_bound);
+Flux ParseLowerBound(const std::string &lower_bound);
+Flux ParseUpperBound(const std::string &upper_bound);
 
 ChemicalEquationSide FillEquationSide(const std::string &substrate_equation, const std::string &atom_equation);
 ChemicalEquationSide ParseSubstrateEquationSide(const std::string &raw_equation);

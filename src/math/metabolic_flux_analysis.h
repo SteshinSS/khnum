@@ -14,7 +14,6 @@
 #include <random>
 
 std::vector<Flux> EstimateFluxes(ObjectiveParameters *parameters,
-                                 const std::vector<FluxVariability> &flux_ranges,
                                  const Matrix &stoichiometry_matrix,
                                  const std::vector<Reaction> &reactions,
                                  const int iteration_total);
@@ -26,7 +25,6 @@ void CalculateResidual(const alglib::real_1d_array &free_fluxes,
 
 void FillBoundVectors(alglib::real_1d_array &lower_bounds,
                       alglib::real_1d_array &upper_bounds,
-                      const std::vector<FluxVariability> &flux_ranges,
                       const std::vector<Reaction> &reactions,
                       const int nullity);
 
@@ -52,5 +50,7 @@ void Fillf0Array(alglib::real_1d_array &residuals,
 
 
 double GetSSR(const alglib::real_1d_array &residuals, int measurements_count);
+
+Matrix GetRREF(const Matrix &item);
 
 #endif //CFLEX_METABOLIC_FLUX_ANALYSIS_H

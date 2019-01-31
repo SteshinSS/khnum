@@ -15,7 +15,7 @@
 
 // Contains FBA-calculated flux ranges
 // probably should rename, so it won't confuse with input bounds
-
+/*
 
 std::map<std::string, Flux> EstablishInitialFluxes(const Matrix &stoichiometry_matrix,
                                          const std::vector<Reaction> &reactions,
@@ -44,5 +44,5 @@ void CreateLinearProblem(LinearProblem &linear_problem,
 
 void PrepareMatrixForGLPK(const Matrix &matrix,
                           LinearProblem &linear_problem);
-
+*/
 #endif //CFLEX_FIND_INITIAL_FLUXES_H
