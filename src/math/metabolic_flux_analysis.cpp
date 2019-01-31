@@ -24,9 +24,8 @@ std::vector<Flux> EstimateFluxes(ObjectiveParameters *parameters,
     Matrix nullspace = stoichiometry_matrix.fullPivLu().kernel();
     nullspace = GetRREF(nullspace);
     parameters->nullspace = &nullspace;
+
     const int measurements_count = GetMeasurementsCount(parameters);
-
-
     const int nullity = nullspace.cols();
     alglib::real_1d_array free_fluxes;
     alglib::real_1d_array lower_bounds;
@@ -50,7 +49,7 @@ std::vector<Flux> EstimateFluxes(ObjectiveParameters *parameters,
     alglib::minlmstate state;
     alglib::minlmreport report;
 
-    alglib::minlmcreatev(nullity, measurements_count, free_fluxes, 0.0000000001, state);
+    alglib::minlmcreatev(nullity, measurements_count, free_fluxes, 0.0001, state);
     alglib::minlmsetcond(state, epsx, maxits);
     alglib::minlmsetbc(state, lower_bounds, upper_bounds);
 
@@ -78,15 +77,21 @@ std::vector<Flux> EstimateFluxes(ObjectiveParameters *parameters,
     std::cerr << "0 iteration. SSR: " << best_ssr << std::endl;
 
     for (int iteration = 1; iteration < iteration_total; ++iteration) {
+        std::cerr << "Start new iteration: from" << std::endl;
         GenerateInitialPoints(free_fluxes, lower_bounds, upper_bounds, reactions, nullity, random_source);
         alglib::minlmrestartfrom(state, free_fluxes);
         alglib::minlmoptimize(state, CalculateResidual, NULL, parameters);
         alglib::real_1d_array new_free_fluxes;
         alglib::minlmresults(state, new_free_fluxes, report);
 
+        std::cerr << "Finish at: " << std::endl;
+        for (int i = 0; i < nullity; ++i) {
+            std::cerr << reactions[reactions.size() - nullity + i].name << " " << new_free_fluxes[i] << std::endl;
+        }
+
         // check which results are better
         std::vector<Flux> new_all_fluxes = CalculateAllFluxesFromFree(
-                free_fluxes, nullspace, *(parameters->reactions));
+                new_free_fluxes, nullspace, *(parameters->reactions));
 
 
         std::vector<EMUandMID> new_simulated_mids = CalculateMids(new_all_fluxes,
@@ -102,6 +107,8 @@ std::vector<Flux> EstimateFluxes(ObjectiveParameters *parameters,
         double new_ssr = GetSSR(new_residuals, measurements_count);
 
         std::cerr << iteration << " iteration. SSR: " << new_ssr << " steps: " << report.iterationscount << std::endl;
+
+        std::cerr << std::endl << std::endl;
 
         if (new_ssr < best_ssr) {
             best_ssr = new_ssr;
@@ -156,7 +163,9 @@ void GenerateInitialPoints(alglib::real_1d_array &free_fluxes,
 
     for (int i = 0; i < nullity; ++i) {
         free_fluxes[i] = lower_bounds[i] + get_random_point(random_source) * (upper_bounds[i] - lower_bounds[i]);
+        std::cerr << reactions[reactions.size() - nullity + i].name << " " << free_fluxes[i] << std::endl;
     }
+    std::cerr << std::endl;
 
 
 }
