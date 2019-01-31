@@ -74,16 +74,7 @@ void RunCli() {
         // ../modeller/create_stoichiometry_matrix.h
         Matrix stoichiometry_matrix = CreateStoichiometryMatrix(reactions, included_metabolites);
 
-        std::cerr << stoichiometry_matrix << std::endl;
-
-        // ../math/flux_balance_analysis.h
-        // Run preliminary FBA for calculate initial fluxes
-        // std::map<std::string, Flux> initial_fluxes = EstablishInitialFluxes(
-        //        stoichiometry_matrix, reactions, included_metabolites);
-
-        // std::vector<FluxVariability> flux_ranges = EstablishAllFluxRanges(
-        //        stoichiometry_matrix, reactions, included_metabolites);
-
+        // estimate bounds
         for (Reaction &reaction : reactions) {
             if (std::isnan(reaction.basis)) {
                 reaction.computed_upper_bound = reaction.setted_upper_bound;

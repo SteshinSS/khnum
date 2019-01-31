@@ -20,11 +20,12 @@ std::vector<Flux> EstimateFluxes(ObjectiveParameters *parameters,
                                  const Matrix &stoichiometry_matrix,
                                  const std::vector<Reaction> &reactions,
                                  const int iteration_total) {
-    Matrix nullspace = GetRREF(stoichiometry_matrix);
 
-    std::cerr << nullspace << std::endl;
+    Matrix nullspace = stoichiometry_matrix.fullPivLu().kernel();
+    nullspace = GetRREF(nullspace);
     parameters->nullspace = &nullspace;
     const int measurements_count = GetMeasurementsCount(parameters);
+
 
     const int nullity = nullspace.cols();
     alglib::real_1d_array free_fluxes;
@@ -44,7 +45,6 @@ std::vector<Flux> EstimateFluxes(ObjectiveParameters *parameters,
                      reactions, nullity);
 
     GenerateInitialPoints(free_fluxes, lower_bounds, upper_bounds, reactions, nullity, random_source);
-
 
     alglib::ae_int_t maxits = 0;
     alglib::minlmstate state;
@@ -180,21 +180,15 @@ std::vector<Flux> CalculateAllFluxesFromFree(const alglib::real_1d_array &free_f
 
     Matrix all_fluxes_matrix = nullspace * free_fluxes_eigen;
 
-
     std::vector<Flux> all_fluxes(reactions.size());
-    // fill depended fluxes
+
     for (int i = 0; i < all_fluxes_matrix.rows(); ++i) {
-        all_fluxes[reactions.at(reactions.size() - all_fluxes_matrix.rows() + i).id] = -all_fluxes_matrix(i, 0);
+        all_fluxes[reactions.at(reactions.size() - all_fluxes_matrix.rows() + i).id] = all_fluxes_matrix(i, 0);
     }
 
     // fill const fake fluxes
-    for (int i = 0; i < reactions.size() - all_fluxes_matrix.rows() - free_fluxes_eigen.size(); ++i) {
+    for (int i = 0; i < reactions.size() - all_fluxes_matrix.rows(); ++i) {
         all_fluxes[reactions.at(i).id] = 1;
-    }
-
-    // fill free fluxes
-    for (int i = 0; i < free_fluxes_eigen.size(); ++i) {
-        all_fluxes[reactions.at(reactions.size() - free_fluxes_eigen.size() + i).id] = free_fluxes_eigen[i];
     }
 
 
@@ -218,29 +212,26 @@ void Fillf0Array(alglib::real_1d_array &residuals,
 double GetSSR(const alglib::real_1d_array &residuals, int measurements_count) {
     double answer = 0.0;
     for (int measurement = 0; measurement < measurements_count; ++measurement) {
-        answer += residuals(measurement);
+        answer += residuals(measurement) * residuals(measurement);
     }
     return answer;
 }
 
 Matrix GetRREF(const Matrix &item) {
-    Matrix rref_form = item;
-    Eigen::FullPivLU<Eigen::MatrixXd> lu_matrix(rref_form);
-
-    for (int pivot = 0; pivot < lu_matrix.rank(); ++pivot) {
-        rref_form.row(pivot) /= rref_form(pivot, pivot);
-        for (int i = pivot + 1; i < rref_form.rows(); ++i) {
-            rref_form.row(i) -= rref_form.row(pivot) * rref_form(i, pivot);
-        }
-    }
-
-    for (int pivot = lu_matrix.rank() - 1; pivot > 0; --pivot) {
+    Matrix result = item;
+    for (int pivot = item.cols() - 1; pivot > 0; --pivot) {
+        result.col(pivot) /= result(item.rows() - item.cols() + pivot, pivot);
         for (int i = 0; i < pivot; ++i) {
-            rref_form.row(i) -= rref_form.row(pivot) * rref_form(i, pivot);
+            result.col(i) -= result.col(pivot) * result(item.rows() - item.cols() + pivot, i);
+        }
+    }
+    result.col(0) /= result(item.rows() - item.cols(), 0);
+    for (int pivot = 0; pivot < item.cols(); ++pivot) {
+        for (int i = pivot + 1; i < item.cols(); ++i) {
+            result.col(i) -= result.col(pivot) * result(item.rows() - item.cols() + pivot, i);
         }
     }
 
-    Matrix A = rref_form.block(0, lu_matrix.rank(), lu_matrix.rank(), rref_form.cols() - lu_matrix.rank());
+    return result;
 
-    return A;
 }
