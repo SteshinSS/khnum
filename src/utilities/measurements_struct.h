@@ -1,8 +1,8 @@
 #ifndef CFLEX_MEASUREMENTS_STRUCT_H
 #define CFLEX_MEASUREMENTS_STRUCT_H
 
-#include "../utilities/EMU.h"
-#include "../utilities/MID.h"
+#include "EMU.h"
+#include "MID.h"
 
 #include <vector>
 

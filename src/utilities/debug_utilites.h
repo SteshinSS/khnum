@@ -5,7 +5,7 @@
 #ifndef CFLEX_DEBUG_UTILITES_H
 #define CFLEX_DEBUG_UTILITES_H
 
-#include "../utilities/EMU.h"
+#include "EMU.h"
 
 const std::string empty_string;
 

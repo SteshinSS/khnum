@@ -1,6 +1,6 @@
 #include "create_stoichiometry_matrix.h"
-#include "../math/math_utilites.h"
-#include "../utilities/reaction_struct.h"
+#include "math_utilites.h"
+#include "reaction_struct.h"
 
 #include <string>
 #include <vector>

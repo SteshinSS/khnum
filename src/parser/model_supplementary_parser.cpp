@@ -1,8 +1,8 @@
 #include "model_supplementary_parser.h"
 #include "parser_utilities.h"
-#include "../utilities/measurements_struct.h"
-#include "../utilities/EMU.h"
-#include "../utilities/MID.h"
+#include "measurements_struct.h"
+#include "EMU.h"
+#include "MID.h"
 #include <vector>
 #include <algorithm>
 #include <string>

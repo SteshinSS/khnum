@@ -1,7 +1,7 @@
 #ifndef CFLEX_CREATE_NULLSPACE_H
 #define CFLEX_CREATE_NULLSPACE_H
 
-#include "../math/math_utilites.h"
+#include "math_utilites.h"
 
 Matrix GetRREF(const Matrix &item);
 

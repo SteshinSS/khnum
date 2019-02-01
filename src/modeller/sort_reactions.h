@@ -2,7 +2,7 @@
 #define CFLEX_SORT_REACTIONS_H
 
 
-#include "../utilities/reaction_struct.h"
+#include "reaction_struct.h"
 
 #include <vector>
 #include <algorithm>

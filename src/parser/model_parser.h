@@ -1,7 +1,7 @@
 #ifndef CFLEX_MODEL_PARSER_H
 #define CFLEX_MODEL_PARSER_H
 
-#include "../utilities/reaction_struct.h"
+#include "reaction_struct.h"
 
 #include <vector>
 #include <string>

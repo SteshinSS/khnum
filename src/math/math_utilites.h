@@ -1,7 +1,7 @@
 #ifndef CFLEX_MATH_UTILITES_H
 #define CFLEX_MATH_UTILITES_H
 
-#include "../Eigen/Dense"
+#include "Dense"
 
 using Matrix = Eigen::MatrixXd;
 

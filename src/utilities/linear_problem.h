@@ -1,7 +1,7 @@
 #ifndef CFLEX_LINEAR_PROBLEM_H
 #define CFLEX_LINEAR_PROBLEM_H
 
-#include "../glpk/glpk.h"
+#include "glpk.h"
 
 // glpk wrapper for automatic memory management
 // should remake

@@ -2,10 +2,10 @@
 #define CFLEX_CALCULATE_MIDS_H
 
 
-#include "../utilities/EMU.h"
-#include "../utilities/MID.h"
-#include "../utilities/reaction_struct.h"
-#include "../math/math_utilites.h"
+#include "EMU.h"
+#include "MID.h"
+#include "reaction_struct.h"
+#include "math_utilites.h"
 
 #include <vector>
 

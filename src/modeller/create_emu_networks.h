@@ -1,8 +1,8 @@
 #ifndef CFLEX_CREATE_EMU_NETWORKS_H
 #define CFLEX_CREATE_EMU_NETWORKS_H
 
-#include "../utilities/EMU.h"
-#include "../utilities/MID.h"
+#include "EMU.h"
+#include "MID.h"
 
 #include <vector>
 

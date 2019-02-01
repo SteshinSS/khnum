@@ -1,7 +1,7 @@
 #include "create_emu_networks.h"
 
-#include "../utilities/EMU.h"
-#include "../utilities/MID.h"
+#include "EMU.h"
+#include "MID.h"
 
 #include <vector>
 #include <queue>

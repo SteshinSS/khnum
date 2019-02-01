@@ -5,7 +5,7 @@
 #ifndef CFLEX_OBJECTIVE_PARAMETERS_H
 #define CFLEX_OBJECTIVE_PARAMETERS_H
 
-#include "../math/math_utilites.h"
+#include "math_utilites.h"
 #include "input_substrate.h"
 #include "MID.h"
 #include "EMU.h"

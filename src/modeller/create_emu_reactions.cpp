@@ -1,7 +1,7 @@
 #include "create_emu_reactions.h"
-#include "../utilities/EMU.h"
-#include "../utilities/reaction_struct.h"
-#include "../utilities/debug_utilites.h"
+#include "EMU.h"
+#include "reaction_struct.h"
+#include "debug_utilites.h"
 
 #include <vector>
 #include <string>

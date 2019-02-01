@@ -1,7 +1,7 @@
 #include "calculate_input_mid.h"
-#include "../utilities/EMU.h"
-#include "../utilities/MID.h"
-#include "../utilities/input_substrate.h"
+#include "EMU.h"
+#include "MID.h"
+#include "input_substrate.h"
 
 #include <vector>
 #include <algorithm>

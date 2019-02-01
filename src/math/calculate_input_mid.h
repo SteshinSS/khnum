@@ -1,8 +1,8 @@
 #ifndef CFLEX_CALCULATE_INPUT_MID_H
 #define CFLEX_CALCULATE_INPUT_MID_H
 
-#include "../utilities/MID.h"
-#include "../utilities/input_substrate.h"
+#include "MID.h"
+#include "input_substrate.h"
 
 #include <vector>
 

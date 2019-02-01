@@ -1,8 +1,8 @@
 #ifndef CFLEX_CREATE_EMU_LIST_H
 #define CFLEX_CREATE_EMU_LIST_H
 
-#include "../utilities/EMU.h"
-#include "../utilities/input_substrate.h"
+#include "EMU.h"
+#include "input_substrate.h"
 
 #include <vector>
 

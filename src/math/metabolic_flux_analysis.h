@@ -1,13 +1,13 @@
 #ifndef CFLEX_METABOLIC_FLUX_ANALYSIS_H
 #define CFLEX_METABOLIC_FLUX_ANALYSIS_H
 
-#include "../utilities/reaction_struct.h"
-#include "../utilities/EMU.h"
-#include "../utilities/MID.h"
-#include "../utilities/objective_parameters.h"
-#include "../math/math_utilites.h"
+#include "reaction_struct.h"
+#include "EMU.h"
+#include "MID.h"
+#include "objective_parameters.h"
+#include "math_utilites.h"
 
-#include "../alglib/optimization.h"
+#include "optimization.h"
 
 #include <vector>
 #include <string>

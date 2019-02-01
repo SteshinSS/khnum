@@ -1,14 +1,14 @@
 #include "metabolic_flux_analysis.h"
 
-#include "../utilities/reaction_struct.h"
-#include "../utilities/EMU.h"
-#include "../utilities/MID.h"
-#include "../math/calculate_mids.h"
-#include "../Eigen/Eigen"
-#include "../math/math_utilites.h"
+#include "reaction_struct.h"
+#include "EMU.h"
+#include "MID.h"
+#include "calculate_mids.h"
+#include "Eigen"
+#include "math_utilites.h"
 
-#include "../alglib/stdafx.h"
-#include "../alglib/optimization.h"
+#include "stdafx.h"
+#include "optimization.h"
 
 #include <vector>
 #include <string>

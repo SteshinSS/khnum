@@ -1,14 +1,20 @@
 #include "flux_balance_analysis.h"
-#include "../math/math_utilites.h"
-#include "../utilities/reaction_struct.h"
-#include "../utilities/linear_problem.h"
-#include "../glpk/glpk.h"
+#include "math_utilites.h"
+#include "reaction_struct.h"
+#include "linear_problem.h"
+#include "glpk.h"
 
 #include <vector>
 #include <string>
 #include <cmath>
 #include <map>
+
+// Old code saved for example
+
+
 /*
+ *
+ *
 // should think about functions parameters
 // should think twice about Class LinearProblem design
 std::map<std::string, Flux> EstablishInitialFluxes(const Matrix &stoichiometry_matrix,
@@ -111,6 +117,8 @@ Flux EstablishExtremeFlux(int reaction_index,
     return glp_get_col_prim(bound, reaction_index);
 }
 
+
+*/
 // Prepare LinearProblem with constraints from the stoichiometry matrix
 // and bounds from the model
 //
@@ -173,4 +181,3 @@ void PrepareMatrixForGLPK(const Matrix &matrix,
         }
     }
 }
- */

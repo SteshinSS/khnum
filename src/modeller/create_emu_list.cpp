@@ -1,7 +1,7 @@
 #include "create_emu_list.h"
 
-#include "../utilities/EMU.h"
-#include "../utilities/input_substrate.h"
+#include "EMU.h"
+#include "input_substrate.h"
 
 #include <vector>
 #include <string>

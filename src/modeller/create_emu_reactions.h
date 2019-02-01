@@ -1,8 +1,8 @@
 #ifndef CFLEX_CREATE_EMU_REACTIONS_H
 #define CFLEX_CREATE_EMU_REACTIONS_H
 
-#include "../utilities/reaction_struct.h"
-#include "../utilities/EMU.h"
+#include "reaction_struct.h"
+#include "EMU.h"
 
 #include <vector>
 #include <string>

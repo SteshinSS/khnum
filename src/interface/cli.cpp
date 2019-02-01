@@ -1,23 +1,9 @@
 #include "cli.h"
-#include "../parser/model_parser.h"
-#include "../parser/model_supplementary_parser.h"
-#include "../modeller/create_metabolite_list.h"
-#include "../utilities/EMU.h"
-#include "../modeller/create_emu_reactions.h"
-#include "../modeller/create_stoichiometry_matrix.h"
-#include "../modeller/create_emu_networks.h"
-#include "../math/math_utilites.h"
-#include "../math/flux_balance_analysis.h"
-#include "../utilities/debug_utilites.h"
-#include "../utilities/input_substrate.h"
-#include "../modeller/create_emu_list.h"
-#include "../math/calculate_input_mid.h"
-#include "../utilities/MID.h"
-#include "../math/calculate_mids.h"
-#include "../math/metabolic_flux_analysis.h"
-#include "../modeller/sort_reactions.h"
-#include "../utilities/objective_parameters.h"
-#include "../modeller/create_nullspace.h"
+
+#include "parser.h"
+#include "modeller.h"
+#include "mfa_math.h"
+#include "utilities.h"
 
 #include <iostream>
 #include <fstream>
@@ -28,12 +14,7 @@
 
 void RunCli() {
     try {
-
-
-        // ../parser/model_parser.h
         std::vector<Reaction> reactions = ParseReactions("../model/model.csv");
-
-        // ../modeller/sort_reactions.h
         reactions = SortReactions(reactions);
 
         // ../parser/model_supplementary_parser.h

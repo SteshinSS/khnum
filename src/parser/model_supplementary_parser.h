@@ -1,10 +1,10 @@
 #ifndef CFLEX_MODEL_SUPPLEMENTARY_PARSER_H
 #define CFLEX_MODEL_SUPPLEMENTARY_PARSER_H
 
-#include "../utilities/measurements_struct.h"
-#include "../utilities/EMU.h"
-#include "../utilities/input_substrate.h"
-#include "../utilities/MID.h"
+#include "measurements_struct.h"
+#include "EMU.h"
+#include "input_substrate.h"
+#include "MID.h"
 #include <vector>
 #include <string>
 

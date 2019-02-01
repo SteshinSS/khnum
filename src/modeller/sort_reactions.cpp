@@ -2,7 +2,7 @@
 #include "sort_reactions.h"
 
 
-#include "../utilities/reaction_struct.h"
+#include "reaction_struct.h"
 
 #include <vector>
 #include <algorithm>

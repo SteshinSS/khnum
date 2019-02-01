@@ -1,6 +1,6 @@
 #include "create_nullspace.h"
 
-#include "../math/math_utilites.h"
+#include "math_utilites.h"
 
 Matrix GetNullspace(const Matrix &matrix) {
     Matrix nullspace = matrix.fullPivLu().kernel();
