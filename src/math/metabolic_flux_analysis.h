@@ -30,14 +30,15 @@ void GenerateInitialPoints(alglib::real_1d_array &free_fluxes,
                            const alglib::real_1d_array &upper_bounds,
                            const std::vector<Reaction> &reactions,
                            const int nullity,
+                           const int iteration,
                            std::mt19937 &random_source);
 
 
 void SetOptimizationParameters(alglib::real_1d_array &free_fluxes,
                                alglib::real_1d_array &lower_bounds,
                                alglib::real_1d_array &upper_bounds,
-                               int nullity,
-                               int measurements_count,
+                               const int nullity,
+                               const int measurements_count,
                                alglib::minlmstate &state,
                                alglib::minlmreport &report);
 
@@ -63,7 +64,20 @@ void Fillf0Array(alglib::real_1d_array &residuals,
                  const std::vector<Measurement> &measurements);
 
 
-double GetSSR(const alglib::real_1d_array &residuals, int measurements_count);
+double GetSSR(const alglib::real_1d_array &residuals, const int measurements_count);
 
+
+
+
+void PrintStartMessage(const alglib::real_1d_array &free_fluxes,
+                       const std::vector<Reaction> &reactions,
+                       const int nullity,
+                       const int iteration);
+
+
+void PrintFinalMessage(const alglib::real_1d_array &free_fluxes,
+                       const std::vector<Reaction> &reactions,
+                       const double ssr,
+                       const alglib::minlmreport &report);
 
 #endif //CFLEX_METABOLIC_FLUX_ANALYSIS_H

@@ -21,9 +21,9 @@ std::vector<Reaction> ParseReactions(const std::string &model_path) {
     while (!raw_line.empty()) {
         std::stringstream line(raw_line);
         Reaction new_reaction;
-        FillReaction(&new_reaction, line);
         new_reaction.id = reaction_id;
         ++reaction_id;
+        FillReaction(&new_reaction, line);
         reactions.emplace_back(new_reaction);
         if (model_file.eof()) {
             break;
@@ -40,7 +40,7 @@ void FillReaction(Reaction *reaction, std::stringstream &line) {
     reaction->chemical_equation = ParseChemicalEquation(line);
     reaction->rate = ParseRate(GetCell(line));
     reaction->type = ParseReactionType(GetCell(line));
-    auto [new_basis, is_basis_x] = ParseBasis(GetCell(line));
+    auto[new_basis, is_basis_x] = ParseBasis(GetCell(line));
     reaction->basis = new_basis;
     reaction->is_set_free = is_basis_x;
     reaction->deviation = ParseDeviation(GetCell(line));
@@ -50,14 +50,18 @@ void FillReaction(Reaction *reaction, std::stringstream &line) {
 
 ChemicalEquation ParseChemicalEquation(std::stringstream &line) {
     const std::string substrate_equation = GetCell(line);
+    const size_t substrate_delimiter_position = substrate_equation.find(reaction_side_delimiter);
+
     const std::string atom_equation = GetCell(line);
-    size_t substrate_delimiter_position = substrate_equation.find(reaction_side_delimiter);
     size_t atom_delimiter_position = atom_equation.find(reaction_side_delimiter);
+
     bool is_atom_equation_ok = (atom_delimiter_position != std::string::npos) || atom_equation.empty();
 
     if (substrate_delimiter_position != std::string::npos && is_atom_equation_ok) {
         const std::string left_side_substrate_equation = substrate_equation.substr(0, substrate_delimiter_position);
-        const std::string left_side_atom_equation = atom_equation.substr(0, atom_delimiter_position);
+        const std::string left_side_atom_equation = atom_equation.empty() ? "" :
+                                                    atom_equation.substr(0, atom_delimiter_position);
+
         ChemicalEquationSide left = FillEquationSide(
                 left_side_substrate_equation, left_side_atom_equation);
 
@@ -85,7 +89,7 @@ ChemicalEquationSide ParseSubstrateEquationSide(const std::string &raw_equation)
     ChemicalEquationSide result;
     std::stringstream equation{raw_equation};
     bool previous_token_is_coefficient{false}; // true, if previous iteration have found a coefficient
-    SubstrateCoefficient last_coefficient{}; // contain previous coefficient, if previous token is coefficient
+    SubstrateCoefficient last_coefficient{}; // contain previous coefficient, if previous token is a coefficient
     std::string token;
     getline(equation, token, ' ');
     while (!token.empty()) {
@@ -153,7 +157,7 @@ void ParseAtomEquationSide(ChemicalEquationSide *equation_side, const std::strin
 
 Rate ParseRate(const std::string &rate) {
     if (rate.empty()) {
-        return std::numeric_limits<double>::quiet_NaN();  // no rates
+        return std::numeric_limits<double>::quiet_NaN();  // no rate
     } else {
         return std::stod(rate);
     }
@@ -172,10 +176,10 @@ ReactionType ParseReactionType(const std::string &type) {
         } else if (type == "B") {
             return ReactionType::MetaboliteBalance;
         } else {
-            throw std::runtime_error("There is reaction with bad Type!");
+            throw std::runtime_error("There is reaction with bad type!");
         }
     } else {
-        throw std::runtime_error("There is reaction without Type in model!");
+        throw std::runtime_error("There is reaction without type in model!");
     }
 }
 
@@ -184,8 +188,7 @@ std::tuple<Basis, bool> ParseBasis(const std::string &basis) {
         return {std::numeric_limits<double>::quiet_NaN(), true};
     } else if (basis.empty()) {
         return {std::numeric_limits<double>::quiet_NaN(), false};
-    }
-    else {
+    } else {
         return {std::stod(basis), true};
     }
 }

@@ -39,7 +39,7 @@ std::vector<Flux> EstimateFluxes(ObjectiveParameters &parameters,
 
     FillBoundVectors(lower_bounds, upper_bounds, reactions, nullity);
 
-    GenerateInitialPoints(free_fluxes, lower_bounds, upper_bounds, reactions, nullity, random_source);
+    GenerateInitialPoints(free_fluxes, lower_bounds, upper_bounds, reactions, nullity, 1, random_source);
 
     alglib::minlmstate state;
     alglib::minlmreport report;
@@ -51,7 +51,7 @@ std::vector<Flux> EstimateFluxes(ObjectiveParameters &parameters,
                                                   &parameters, state, report);
 
     for (int iteration = 1; iteration < iteration_total; ++iteration) {
-        GenerateInitialPoints(free_fluxes, lower_bounds, upper_bounds, reactions, nullity, random_source);
+        GenerateInitialPoints(free_fluxes, lower_bounds, upper_bounds, reactions, nullity, iteration + 1, random_source);
         alglib::minlmrestartfrom(state, free_fluxes);
 
         auto[new_ssr, new_fluxes] = RunOptimization(measurements_count,
@@ -61,7 +61,6 @@ std::vector<Flux> EstimateFluxes(ObjectiveParameters &parameters,
             best_ssr = new_ssr;
             best_fluxes = new_fluxes;
         }
-
     }
 
     return best_fluxes;
@@ -97,6 +96,7 @@ void GenerateInitialPoints(alglib::real_1d_array &free_fluxes,
                            const alglib::real_1d_array &upper_bounds,
                            const std::vector<Reaction> &reactions,
                            const int nullity,
+                           const int iteration,
                            std::mt19937 &random_source) {
 
     std::uniform_real_distribution<> get_random_point(0.0, 1.0);
@@ -104,14 +104,26 @@ void GenerateInitialPoints(alglib::real_1d_array &free_fluxes,
     for (int i = 0; i < nullity; ++i) {
         free_fluxes[i] = lower_bounds[i] + get_random_point(random_source) * (upper_bounds[i] - lower_bounds[i]);
     }
+
+    PrintStartMessage(free_fluxes, reactions, nullity, iteration);
 }
 
+void PrintStartMessage(const alglib::real_1d_array &free_fluxes,
+                       const std::vector<Reaction> &reactions,
+                       const int nullity,
+                       const int iteration) {
+    std::cout << "Start " << iteration << " iteration from: " << std::endl;
+    for (int i = 0; i < nullity; ++i) {
+        std::cout << reactions[reactions.size() - nullity + i].name << " = " << free_fluxes[i] << std::endl;
+    }
+    std::cout << std::endl;
+}
 
 void SetOptimizationParameters(alglib::real_1d_array &free_fluxes,
                                alglib::real_1d_array &lower_bounds,
                                alglib::real_1d_array &upper_bounds,
-                               int nullity,
-                               int measurements_count,
+                               const int nullity,
+                               const int measurements_count,
                                alglib::minlmstate &state,
                                alglib::minlmreport &report) {
     alglib::ae_int_t maxits = 0;
@@ -148,6 +160,8 @@ std::tuple<double, std::vector<Flux>> RunOptimization(int measurements_count,
 
     double best_ssr = GetSSR(residuals, measurements_count);
 
+    PrintFinalMessage(final_free_fluxes, *(parameters->reactions), best_ssr, report);
+
     return std::tie(best_ssr, final_all_fluxes);
 }
 
@@ -177,7 +191,7 @@ std::vector<Flux> CalculateAllFluxesFromFree(const alglib::real_1d_array &free_f
     std::vector<Flux> all_fluxes(reactions.size());
 
     // non metabolite balance reactions
-    const int real_reactions_total =  all_fluxes_matrix.rows();
+    const int real_reactions_total = all_fluxes_matrix.rows();
 
     // metabolite balance
     const int fake_reactions_total = reactions.size() - all_fluxes_matrix.rows();
@@ -217,7 +231,7 @@ void Fillf0Array(alglib::real_1d_array &residuals,
     }
 }
 
-double GetSSR(const alglib::real_1d_array &residuals, int measurements_count) {
+double GetSSR(const alglib::real_1d_array &residuals, const int measurements_count) {
     double answer = 0.0;
     for (int measurement = 0; measurement < measurements_count; ++measurement) {
         answer += residuals(measurement) * residuals(measurement);
@@ -225,4 +239,15 @@ double GetSSR(const alglib::real_1d_array &residuals, int measurements_count) {
     return answer;
 }
 
+void PrintFinalMessage(const alglib::real_1d_array &free_fluxes,
+                       const std::vector<Reaction> &reactions,
+                       const double ssr,
+                       const alglib::minlmreport &report) {
+    std::cout << "Finish at: " << std::endl;
 
+    for (int i = 0; i < free_fluxes.length(); ++i) {
+        std::cout << reactions[reactions.size() - free_fluxes.length() + i].name <<
+                  " = " << free_fluxes[i] << std::endl;
+    }
+    std::cout << "with SSR: " << ssr << " in " << report.iterationscount << " steps." << std::endl << std::endl;
+}

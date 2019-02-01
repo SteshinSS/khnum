@@ -4,8 +4,7 @@
 #include <vector>
 #include <string>
 
-using AtomStates = std::vector<char>; // there are other available options as vector<char>
-
+using AtomStates = std::vector<char>; // like a vector<bool> but iterable
 using EMUcoefficient = double;
 
 struct EMU {
@@ -15,7 +14,6 @@ struct EMU {
 
 // need this for stl containers
 bool operator<(const EMU &lhs, const EMU &rhs);
-
 bool operator==(const EMU &lhs, const EMU &rhs);
 
 // uses for EMU reactions
@@ -26,7 +24,6 @@ struct EMUSubstrate {
 
 // need this for stl containers
 bool operator==(EMUSubstrate const &lhs, EMUSubstrate const &rhs);
-
 bool operator!=(EMUSubstrate const &lhs, EMUSubstrate const &rhs);
 
 using EMUReactionSide = std::vector<EMUSubstrate>;
@@ -37,9 +34,7 @@ struct EMUReaction {
     EMUSubstrate right;
 };
 
-
 bool operator==(const EMUReaction &lhs, const EMUReaction &rhs);
-
 using EMUNetwork = std::vector<EMUReaction>;
 
 #endif //CFLEX_EMU_H

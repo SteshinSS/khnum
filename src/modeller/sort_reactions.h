@@ -8,8 +8,9 @@
 #include <algorithm>
 #include <limits>
 
-std::vector<Reaction> SortReactions(std::vector<Reaction> reactions);
+std::vector<Reaction> SortReactionsByType(std::vector<Reaction> reactions);
 
+std::vector<Reaction> SortReactionByID(std::vector<Reaction> reactions);
 
 int GetPriority(const Reaction &reaction);
 

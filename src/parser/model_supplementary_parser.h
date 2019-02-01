@@ -12,7 +12,6 @@ std::vector<std::string> ParseExcludedMetabolites(const std::string &excluded_me
 
 std::vector<EMU> ParseMeasuredIsotopes(const std::string &measured_isotopes_path);
 
-
 std::vector<Measurement> ParseMeasurments(const std::string &measurements_path,
                                         const std::vector<EMU> &measured_isotopes);
 

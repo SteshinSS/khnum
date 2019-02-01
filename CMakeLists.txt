@@ -5,7 +5,7 @@ file(GLOB_RECURSE sources      src/*.cpp src/*.h)
 file(GLOB_RECURSE test test/*.cpp)
 file(GLOB_RECURSE libs lib/*.cpp lib/*.h)
 
-add_executable(CFlex ${sources} ${libs} src/math/mfa_math.h)
+add_executable(CFlex ${sources} ${libs} src/math/mfa_math.h src/math/calculate_flux_bounds.cpp src/math/calculate_flux_bounds.h)
 
 target_compile_options(CFlex PUBLIC -std=c++17)
 

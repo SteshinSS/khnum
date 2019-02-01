@@ -12,7 +12,7 @@
 #include <iostream>
 
 
-std::vector<Reaction> SortReactions(std::vector<Reaction> reactions) {
+std::vector<Reaction> SortReactionsByType(std::vector<Reaction> reactions) {
     std::sort(reactions.begin(), reactions.end(), [](const Reaction &lhs, const Reaction &rhs) {
         int lhs_priority = GetPriority(lhs);
         int rhs_priority = GetPriority(rhs);
@@ -49,4 +49,12 @@ int GetPriority(const Reaction &reaction) {
     return priority;
 }
 
+
+std::vector<Reaction> SortReactionByID(std::vector<Reaction> reactions) {
+    std::sort(reactions.begin(), reactions.end(), [](const Reaction &lhs, const Reaction &rhs) {
+        return lhs.id < rhs.id;
+    });
+
+    return reactions;
+}
 
