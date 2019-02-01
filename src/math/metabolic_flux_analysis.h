@@ -12,16 +12,12 @@
 #include <vector>
 #include <string>
 #include <random>
+#include <tuple>
 
-std::vector<Flux> EstimateFluxes(ObjectiveParameters *parameters,
-                                 const Matrix &stoichiometry_matrix,
-                                 const std::vector<Reaction> &reactions,
+std::vector<Flux> EstimateFluxes(ObjectiveParameters &parameters,
                                  const int iteration_total);
 
-void CalculateResidual(const alglib::real_1d_array &free_fluxes,
-                       alglib::real_1d_array &residuals,
-                       void *ptr);
-
+int GetMeasurementsCount(const std::vector<Measurement> &measurements);
 
 void FillBoundVectors(alglib::real_1d_array &lower_bounds,
                       alglib::real_1d_array &upper_bounds,
@@ -37,20 +33,37 @@ void GenerateInitialPoints(alglib::real_1d_array &free_fluxes,
                            std::mt19937 &random_source);
 
 
-int GetMeasurementsCount(ObjectiveParameters *parameters);
+void SetOptimizationParameters(alglib::real_1d_array &free_fluxes,
+                               alglib::real_1d_array &lower_bounds,
+                               alglib::real_1d_array &upper_bounds,
+                               int nullity,
+                               int measurements_count,
+                               alglib::minlmstate &state,
+                               alglib::minlmreport &report);
 
+
+std::tuple<double, std::vector<Flux>> RunOptimization( int measurements_count,
+                                                       ObjectiveParameters *parameters,
+                                                       alglib::minlmstate &state,
+                                                       alglib::minlmreport &report);
+
+void CalculateResidual(const alglib::real_1d_array &free_fluxes,
+                       alglib::real_1d_array &residuals,
+                       void *ptr);
 
 std::vector<Flux> CalculateAllFluxesFromFree(const alglib::real_1d_array &free_fluxes,
                                              const Matrix &nullspace,
                                              const std::vector<Reaction> &reactions);
 
+
+Eigen::VectorXd GetEigenVectorFromAlgLibVector(const alglib::real_1d_array &alglib_vector);
+
 void Fillf0Array(alglib::real_1d_array &residuals,
                  const std::vector<EMUandMID> &simulated_mids,
-                 const ObjectiveParameters &parameters);
+                 const std::vector<Measurement> &measurements);
 
 
 double GetSSR(const alglib::real_1d_array &residuals, int measurements_count);
 
-Matrix GetRREF(const Matrix &item);
 
 #endif //CFLEX_METABOLIC_FLUX_ANALYSIS_H

@@ -17,6 +17,7 @@
 #include "../math/metabolic_flux_analysis.h"
 #include "../modeller/sort_reactions.h"
 #include "../utilities/objective_parameters.h"
+#include "../modeller/create_nullspace.h"
 
 #include <iostream>
 #include <fstream>
@@ -74,6 +75,10 @@ void RunCli() {
         // ../modeller/create_stoichiometry_matrix.h
         Matrix stoichiometry_matrix = CreateStoichiometryMatrix(reactions, included_metabolites);
 
+        // ../modeller/create_nullspace.h
+        Matrix nullspace = GetNullspace(stoichiometry_matrix);
+
+
         // estimate bounds
         for (Reaction &reaction : reactions) {
             if (std::isnan(reaction.basis)) {
@@ -97,12 +102,9 @@ void RunCli() {
         parameters.reactions = &reactions;
         parameters.input_mids = &input_substrates_mids;
         parameters.measurements = &measurements;
-        parameters.nullspace = nullptr;
+        parameters.nullspace = &nullspace;
 
-        std::vector<Flux> answer = EstimateFluxes(&parameters,
-                                                  stoichiometry_matrix,
-                                                  reactions,
-                                                  10);
+        std::vector<Flux> answer = EstimateFluxes(parameters, 10);
 
         for (const Reaction &reaction : reactions) {
             std::cerr << reaction.name << " " << answer[reaction.id] << std::endl;
