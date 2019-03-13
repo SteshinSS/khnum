@@ -1,8 +1,7 @@
-PYR_EX
-GLU_EX
-CO2_EX
-O2_EX
-PYR_B
-AKG_B
-OAA_B
-ATPM
+mal_L_b     
+ac_ex     
+glc_DS_b     
+glc_DU_b     
+co2_nat     
+co2_ex     
+Biomass

@@ -7,5 +7,5 @@
 Matrix CreateStoichiometryMatrix(const std::vector<Reaction> &reactions,
                                  const std::vector<std::string> &metabolite_list);
 
-double GetTotalCoefficient(const ChemicalEquation &chemical_equation, const std::string &metabolite);
+double GetTotalCoefficient(const ChemicalEquation &chemical_equation, const std::string &metabolite, const int id);
 #endif //CFLEX_CREATE_STOICHIOMETRY_MATRIX_H

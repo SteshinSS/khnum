@@ -32,7 +32,7 @@ std::vector<EMUNetwork> CreateEMUNetworks(const std::vector<EMUReaction> &reacti
         emus_to_check.pop();
         int emu_size = GetEMUSize(next_emu);
 
-        if(IsEMUAlreadyChecked(next_emu, already_checked_emus)) {
+        if (IsEMUAlreadyChecked(next_emu, already_checked_emus)) {
             continue;
         }
 
@@ -50,10 +50,18 @@ std::vector<EMUNetwork> CreateEMUNetworks(const std::vector<EMUReaction> &reacti
         already_checked_emus.push_back(next_emu);
     }
 
+    // remove empty networks
+
+    emu_networks.erase(
+            std::remove_if(emu_networks.begin(), emu_networks.end(), [](const EMUNetwork &network) {
+                return network.empty();
+            }),
+            emu_networks.end());
+
     return emu_networks;
 }
 
-int FindTheLargestEMUSize (const std::vector<EMUReaction> &reactions) {
+int FindTheLargestEMUSize(const std::vector<EMUReaction> &reactions) {
     int max_size = -1;
     for (const EMUReaction &reaction : reactions) {
         for (const EMUSubstrate &emu_substrate : reaction.left) {
@@ -64,7 +72,7 @@ int FindTheLargestEMUSize (const std::vector<EMUReaction> &reactions) {
     return max_size;
 }
 
-bool IsEMUAlreadyChecked (const EMU &emu, const std::vector<EMU> &already_checked_emus) {
+bool IsEMUAlreadyChecked(const EMU &emu, const std::vector<EMU> &already_checked_emus) {
     auto emu_position = find(already_checked_emus.begin(),
                              already_checked_emus.end(),
                              emu);

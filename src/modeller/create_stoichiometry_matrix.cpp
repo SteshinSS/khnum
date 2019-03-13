@@ -28,7 +28,8 @@ Matrix CreateStoichiometryMatrix(const std::vector<Reaction> &reactions,
                 std::string current_metabolite_name = metabolite_list.at(metabolite);
                 stoichiometry_matrix(metabolite, stoichiometry_reaction_number) = GetTotalCoefficient(
                     reaction.chemical_equation,
-                    current_metabolite_name);
+                    current_metabolite_name,
+                    reaction.id);
             }
             ++stoichiometry_reaction_number;
         }
@@ -37,7 +38,7 @@ Matrix CreateStoichiometryMatrix(const std::vector<Reaction> &reactions,
     return stoichiometry_matrix;
 }
 
-double GetTotalCoefficient(const ChemicalEquation &chemical_equation, const std::string &metabolite) {
+double GetTotalCoefficient(const ChemicalEquation &chemical_equation, const std::string &metabolite, const int id) {
     double result{0.0};
     bool is_found_at_left{false};
     for (const Substrate &substrate : chemical_equation.left) {
@@ -51,7 +52,8 @@ double GetTotalCoefficient(const ChemicalEquation &chemical_equation, const std:
             if (!is_found_at_left) {
                 result += substrate.coefficient;
             } else {
-                throw std::runtime_error("There is reaction with the same substrate in both sides!");
+                throw std::runtime_error("There is reaction with the same substrate in both sides! " +
+                std::to_string(id));
             }
         }
     }

@@ -2,6 +2,7 @@
 #include "parser_utilities.h"
 #include <exception>
 #include <fstream>
+#include <iostream>
 #include <limits>
 #include <sstream>
 #include <string>
@@ -18,24 +19,31 @@ std::vector<Reaction> ParseReactions(const std::string &model_path) {
     std::string raw_line;
     getline(model_file, raw_line);
     int reaction_id = 0;
-    while (!raw_line.empty()) {
-        std::stringstream line(raw_line);
-        Reaction new_reaction;
-        new_reaction.id = reaction_id;
-        ++reaction_id;
-        FillReaction(&new_reaction, line);
-        reactions.emplace_back(new_reaction);
-        if (model_file.eof()) {
-            break;
-        } else {
-            getline(model_file, raw_line);
+    try {
+        while (!raw_line.empty()) {
+            std::stringstream line(raw_line);
+            Reaction new_reaction;
+            new_reaction.id = reaction_id;
+            ++reaction_id;
+            FillReaction(&new_reaction, line);
+            reactions.emplace_back(new_reaction);
+            if (model_file.eof()) {
+                break;
+            } else {
+                getline(model_file, raw_line);
+            }
         }
+    } catch (std::runtime_error &parser_error) {
+        std::cerr << "Line: " << reaction_id << std::endl;
+        throw (parser_error);
     }
+
 
     return reactions;
 }
 
 void FillReaction(Reaction *reaction, std::stringstream &line) {
+
     reaction->name = GetCell(line);
     reaction->chemical_equation = ParseChemicalEquation(line);
     reaction->rate = ParseRate(GetCell(line));
@@ -44,8 +52,17 @@ void FillReaction(Reaction *reaction, std::stringstream &line) {
     reaction->basis = new_basis;
     reaction->is_set_free = is_basis_x;
     reaction->deviation = ParseDeviation(GetCell(line));
+
+    // turn this code ON if UB and LB are available
+    /*
     reaction->setted_lower_bound = ParseLowerBound(GetCell(line));
     reaction->setted_upper_bound = ParseUpperBound(GetCell(line));
+     */
+
+    reaction->setted_lower_bound = 0;
+    reaction->setted_upper_bound = 10;
+    GetCell(line);
+    GetCell(line);
 }
 
 ChemicalEquation ParseChemicalEquation(std::stringstream &line) {
@@ -93,23 +110,31 @@ ChemicalEquationSide ParseSubstrateEquationSide(const std::string &raw_equation)
     std::string token;
     getline(equation, token, ' ');
     while (!token.empty()) {
-        if (std::isdigit(token[0])) { // it is coefficient
+        try {
+            std::size_t position_of_not_number; // see second argument of std::stod
+            last_coefficient = std::stod(token, &position_of_not_number);
+
+            if (position_of_not_number != token.size()) { // in case of substrate name starts with a number
+                throw std::invalid_argument("");
+            }
             if (!previous_token_is_coefficient) {
                 previous_token_is_coefficient = true;
-                last_coefficient = std::stod(token);
+
             } else {
                 throw std::runtime_error("There is reaction with two coefficient in row!");
             }
-        } else if (token != substrate_delimiter) {
-            if (!previous_token_is_coefficient) {
-                last_coefficient = 1.0;
+        } catch (std::invalid_argument) {
+            if (token != substrate_delimiter) {
+                if (!previous_token_is_coefficient) {
+                    last_coefficient = 1.0;
+                }
+                previous_token_is_coefficient = false;
+                Substrate new_substrate;
+                new_substrate.name = token;
+                new_substrate.coefficient = last_coefficient;
+                new_substrate.formula = "";
+                result.push_back(new_substrate);
             }
-            previous_token_is_coefficient = false;
-            Substrate new_substrate;
-            new_substrate.name = token;
-            new_substrate.coefficient = last_coefficient;
-            new_substrate.formula = "";
-            result.push_back(new_substrate);
         }
         if (equation.eof()) {
             break;

@@ -140,7 +140,9 @@ EMUReaction CreateOneEMUReaction(const Reaction &reaction,
 
             if (!is_atom_found) {
                 throw std::runtime_error("There is reaction in which there are atoms "
-                                         "in the right side such that are not in the left one");
+                                         "in the right side such that are not in the left one " +
+                                         std::to_string(reaction.id));
+
             }
         }
     }

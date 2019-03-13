@@ -17,6 +17,7 @@ std::vector<std::string> ParseExcludedMetabolites(const std::string &excluded_me
 std::vector<EMU> ParseMeasuredIsotopes(const std::string &measured_isotopes_path) {
     std::vector<EMU> measured_isotopes;
     std::vector<std::string> raw_measured_isotopes = ParseEachLine(measured_isotopes_path);
+    int line_number = 1;
     for (std::string const &raw_measured_isotope : raw_measured_isotopes) {
         std::stringstream line(raw_measured_isotope);
         EMU new_emu;
@@ -32,9 +33,10 @@ std::vector<EMU> ParseMeasuredIsotopes(const std::string &measured_isotopes_path
             } else if (row_atom_states[atom_position] == '0') {
                 new_emu.atom_states[atom_position] = false;
             } else {
-                throw std::runtime_error("There is strange atom states in measured isotope!");
+                throw std::runtime_error("Line: " + std::to_string(line_number) + "There is strange atom states in measured isotope!");
             }
         }
+        ++line_number;
 
         measured_isotopes.push_back(new_emu);
     }
