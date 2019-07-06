@@ -1,5 +1,7 @@
 #include "cli.h"
 
+#include "file_system.h"
+
 #include "parser.h"
 #include "modeller.h"
 #include "mfa_math.h"
@@ -14,11 +16,13 @@
 
 void RunCli() {
     try {
-        std::vector<Reaction> reactions = ParseReactions("../model/model.csv");
+        FileSystem model("../modelTca");
+
+        std::vector<Reaction> reactions = ParseReactions(model.getModelFile());
         reactions = SortReactionsByType(reactions);
-        std::vector<EMU> measured_emus = ParseMeasuredIsotopes("../model/measured_isotopes.txt");
-        std::vector<Measurement> measurements = ParseMeasurments("../model/measurements.csv", measured_emus);
-        std::vector<InputSubstrate> input_substrates = ParseInputSubstrates("../model/substrate_input.csv");
+        std::vector<EMU> measured_emus = ParseMeasuredIsotopes(model.getMeasuredIsotopesFile());
+        std::vector<Measurement> measurements = ParseMeasurments(model.getMeasurementsFile(), measured_emus);
+        std::vector<InputSubstrate> input_substrates = ParseInputSubstrates(model.getSubstrateInputFile());
 
 
         // Creates all elementary reaction in term of EMU
@@ -40,7 +44,7 @@ void RunCli() {
         // Creates list with all reactions metabolites
         std::vector<std::string> full_metabolite_list = CreateFullMetaboliteList(reactions);
 
-        std::vector<std::string> excluded_metabolites = ParseExcludedMetabolites("../model/excluded_metabolites.txt");
+        std::vector<std::string> excluded_metabolites = ParseExcludedMetabolites(model.getExcludedMetabolitesFile());
         std::vector<std::string> included_metabolites = CreateIncludedMetaboliteList(
                 full_metabolite_list, excluded_metabolites);
 

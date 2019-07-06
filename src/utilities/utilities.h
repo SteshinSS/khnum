@@ -4,7 +4,6 @@
 #include "debug_utilites.h"
 #include "EMU.h"
 #include "input_substrate.h"
-#include "linear_problem.h"
 #include "measurements_struct.h"
 #include "MID.h"
 #include "objective_parameters.h"
