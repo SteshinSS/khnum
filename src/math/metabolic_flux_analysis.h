@@ -2,7 +2,7 @@
 #define CFLEX_METABOLIC_FLUX_ANALYSIS_H
 
 #include "reaction_struct.h"
-#include "EMU.h"
+#include "Emu.h"
 #include "MID.h"
 #include "objective_parameters.h"
 #include "math_utilites.h"
@@ -14,7 +14,7 @@
 #include <random>
 #include <tuple>
 
-std::vector<Flux> EstimateFluxes(ObjectiveParameters &parameters,
+std::vector<alglib::real_1d_array> EstimateFluxes(ObjectiveParameters &parameters,
                                  const int iteration_total);
 
 int GetMeasurementsCount(const std::vector<Measurement> &measurements);
@@ -43,7 +43,7 @@ void SetOptimizationParameters(alglib::real_1d_array &free_fluxes,
                                alglib::minlmreport &report);
 
 
-std::tuple<double, std::vector<Flux>> RunOptimization( int measurements_count,
+alglib::real_1d_array RunOptimization( int measurements_count,
                                                        ObjectiveParameters *parameters,
                                                        alglib::minlmstate &state,
                                                        alglib::minlmreport &report);
@@ -60,7 +60,7 @@ std::vector<Flux> CalculateAllFluxesFromFree(const alglib::real_1d_array &free_f
 Eigen::VectorXd GetEigenVectorFromAlgLibVector(const alglib::real_1d_array &alglib_vector);
 
 void Fillf0Array(alglib::real_1d_array &residuals,
-                 const std::vector<EMUandMID> &simulated_mids,
+                 const std::vector<EmuAndMid> &simulated_mids,
                  const std::vector<Measurement> &measurements);
 
 

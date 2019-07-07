@@ -1,7 +1,7 @@
 #include "metabolic_flux_analysis.h"
 
 #include "reaction_struct.h"
-#include "EMU.h"
+#include "Emu.h"
 #include "MID.h"
 #include "calculate_mids.h"
 #include "Eigen"
@@ -17,7 +17,7 @@
 #include <tuple>
 #include <limits>
 
-std::vector<Flux> EstimateFluxes(ObjectiveParameters &parameters,
+std::vector<alglib::real_1d_array> EstimateFluxes(ObjectiveParameters &parameters,
                                  const int iteration_total) {
 
     const int measurements_count = GetMeasurementsCount(*(parameters.measurements));
@@ -39,31 +39,25 @@ std::vector<Flux> EstimateFluxes(ObjectiveParameters &parameters,
 
     FillBoundVectors(lower_bounds, upper_bounds, reactions, nullity);
 
-    GenerateInitialPoints(free_fluxes, lower_bounds, upper_bounds, reactions, nullity, 1, random_source);
-
     alglib::minlmstate state;
     alglib::minlmreport report;
 
     SetOptimizationParameters(free_fluxes, lower_bounds, upper_bounds, nullity, measurements_count, state,
                               report);
 
-    auto[best_ssr, best_fluxes] = RunOptimization(measurements_count,
-                                                  &parameters, state, report);
+    std::vector<alglib::real_1d_array> allSolutions;
 
-    for (int iteration = 1; iteration < iteration_total; ++iteration) {
-        GenerateInitialPoints(free_fluxes, lower_bounds, upper_bounds, reactions, nullity, iteration + 1, random_source);
+    for (int iteration = 0; iteration < iteration_total; ++iteration) {
+        GenerateInitialPoints(free_fluxes, lower_bounds, upper_bounds, reactions, nullity, iteration, random_source);
         alglib::minlmrestartfrom(state, free_fluxes);
 
-        auto[new_ssr, new_fluxes] = RunOptimization(measurements_count,
+        alglib::real_1d_array newSolution = RunOptimization(measurements_count,
                                                     &parameters, state, report);
 
-        if (new_ssr < best_ssr) {
-            best_ssr = new_ssr;
-            best_fluxes = new_fluxes;
-        }
+        allSolutions.emplace_back(newSolution);
     }
 
-    return best_fluxes;
+    return allSolutions;
 }
 
 
@@ -134,7 +128,7 @@ void SetOptimizationParameters(alglib::real_1d_array &free_fluxes,
     alglib::minlmsetbc(state, lower_bounds, upper_bounds);
 }
 
-std::tuple<double, std::vector<Flux>> RunOptimization(int measurements_count,
+alglib::real_1d_array RunOptimization(int measurements_count,
                                                       ObjectiveParameters *parameters,
                                                       alglib::minlmstate &state,
                                                       alglib::minlmreport &report) {
@@ -148,7 +142,7 @@ std::tuple<double, std::vector<Flux>> RunOptimization(int measurements_count,
             final_free_fluxes, *(parameters->nullspace), *(parameters->reactions));
 
 
-    std::vector<EMUandMID> simulated_mids = CalculateMids(final_all_fluxes,
+    std::vector<EmuAndMid> simulated_mids = CalculateMids(final_all_fluxes,
                                                           *(parameters->networks),
                                                           *(parameters->input_mids),
                                                           *(parameters->measured_isotopes));
@@ -162,7 +156,7 @@ std::tuple<double, std::vector<Flux>> RunOptimization(int measurements_count,
 
     PrintFinalMessage(final_free_fluxes, *(parameters->reactions), best_ssr, report);
 
-    return std::tie(best_ssr, final_all_fluxes);
+    return final_free_fluxes;
 }
 
 
@@ -174,7 +168,7 @@ void CalculateResidual(const alglib::real_1d_array &free_fluxes,
     std::vector<Flux> calculated_fluxes = CalculateAllFluxesFromFree(
             free_fluxes, *(parameters.nullspace), *(parameters.reactions));
 
-    std::vector<EMUandMID> simulated_mids = CalculateMids(calculated_fluxes,
+    std::vector<EmuAndMid> simulated_mids = CalculateMids(calculated_fluxes,
                                                           *(parameters.networks),
                                                           *(parameters.input_mids),
                                                           *(parameters.measured_isotopes));
@@ -218,7 +212,7 @@ Eigen::VectorXd GetEigenVectorFromAlgLibVector(const alglib::real_1d_array &algl
 }
 
 void Fillf0Array(alglib::real_1d_array &residuals,
-                 const std::vector<EMUandMID> &simulated_mids,
+                 const std::vector<EmuAndMid> &simulated_mids,
                  const std::vector<Measurement> &measurements) {
     int total_residuals = 0;
     for (int isotope = 0; isotope < simulated_mids.size(); ++isotope) {

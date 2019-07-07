@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 
-void ShowEMU(const EMU &emu, const std::string &what) {
+void ShowEMU(const Emu &emu, const std::string &what) {
     std::cerr << emu.name << ":";
     for (bool const &state : emu.atom_states) {
         std::cerr << static_cast<int>(state);

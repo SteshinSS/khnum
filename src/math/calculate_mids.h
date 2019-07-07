@@ -2,69 +2,69 @@
 #define CFLEX_CALCULATE_MIDS_H
 
 
-#include "EMU.h"
+#include "Emu.h"
 #include "MID.h"
 #include "reaction_struct.h"
 #include "math_utilites.h"
 
 #include <vector>
 
-std::vector<EMUandMID> CalculateMids(const std::vector<Flux> &fluxes,
+std::vector<EmuAndMid> CalculateMids(const std::vector<Flux> &fluxes,
                                      const std::vector<EMUNetwork> &networks,
-                                     std::vector<EMUandMID> known_mids,
-                                     const std::vector<EMU> &measured_isotopes);
+                                     std::vector<EmuAndMid> known_mids,
+                                     const std::vector<Emu> &measured_isotopes);
 
 
 int FindNetworkSize(const EMUNetwork &network);
 
 
-std::vector<EMUandMID> SelectMeasuredMID(const std::vector<EMUandMID> &known_mids,
-                                         const std::vector<EMU> &measured_isotopes);
+std::vector<EmuAndMid> SelectMeasuredMID(const std::vector<EmuAndMid> &known_mids,
+                                         const std::vector<Emu> &measured_isotopes);
 
 void SolveOneNetwork(const std::vector<Flux> &fluxes,
                      const EMUNetwork &network,
-                     std::vector<EMUandMID> &known_mids);
+                     std::vector<EmuAndMid> &known_mids);
 
 
-void FillEMULists(std::vector<EMU> &unknown_emus,
-                  std::vector<EMUandMID> &known_emus,
+void FillEMULists(std::vector<Emu> &unknown_emus,
+                  std::vector<EmuAndMid> &known_emus,
                   const EMUNetwork &network,
-                  const std::vector<EMUandMID> &known_mids);
+                  const std::vector<EmuAndMid> &known_mids);
 
 
 void FormYMatrix(Matrix &Y,
-                 const std::vector<EMUandMID> &known_emus,
+                 const std::vector<EmuAndMid> &known_emus,
                  const int current_size);
 
 
 void FormABMatrices(Matrix &A, Matrix &B,
                     const EMUNetwork &network,
-                    const std::vector<EMUandMID> &known_emus,
-                    const std::vector<EMU> &unknown_emus,
+                    const std::vector<EmuAndMid> &known_emus,
+                    const std::vector<Emu> &unknown_emus,
                     const std::vector<Flux> &fluxes,
-                    const std::vector<EMUandMID> &known_mids);
+                    const std::vector<EmuAndMid> &known_mids);
 
 
 void AppendNewMIDs(const Matrix &X,
-                   const std::vector<EMU> &unknown_emus,
-                   std::vector<EMUandMID> &known_mids,
+                   const std::vector<Emu> &unknown_emus,
+                   std::vector<EmuAndMid> &known_mids,
                    const int current_size);
 
-bool IsEMUKnown(const EMU &emu,
-                const std::vector<EMUandMID> known_emus);
+bool IsEMUKnown(const Emu &emu,
+                const std::vector<EmuAndMid> known_emus);
 
 
-int FindUnknownEMUsPosition(const EMU &emu,
-                            const std::vector<EMU> unknown_emus);
+int FindUnknownEMUsPosition(const Emu &emu,
+                            const std::vector<Emu> unknown_emus);
 
 
-int FindKnownEMUsPosition(const EMU &emu,
-                          const std::vector<EMUandMID> known_emus);
+int FindKnownEMUsPosition(const Emu &emu,
+                          const std::vector<EmuAndMid> known_emus);
 
-const MID *GetMID(const EMU &emu,
-                  const std::vector<EMUandMID> &known_mids);
+const MID *GetMID(const Emu &emu,
+                  const std::vector<EmuAndMid> &known_mids);
 
-EMUandMID ConvolveEMU(const EMUReactionSide &convolve_reaction,
-                      const std::vector<EMUandMID> &known_mids);
+EmuAndMid ConvolveEMU(const EMUReactionSide &convolve_reaction,
+                      const std::vector<EmuAndMid> &known_mids);
 
 #endif //CFLEX_CALCULATE_MIDS_H

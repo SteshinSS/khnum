@@ -1,5 +1,5 @@
 #include "create_emu_reactions.h"
-#include "EMU.h"
+#include "Emu.h"
 #include "reaction_struct.h"
 #include "debug_utilites.h"
 
@@ -12,16 +12,16 @@
 #include <iostream>
 
 std::vector<EMUReaction> CreateAllEMUReactions(const std::vector<Reaction> &reactions,
-                                               const std::vector<EMU> &observable_emus) {
+                                               const std::vector<Emu> &observable_emus) {
     std::vector<EMUReaction> all_emu_reactions;
-    std::queue<EMU> emu_to_check; // contains all EMUs for finding their synthesis reactions
-    std::set<EMU> already_checked_emu; // contains checked EMUs
-    for (const EMU &emu : observable_emus) { // initializing queue
+    std::queue<Emu> emu_to_check; // contains all EMUs for finding their synthesis reactions
+    std::set<Emu> already_checked_emu; // contains checked EMUs
+    for (const Emu &emu : observable_emus) { // initializing queue
         emu_to_check.push(emu);
     }
 
     while (!emu_to_check.empty()) {
-        EMU next_emu = emu_to_check.front();
+        Emu next_emu = emu_to_check.front();
         emu_to_check.pop();
 
         if (already_checked_emu.find(next_emu) == already_checked_emu.end()) {
@@ -43,7 +43,7 @@ std::vector<EMUReaction> CreateAllEMUReactions(const std::vector<Reaction> &reac
 }
 
 std::vector<Reaction> GetSynthesisReactions(const std::vector<Reaction> &reactions,
-                                            const EMU &emu) {
+                                            const Emu &emu) {
     std::vector<Reaction> synthesis_reactions;
     for (const Reaction &reaction : reactions) {
         if (reaction.type != ReactionType::MetaboliteBalance) {
@@ -63,17 +63,17 @@ std::vector<Reaction> GetSynthesisReactions(const std::vector<Reaction> &reactio
     return synthesis_reactions;
 }
 
-// Creates set of EMU reactions which are produce the produced_emu
+// Creates set of Emu reactions which are produce the produced_emu
 std::vector<EMUReaction> CreateNewEMUReactions(const Reaction &reaction,
-                                               const EMU &produced_emu) {
+                                               const Emu &produced_emu) {
     std::vector<EMUReaction> new_emu_reactions = CreateAllEMUReactions(reaction, produced_emu);
     std::vector<EMUReaction> unique_emu_reactions = SelectUniqueEMUReactions(new_emu_reactions);
     return unique_emu_reactions;
 }
 
-// Creates set of all EMU reactions. Repetitions are possible
+// Creates set of all Emu reactions. Repetitions are possible
 std::vector<EMUReaction> CreateAllEMUReactions(const Reaction &reaction,
-                                               const EMU &produced_emu) {
+                                               const Emu &produced_emu) {
     std::vector<EMUReaction> all_new_emu_reactions;
     // find all occurrences of produced_emu in the reaction
     for (const Substrate &substrate : reaction.chemical_equation.right) {
@@ -86,7 +86,7 @@ std::vector<EMUReaction> CreateAllEMUReactions(const Reaction &reaction,
 
 EMUReaction CreateOneEMUReaction(const Reaction &reaction,
                                  const Substrate &produced_emu_substrate,
-                                 const EMU &produced_emu) {
+                                 const Emu &produced_emu) {
     EMUReaction result_reaction;
     result_reaction.id = reaction.id;
 
@@ -166,8 +166,8 @@ std::vector<EMUReaction> SelectUniqueEMUReactions(const std::vector<EMUReaction>
     return unique_new_emu_reactions;
 }
 
-void AddNewEMUInQueue(std::queue<EMU> *queue,
-                      const std::set<EMU> &emu_ignore_list,
+void AddNewEMUInQueue(std::queue<Emu> *queue,
+                      const std::set<Emu> &emu_ignore_list,
                       const EMUReactionSide &reaction_side) {
     for (EMUSubstrate const &substrate : reaction_side) {
         if (emu_ignore_list.find(substrate.emu) == emu_ignore_list.end()) {

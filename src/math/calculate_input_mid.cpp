@@ -1,15 +1,15 @@
 #include "calculate_input_mid.h"
-#include "EMU.h"
+#include "Emu.h"
 #include "MID.h"
 #include "input_substrate.h"
 
 #include <vector>
 #include <algorithm>
 
-std::vector<EMUandMID> CalculateInputMid(const std::vector<InputSubstrate> &input_substrates,
-                                         const std::vector<EMU> &input_emus) {
-    std::vector<EMUandMID> input_mids;
-    for (const EMU &input_emu : input_emus) {
+std::vector<EmuAndMid> CalculateInputMid(const std::vector<InputSubstrate> &input_substrates,
+                                         const std::vector<Emu> &input_emus) {
+    std::vector<EmuAndMid> input_mids;
+    for (const Emu &input_emu : input_emus) {
         // find input substrate with such name
         auto input_substrate_iterator = std::find_if(input_substrates.begin(),
                                                      input_substrates.end(),
@@ -17,19 +17,19 @@ std::vector<EMUandMID> CalculateInputMid(const std::vector<InputSubstrate> &inpu
                                                        return input_substrate.name == input_emu.name;
                                                      });
 
-        EMUandMID new_mid = CalculateOneMid(*input_substrate_iterator, input_emu);
+        EmuAndMid new_mid = CalculateOneMid(*input_substrate_iterator, input_emu);
         input_mids.push_back(new_mid);
     }
     return input_mids;
 }
 
-EMUandMID CalculateOneMid(const InputSubstrate &input_substrate,
-                          const EMU &input_emu) {
-    EMUandMID new_emu_mid;
+EmuAndMid CalculateOneMid(const InputSubstrate &input_substrate,
+                          const Emu &input_emu) {
+    EmuAndMid new_emu_mid;
     new_emu_mid.emu = input_emu;
 
     // Let input_emu be PYR:1010
-    // It means that EMU consists of two traced atoms of PYR: at 0 and 2 positions
+    // It means that Emu consists of two traced atoms of PYR: at 0 and 2 positions
 
     // Find atom positions included in input_emu
     // For our example included_atoms = [0, 2]
@@ -41,7 +41,7 @@ EMUandMID CalculateOneMid(const InputSubstrate &input_substrate,
     }
 
     int emu_size = included_atoms.size();
-    // MID is a vector which ith value equal fraction of such EMU with mass shift = i
+    // MID is a vector which ith value equal fraction of such Emu with mass shift = i
     // For our example there are 3 posibilities of mass shifts: M + 0, M + 1, or M + 2
     MID new_mid(emu_size + 1, 0.0);
     for (int mass_shift = 0; mass_shift < emu_size + 1; ++mass_shift) {

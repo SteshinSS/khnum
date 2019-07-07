@@ -8,15 +8,15 @@
 #include "math_utilites.h"
 #include "input_substrate.h"
 #include "MID.h"
-#include "EMU.h"
+#include "Emu.h"
 #include "measurements_struct.h"
 #include "reaction_struct.h"
 
 struct ObjectiveParameters {
     Matrix *nullspace;
     std::vector<EMUNetwork> *networks;
-    std::vector<EMUandMID> *input_mids;
-    std::vector<EMU> *measured_isotopes;
+    std::vector<EmuAndMid> *input_mids;
+    std::vector<Emu> *measured_isotopes;
     std::vector<Measurement> *measurements;
     std::vector<Reaction> *reactions;
 };

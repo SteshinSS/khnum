@@ -1,6 +1,6 @@
 #include "create_emu_networks.h"
 
-#include "EMU.h"
+#include "Emu.h"
 #include "MID.h"
 
 #include <vector>
@@ -8,27 +8,27 @@
 #include <algorithm>
 
 std::vector<EMUNetwork> CreateEMUNetworks(const std::vector<EMUReaction> &reactions,
-                                          const std::vector<EMU> &input_emu_list,
-                                          const std::vector<EMU> &measured_isotopes) {
+                                          const std::vector<Emu> &input_emu_list,
+                                          const std::vector<Emu> &measured_isotopes) {
     int max_size = FindTheLargestEMUSize(reactions);
 
-    // emu_networks[i] contains EMU network of i + 1 size
+    // emu_networks[i] contains Emu network of i + 1 size
     std::vector<EMUNetwork> emu_networks(max_size);
 
     // dfs queue
-    std::queue<EMU> emus_to_check;
-    for (const EMU &measured_isotope : measured_isotopes) {
+    std::queue<Emu> emus_to_check;
+    for (const Emu &measured_isotope : measured_isotopes) {
         emus_to_check.push(measured_isotope);
     }
 
     // visited
-    std::vector<EMU> already_checked_emus;
-    for (const EMU &emu : input_emu_list) {
+    std::vector<Emu> already_checked_emus;
+    for (const Emu &emu : input_emu_list) {
         already_checked_emus.push_back(emu);
     }
 
     while (!emus_to_check.empty()) {
-        EMU next_emu = emus_to_check.front();
+        Emu next_emu = emus_to_check.front();
         emus_to_check.pop();
         int emu_size = GetEMUSize(next_emu);
 
@@ -72,14 +72,14 @@ int FindTheLargestEMUSize(const std::vector<EMUReaction> &reactions) {
     return max_size;
 }
 
-bool IsEMUAlreadyChecked(const EMU &emu, const std::vector<EMU> &already_checked_emus) {
+bool IsEMUAlreadyChecked(const Emu &emu, const std::vector<Emu> &already_checked_emus) {
     auto emu_position = find(already_checked_emus.begin(),
                              already_checked_emus.end(),
                              emu);
     return emu_position != already_checked_emus.end();
 }
 
-int GetEMUSize(const EMU &emu) {
+int GetEMUSize(const Emu &emu) {
     int size = 0;
     for (const bool &state : emu.atom_states) {
         if (state) {

@@ -5,11 +5,11 @@
 #ifndef CFLEX_DEBUG_UTILITES_H
 #define CFLEX_DEBUG_UTILITES_H
 
-#include "EMU.h"
+#include "Emu.h"
 
 const std::string empty_string;
 
-void ShowEMU(const EMU &emu, const std::string &what = empty_string);
+void ShowEMU(const Emu &emu, const std::string &what = empty_string);
 
 void ShowEMUReaction(const EMUReaction &emu_reaction, const std::string &what = empty_string);
 

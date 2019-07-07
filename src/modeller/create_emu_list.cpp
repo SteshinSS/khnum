@@ -1,14 +1,14 @@
 #include "create_emu_list.h"
 
-#include "EMU.h"
+#include "Emu.h"
 #include "input_substrate.h"
 
 #include <vector>
 #include <string>
 
-std::vector<EMU> CreateInputEMUList(const std::vector<EMUReaction> &reactions,
+std::vector<Emu> CreateInputEMUList(const std::vector<EMUReaction> &reactions,
                                     const std::vector<InputSubstrate> &input_substrates) {
-    std::vector<EMU> input_emu_list;
+    std::vector<Emu> input_emu_list;
     for (const EMUReaction &reaction : reactions) {
         // check the left side
         for (const EMUSubstrate &emu_substrate : reaction.left) {

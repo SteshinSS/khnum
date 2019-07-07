@@ -7,18 +7,18 @@
 using AtomStates = std::vector<char>; // like a vector<bool> but iterable
 using EMUcoefficient = double;
 
-struct EMU {
+struct Emu {
     std::string name;
     AtomStates atom_states;
 };
 
 // need this for stl containers
-bool operator<(const EMU &lhs, const EMU &rhs);
-bool operator==(const EMU &lhs, const EMU &rhs);
+bool operator<(const Emu &lhs, const Emu &rhs);
+bool operator==(const Emu &lhs, const Emu &rhs);
 
-// uses for EMU reactions
+// uses for Emu reactions
 struct EMUSubstrate {
-    EMU emu;
+    Emu emu;
     EMUcoefficient coefficient;
 };
 

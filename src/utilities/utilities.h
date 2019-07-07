@@ -2,7 +2,7 @@
 #define CFLEX_UTILITIES_H
 
 #include "debug_utilites.h"
-#include "EMU.h"
+#include "Emu.h"
 #include "input_substrate.h"
 #include "measurements_struct.h"
 #include "MID.h"

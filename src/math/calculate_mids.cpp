@@ -1,6 +1,6 @@
 #include "calculate_mids.h"
 
-#include "EMU.h"
+#include "Emu.h"
 #include "MID.h"
 #include "reaction_struct.h"
 #include "math_utilites.h"
@@ -11,10 +11,10 @@
 #include <exception>
 
 
-std::vector<EMUandMID> CalculateMids(const std::vector<Flux>  &fluxes,
+std::vector<EmuAndMid> CalculateMids(const std::vector<Flux>  &fluxes,
                                      const std::vector<EMUNetwork> &networks,
-                                     std::vector<EMUandMID> known_mids,
-                                     const std::vector<EMU> &measured_isotopes) {
+                                     std::vector<EmuAndMid> known_mids,
+                                     const std::vector<Emu> &measured_isotopes) {
     for (const EMUNetwork &network : networks) {
         SolveOneNetwork(fluxes, network, known_mids);
     }
@@ -33,14 +33,14 @@ int FindNetworkSize(const EMUNetwork &network) {
 
 
 // Return vector of simulated MIDs of measured_isotopes
-std::vector<EMUandMID> SelectMeasuredMID(const std::vector<EMUandMID> &known_mids,
-                                         const std::vector<EMU> &measured_isotopes) {
-    std::vector<EMUandMID> measured_mids;
+std::vector<EmuAndMid> SelectMeasuredMID(const std::vector<EmuAndMid> &known_mids,
+                                         const std::vector<Emu> &measured_isotopes) {
+    std::vector<EmuAndMid> measured_mids;
 
-    for (const EMU &measured_isotope : measured_isotopes) {
+    for (const Emu &measured_isotope : measured_isotopes) {
         auto position = find_if(known_mids.begin(),
                                 known_mids.end(),
-                                [&measured_isotope](const EMUandMID &emu) {
+                                [&measured_isotope](const EmuAndMid &emu) {
                                     return emu.emu == measured_isotope;
                                 });
 
@@ -57,7 +57,7 @@ std::vector<EMUandMID> SelectMeasuredMID(const std::vector<EMUandMID> &known_mid
 
 void SolveOneNetwork(const std::vector<Flux> &fluxes,
                      const EMUNetwork &network,
-                     std::vector<EMUandMID> &known_mids) {
+                     std::vector<EmuAndMid> &known_mids) {
 
     const int current_size = FindNetworkSize(network);
 
@@ -66,11 +66,11 @@ void SolveOneNetwork(const std::vector<Flux> &fluxes,
 
     // EMUs which MIDs are unknown
     // for the X matrix
-    std::vector<EMU> unknown_emus;
+    std::vector<Emu> unknown_emus;
 
     // EMUs which MIDs are known
     // for the Y matrix
-    std::vector<EMUandMID> known_emus;
+    std::vector<EmuAndMid> known_emus;
 
     FillEMULists(unknown_emus, known_emus, network, known_mids);
 
@@ -87,10 +87,10 @@ void SolveOneNetwork(const std::vector<Flux> &fluxes,
     AppendNewMIDs(X,unknown_emus, known_mids, current_size);
 }
 
-void FillEMULists(std::vector<EMU> &unknown_emus,
-                  std::vector<EMUandMID> &known_emus,
+void FillEMULists(std::vector<Emu> &unknown_emus,
+                  std::vector<EmuAndMid> &known_emus,
                   const EMUNetwork &network,
-                  const std::vector<EMUandMID> &known_mids) {
+                  const std::vector<EmuAndMid> &known_mids) {
 
     // Fills known_emus and unknown_emus
     for (const EMUReaction &reaction : network) {
@@ -99,7 +99,7 @@ void FillEMULists(std::vector<EMU> &unknown_emus,
         if (reaction.left.size() == 1) {
             const MID *mid = GetMID(reaction.left[0].emu, known_mids);
             if (mid) {
-                EMUandMID new_known;
+                EmuAndMid new_known;
                 new_known.emu = reaction.left[0].emu;
                 new_known.mid = *mid;
                 known_emus.push_back(new_known);
@@ -107,14 +107,14 @@ void FillEMULists(std::vector<EMU> &unknown_emus,
                 unknown_emus.push_back(reaction.left[0].emu);
             }
         } else {
-            EMUandMID convolution = ConvolveEMU(reaction.left, known_mids);
+            EmuAndMid convolution = ConvolveEMU(reaction.left, known_mids);
             known_emus.push_back(convolution);
         }
 
         // checking the right side
         const MID *mid = GetMID(reaction.right.emu, known_emus);
         if (mid) {
-            EMUandMID new_known;
+            EmuAndMid new_known;
             new_known.emu = reaction.right.emu;
             new_known.mid = *mid;
             known_emus.push_back(new_known);
@@ -133,7 +133,7 @@ void FillEMULists(std::vector<EMU> &unknown_emus,
 
 
 void FormYMatrix(Matrix &Y,
-                 const std::vector<EMUandMID> &known_emus,
+                 const std::vector<EmuAndMid> &known_emus,
                  const int current_size) {
     for (int known_emu_index = 0; known_emu_index < known_emus.size(); ++known_emu_index) {
         for (int mass_shift = 0; mass_shift < current_size + 1; ++mass_shift) {
@@ -144,14 +144,14 @@ void FormYMatrix(Matrix &Y,
 
 void FormABMatrices(Matrix &A, Matrix &B,
                     const EMUNetwork &network,
-                    const std::vector<EMUandMID> &known_emus,
-                    const std::vector<EMU> &unknown_emus,
+                    const std::vector<EmuAndMid> &known_emus,
+                    const std::vector<Emu> &unknown_emus,
                     const std::vector<Flux> &fluxes,
-                    const std::vector<EMUandMID> &known_mids) {
+                    const std::vector<EmuAndMid> &known_mids) {
     for (const EMUReaction &reaction : network) {
         EMUSubstrate substrate;
         if (reaction.left.size() > 1) {
-            EMUandMID convolution = ConvolveEMU(reaction.left, known_mids);
+            EmuAndMid convolution = ConvolveEMU(reaction.left, known_mids);
             substrate.emu = convolution.emu;
             substrate.coefficient = 1.0;
         } else {
@@ -183,12 +183,12 @@ void FormABMatrices(Matrix &A, Matrix &B,
 
 
 void AppendNewMIDs(const Matrix &X,
-                   const std::vector<EMU> &unknown_emus,
-                   std::vector<EMUandMID> &known_mids,
+                   const std::vector<Emu> &unknown_emus,
+                   std::vector<EmuAndMid> &known_mids,
                    const int current_size) {
 
     for (int previously_unknown_index = 0; previously_unknown_index < unknown_emus.size(); ++previously_unknown_index) {
-        EMUandMID new_known_emu;
+        EmuAndMid new_known_emu;
         new_known_emu.emu = unknown_emus[previously_unknown_index];
         for (int mass_shift = 0; mass_shift < current_size + 1; ++mass_shift) {
             new_known_emu.mid.push_back(X(previously_unknown_index, mass_shift));
@@ -200,19 +200,19 @@ void AppendNewMIDs(const Matrix &X,
 }
 
 
-bool IsEMUKnown(const EMU &emu,
-                const std::vector<EMUandMID> known_emus) {
+bool IsEMUKnown(const Emu &emu,
+                const std::vector<EmuAndMid> known_emus) {
     auto position = find_if(known_emus.begin(),
                             known_emus.end(),
-                            [&emu](const EMUandMID &known_mid) {
+                            [&emu](const EmuAndMid &known_mid) {
                                 return known_mid.emu == emu;
                             });
 
     return position != known_emus.end();
 }
 
-int FindUnknownEMUsPosition(const EMU &emu,
-                            const std::vector<EMU> unknown_emus) {
+int FindUnknownEMUsPosition(const Emu &emu,
+                            const std::vector<Emu> unknown_emus) {
     auto position = find(unknown_emus.begin(),
                          unknown_emus.end(),
                          emu);
@@ -220,20 +220,20 @@ int FindUnknownEMUsPosition(const EMU &emu,
     return position - unknown_emus.begin();
 }
 
-int FindKnownEMUsPosition(const EMU &emu,
-                          const std::vector<EMUandMID> known_emus) {
+int FindKnownEMUsPosition(const Emu &emu,
+                          const std::vector<EmuAndMid> known_emus) {
     auto position = find_if(known_emus.begin(),
                             known_emus.end(),
-                            [&emu](const EMUandMID &known_mid) {
+                            [&emu](const EmuAndMid &known_mid) {
                                 return known_mid.emu == emu;
                             });
 
     return position - known_emus.begin();
 }
 
-EMUandMID ConvolveEMU(const EMUReactionSide &convolve_reaction,
-                      const std::vector<EMUandMID> &known_mids) {
-    EMUandMID convolve_result;
+EmuAndMid ConvolveEMU(const EMUReactionSide &convolve_reaction,
+                      const std::vector<EmuAndMid> &known_mids) {
+    EmuAndMid convolve_result;
     convolve_result.mid = MID(1, 1.0);
     for (const EMUSubstrate &emu : convolve_reaction) {
         convolve_result.emu.name += emu.emu.name;
@@ -247,11 +247,11 @@ EMUandMID ConvolveEMU(const EMUReactionSide &convolve_reaction,
     return convolve_result;
 }
 
-const MID *GetMID(const EMU &emu,
-                  const std::vector<EMUandMID> &known_mids) {
+const MID *GetMID(const Emu &emu,
+                  const std::vector<EmuAndMid> &known_mids) {
     auto position = find_if(known_mids.begin(),
                             known_mids.end(),
-                            [&emu](const EMUandMID &known_mid) {
+                            [&emu](const EmuAndMid &known_mid) {
                                 return known_mid.emu == emu;
                             });
 

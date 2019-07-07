@@ -1,11 +1,11 @@
-#include "EMU.h"
+#include "Emu.h"
 #include <tuple>
 
-bool operator<(const EMU &lhs, const EMU &rhs) {
+bool operator<(const Emu &lhs, const Emu &rhs) {
     return tie(lhs.name, lhs.atom_states) < tie(rhs.name, rhs.atom_states);
 }
 
-bool operator==(const EMU &lhs, const EMU &rhs) {
+bool operator==(const Emu &lhs, const Emu &rhs) {
     return !(lhs < rhs) && !(rhs < lhs);
 }
 

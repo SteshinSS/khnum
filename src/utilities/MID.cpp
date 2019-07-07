@@ -18,10 +18,10 @@ MID operator*(const MID &lhs, const MID &rhs) {
 }
 
 
-bool operator==(const EMUandMID &lhs, const EMUandMID &rhs) {
+bool operator==(const EmuAndMid &lhs, const EmuAndMid &rhs) {
     return std::tie(lhs.emu, lhs.mid) == std::tie(rhs.emu, rhs.mid);
 }
 
-bool operator<(const EMUandMID &lhs, const EMUandMID &rhs) {
+bool operator<(const EmuAndMid &lhs, const EmuAndMid &rhs) {
     return std::tie(lhs.emu, lhs.mid) < std::tie(rhs.emu, rhs.mid);
 }
