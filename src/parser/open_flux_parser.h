@@ -1,5 +1,5 @@
-#ifndef CFLEX_PARSER_OPEN_FLUX_H
-#define CFLEX_PARSER_OPEN_FLUX_H
+#ifndef CFLEX_OPEN_FLUX_PARSER_H
+#define CFLEX_OPEN_FLUX_PARSER_H
 
 #include "parser.h"
 
@@ -9,9 +9,7 @@ public:
 
     ParserOpenFlux(const std::string& path) : path_(path) {}
 
-    ParserResults GetResults() {
-        return results_;
-    }
+    ParserResults GetResults() override;
 
     void ReadExcludedMetabolites() override;
     void ReadMeasuredIsotopes() override;
@@ -22,7 +20,13 @@ public:
 
 private:
     const std::string path_;
-    ParserResults results_;
+
+    std::vector<Reaction> reactions_;
+    std::vector<Emu> measured_isotopes_;
+    std::vector<Measurement> measurements_;
+    std::vector<InputSubstrate> input_substrates_;
+    std::vector<std::string> excluded_metabolites_;
+
     char csv_delimiter{','};
     std::string reaction_side_delimiter{"="};
     std::string substrate_delimiter{"+"};
@@ -46,4 +50,4 @@ private:
     inline std::string GetCell(std::stringstream &line);
 };
 
-#endif //CFLEX_PARSER_OPEN_FLUX_H
+#endif //CFLEX_OPEN_FLUX_PARSER_H

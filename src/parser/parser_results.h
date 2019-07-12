@@ -10,11 +10,11 @@
 #include "input_substrate.h"
 
 struct ParserResults {
-    std::optional<std::vector<Reaction>> reactions;
-    std::optional<std::vector<Emu>> measuredEmu;
-    std::optional<std::vector<Measurement>> measurements;
-    std::optional<std::vector<InputSubstrate>> input_substrate;
-    std::optional<std::vector<std::string>> excluded_metabolites;
+    std::vector<Reaction> reactions;
+    std::vector<Emu> measured_isotopes;
+    std::vector<Measurement> measurements;
+    std::vector<InputSubstrate> input_substrate;
+    std::vector<std::string> excluded_metabolites;
 };
 
 #endif //CFLEX_PARSER_RESULTS_H

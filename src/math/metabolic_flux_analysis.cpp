@@ -17,12 +17,12 @@
 #include <tuple>
 #include <limits>
 
-std::vector<alglib::real_1d_array> EstimateFluxes(ObjectiveParameters &parameters,
+std::vector<alglib::real_1d_array> EstimateFluxes(Problem &parameters,
                                  const int iteration_total) {
 
-    const int measurements_count = GetMeasurementsCount(*(parameters.measurements));
-    const int nullity = (*(parameters.nullspace)).cols();
-    const std::vector<Reaction> &reactions = *(parameters.reactions);
+    const int measurements_count = GetMeasurementsCount(parameters.measurements);
+    const int nullity = (parameters.nullspace).cols();
+    const std::vector<Reaction> &reactions = parameters.reactions;
 
     alglib::real_1d_array free_fluxes;
     free_fluxes.setlength(nullity);
@@ -129,7 +129,7 @@ void SetOptimizationParameters(alglib::real_1d_array &free_fluxes,
 }
 
 alglib::real_1d_array RunOptimization(int measurements_count,
-                                                      ObjectiveParameters *parameters,
+                                                      Problem *parameters,
                                                       alglib::minlmstate &state,
                                                       alglib::minlmreport &report) {
 
@@ -139,22 +139,22 @@ alglib::real_1d_array RunOptimization(int measurements_count,
     alglib::minlmresults(state, final_free_fluxes, report);
 
     std::vector<Flux> final_all_fluxes = CalculateAllFluxesFromFree(
-            final_free_fluxes, *(parameters->nullspace), *(parameters->reactions));
+            final_free_fluxes, parameters->nullspace, parameters->reactions);
 
 
     std::vector<EmuAndMid> simulated_mids = CalculateMids(final_all_fluxes,
-                                                          *(parameters->networks),
-                                                          *(parameters->input_mids),
-                                                          *(parameters->measured_isotopes));
+                                                          parameters->networks,
+                                                          parameters->input_mids,
+                                                          parameters->measured_isotopes);
 
     alglib::real_1d_array residuals;
     residuals.setlength(measurements_count);
 
-    Fillf0Array(residuals, simulated_mids, *(parameters->measurements));
+    Fillf0Array(residuals, simulated_mids, parameters->measurements);
 
     double best_ssr = GetSSR(residuals, measurements_count);
 
-    PrintFinalMessage(final_free_fluxes, *(parameters->reactions), best_ssr, report);
+    PrintFinalMessage(final_free_fluxes, parameters->reactions, best_ssr, report);
 
     return final_free_fluxes;
 }
@@ -163,17 +163,17 @@ alglib::real_1d_array RunOptimization(int measurements_count,
 void CalculateResidual(const alglib::real_1d_array &free_fluxes,
                        alglib::real_1d_array &residuals,
                        void *ptr) {
-    ObjectiveParameters &parameters = *(static_cast<ObjectiveParameters *>(ptr));
+    Problem &parameters = *(static_cast<Problem *>(ptr));
 
     std::vector<Flux> calculated_fluxes = CalculateAllFluxesFromFree(
-            free_fluxes, *(parameters.nullspace), *(parameters.reactions));
+            free_fluxes, parameters.nullspace, parameters.reactions);
 
     std::vector<EmuAndMid> simulated_mids = CalculateMids(calculated_fluxes,
-                                                          *(parameters.networks),
-                                                          *(parameters.input_mids),
-                                                          *(parameters.measured_isotopes));
+                                                          parameters.networks,
+                                                          parameters.input_mids,
+                                                          parameters.measured_isotopes);
 
-    Fillf0Array(residuals, simulated_mids, *(parameters.measurements));
+    Fillf0Array(residuals, simulated_mids, parameters.measurements);
 }
 
 

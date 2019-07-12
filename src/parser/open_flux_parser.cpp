@@ -1,4 +1,4 @@
-#include "parser_open_flux.h"
+#include "open_flux_parser.h"
 
 #include "sort_reactions.h"
 
@@ -10,17 +10,27 @@
 #include <sstream>
 #include <tuple>
 
+ParserResults ParserOpenFlux::GetResults() {
+    ParserResults results;
+    results.reactions = reactions_;
+    results.measured_isotopes = measured_isotopes_;
+    results.measurements = measurements_;
+    results.input_substrate = input_substrates_;
+    results.excluded_metabolites = excluded_metabolites_;
+
+    return results;
+}
+
+
 void ParserOpenFlux::ReadExcludedMetabolites() {
     const std::string excluded_metabolites_path = path_ + "/excluded_metabolites.txt";
-    std::vector<std::string> excluded_metabolites = ParseEachLine(excluded_metabolites_path);
-    results_.excluded_metabolites.emplace(excluded_metabolites);
+    excluded_metabolites_ = ParseEachLine(excluded_metabolites_path);
 }
 
 
 void ParserOpenFlux::ReadMeasuredIsotopes() {
     const std::string measured_isotopes_path = path_ + "/measured_isotopes.txt";
 
-    std::vector<Emu> measured_isotopes;
     std::vector<std::string> raw_measured_isotopes = ParseEachLine(measured_isotopes_path);
     int line_number = 1;
     for (const std::string &raw_measured_isotope : raw_measured_isotopes) {
@@ -44,23 +54,20 @@ void ParserOpenFlux::ReadMeasuredIsotopes() {
         }
         ++line_number;
 
-        measured_isotopes.push_back(new_emu);
+        measured_isotopes_.push_back(new_emu);
     }
-
-    results_.measuredEmu.emplace(measured_isotopes);
 }
 
 
 void ParserOpenFlux::ReadMeasurements() {
     const std::string measurements_path = path_ + "/measurements.csv";
 
-    std::vector<Measurement> measurements;
     std::ifstream input(measurements_path);
     // skip table head-line
     input.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
     std::string raw_line;
-    for (const Emu &isotope : *results_.measuredEmu) {
+    for (const Emu &isotope : measured_isotopes_) {
         Measurement new_measurement;
         new_measurement.emu = isotope;
         for (int mass_shift = 0; mass_shift < isotope.atom_states.size() + 1; ++mass_shift) {
@@ -73,25 +80,21 @@ void ParserOpenFlux::ReadMeasurements() {
             double error = std::stod(GetCell(line));
             new_measurement.errors.push_back(error);
         }
-        measurements.push_back(new_measurement);
+        measurements_.push_back(new_measurement);
     }
-
-    results_.measurements.emplace(measurements);
 }
 
 
 void ParserOpenFlux::ReadReactions() {
     const std::string reactionsPath = path_ + "/model.csv";
-    std::vector<Reaction> reactions = ParseReactions(reactionsPath);
-    reactions = SortReactionsByType(reactions);
-    results_.reactions.emplace(reactions);
+    reactions_ = ParseReactions(reactionsPath);
+    reactions_ = SortReactionsByType(reactions_);
 }
 
 
 void ParserOpenFlux::ReadSubstrateInput() {
     const std::string input_substrates_path = path_ + "/substrate_input.csv";
 
-    std::vector<InputSubstrate> input_substrates;
     std::ifstream input(input_substrates_path);
 
     // skip table head-line
@@ -103,17 +106,17 @@ void ParserOpenFlux::ReadSubstrateInput() {
         std::string input_substrate_name;
         getline(line, input_substrate_name, csv_delimiter);
 
-        auto input_substrate_iterator = std::find_if(input_substrates.begin(),
-                                                     input_substrates.end(),
+        auto input_substrate_iterator = std::find_if(input_substrates_.begin(),
+                                                     input_substrates_.end(),
                                                      [&input_substrate_name](InputSubstrate &input_substrate) {
                                                          return input_substrate.name == input_substrate_name;
                                                      });
 
-        if (input_substrate_iterator == input_substrates.end()) {
+        if (input_substrate_iterator == input_substrates_.end()) {
             InputSubstrate new_input_substrate;
             new_input_substrate.name = input_substrate_name;
-            input_substrates.push_back(new_input_substrate);
-            input_substrate_iterator = input_substrates.end();
+            input_substrates_.push_back(new_input_substrate);
+            input_substrate_iterator = input_substrates_.end();
             --input_substrate_iterator;
         }
 
@@ -138,8 +141,6 @@ void ParserOpenFlux::ReadSubstrateInput() {
 
         input_substrate_iterator->mixtures.push_back(new_mixture);
     }
-
-    results_.input_substrate.emplace(input_substrates);
 }
 
 
@@ -234,8 +235,7 @@ ChemicalEquation ParserOpenFlux::ParseChemicalEquation(std::stringstream &line) 
 }
 
 
-ChemicalEquationSide
-ParserOpenFlux::FillEquationSide(const std::string &substrate_equation, const std::string &atom_equation) {
+ChemicalEquationSide ParserOpenFlux::FillEquationSide(const std::string &substrate_equation, const std::string &atom_equation) {
     ChemicalEquationSide equation_side = ParseSubstrateEquationSide(substrate_equation);
     ParseAtomEquationSide(&equation_side, atom_equation);
     return equation_side;

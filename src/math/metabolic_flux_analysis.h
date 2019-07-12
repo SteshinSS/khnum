@@ -4,7 +4,7 @@
 #include "reaction_struct.h"
 #include "Emu.h"
 #include "MID.h"
-#include "objective_parameters.h"
+#include "problem.h"
 #include "math_utilites.h"
 
 #include "optimization.h"
@@ -14,7 +14,7 @@
 #include <random>
 #include <tuple>
 
-std::vector<alglib::real_1d_array> EstimateFluxes(ObjectiveParameters &parameters,
+std::vector<alglib::real_1d_array> EstimateFluxes(Problem &parameters,
                                  const int iteration_total);
 
 int GetMeasurementsCount(const std::vector<Measurement> &measurements);
@@ -44,7 +44,7 @@ void SetOptimizationParameters(alglib::real_1d_array &free_fluxes,
 
 
 alglib::real_1d_array RunOptimization( int measurements_count,
-                                                       ObjectiveParameters *parameters,
+                                                       Problem *parameters,
                                                        alglib::minlmstate &state,
                                                        alglib::minlmreport &report);
 

@@ -6,7 +6,7 @@
 #include "input_substrate.h"
 #include "measurements_struct.h"
 #include "MID.h"
-#include "objective_parameters.h"
+#include "problem.h"
 #include "reaction_struct.h"
 
 #endif //CFLEX_UTILITIES_H
