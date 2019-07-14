@@ -8,13 +8,13 @@
 #include "utilities/emu_and_mid.h"
 
 
-std::vector<EMUNetwork> CreateEMUNetworks(const std::vector<EmuReaction> &reactions,
+std::vector<EmuNetwork> CreateEMUNetworks(const std::vector<EmuReaction> &reactions,
                                           const std::vector<Emu> &input_emu_list,
                                           const std::vector<Emu> &measured_isotopes) {
     int max_size = FindTheLargestEMUSize(reactions);
 
     // emu_networks[i] contains Emu network of i + 1 size
-    std::vector<EMUNetwork> emu_networks(max_size);
+    std::vector<EmuNetwork> emu_networks(max_size);
 
     // dfs queue
     std::queue<Emu> emus_to_check;
@@ -54,7 +54,7 @@ std::vector<EMUNetwork> CreateEMUNetworks(const std::vector<EmuReaction> &reacti
     // remove empty networks
 
     emu_networks.erase(
-            std::remove_if(emu_networks.begin(), emu_networks.end(), [](const EMUNetwork &network) {
+            std::remove_if(emu_networks.begin(), emu_networks.end(), [](const EmuNetwork &network) {
                 return network.empty();
             }),
             emu_networks.end());

@@ -16,7 +16,7 @@ std::vector<EmuAndMid> CalculateInputMid(const std::vector<InputSubstrate> &inpu
         auto input_substrate_iterator = std::find_if(input_substrates.begin(),
                                                      input_substrates.end(),
                                                      [input_emu](const InputSubstrate &input_substrate) {
-                                                       return input_substrate.name == input_emu.name;
+                                                         return input_substrate.name == input_emu.name;
                                                      });
 
         EmuAndMid new_mid = CalculateOneMid(*input_substrate_iterator, input_emu);

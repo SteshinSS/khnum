@@ -12,26 +12,37 @@
 
 class Solver {
 public:
-    static Solver* getSolver(const Problem &problem);
+    static Solver *getSolver(const Problem &problem);
+
     std::vector<alglib::real_1d_array> getResult();
+
     void Solve();
 
 private:
-    static Solver* instance;
+    static Solver *instance;
+
     Solver(const Problem &problem);
 
     void FillBoundVectors();
+
     void SetOptimizationParameters();
-    void GenerateInitialPoints(std::mt19937& random_source);
+
+    void GenerateInitialPoints(std::mt19937 &random_source);
+
     void PrintStartMessage();
+
     alglib::real_1d_array RunOptimization();
+
     double GetSSR(const alglib::real_1d_array &residuals);
+
     void PrintFinalMessage(const alglib::real_1d_array &free_fluxes);
 
     static std::vector<Flux> CalculateAllFluxesFromFree(const alglib::real_1d_array &free_fluxes_alglib);
+
     static void Fillf0Array(alglib::real_1d_array &residuals, const std::vector<EmuAndMid> &simulated_mids);
+
     static void CalculateResidual(const alglib::real_1d_array &free_fluxes,
-                                  alglib::real_1d_array &residuals, void* ptr);
+                                  alglib::real_1d_array &residuals, void *ptr);
 
 private:
     static int iteration_total_;
@@ -43,7 +54,7 @@ private:
     static std::vector<Reaction> reactions_;
     static std::vector<Emu> measured_isotopes_;
     static Matrix nullspace_;
-    static std::vector<EMUNetwork> networks_;
+    static std::vector<EmuNetwork> networks_;
     static std::vector<EmuAndMid> input_mids_;
     static std::vector<Measurement> measurements_;
 
@@ -56,5 +67,4 @@ private:
 
     static std::vector<alglib::real_1d_array> allSolutions;
 
-    static Simulator simulator;
 };

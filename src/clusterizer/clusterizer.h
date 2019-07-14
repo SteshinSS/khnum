@@ -6,5 +6,5 @@
 
 class Clasterizer {
 public:
-    Clasterizer(std::vector<alglib::real_1d_array>& allSolution);
+    Clasterizer(std::vector<alglib::real_1d_array> &allSolution);
 };

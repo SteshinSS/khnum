@@ -49,14 +49,14 @@ void Modeller::CalculateFluxBounds() {
 void Modeller::CreateNullspaceMatrix() {
     std::vector<std::string> full_metabolite_list = CreateFullMetaboliteList(reactions_);
     std::vector<std::string> included_metabolites = CreateIncludedMetaboliteList(full_metabolite_list,
-            excluded_metabolites_);
+                                                                                 excluded_metabolites_);
 
     Matrix stoichiometry_matrix = CreateStoichiometryMatrix(reactions_, included_metabolites);
     nullspace_ = GetNullspace(stoichiometry_matrix);
 }
 
 
-void Modeller::CalculateMeasurementsCount(){
+void Modeller::CalculateMeasurementsCount() {
     measurements_count_ = 0;
 
     for (const Measurement &measurement : measurements_) {

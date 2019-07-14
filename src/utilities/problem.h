@@ -11,7 +11,7 @@ struct Problem {
     std::vector<Reaction> reactions;
     std::vector<Emu> measured_isotopes;
     Matrix nullspace;
-    std::vector<EMUNetwork> networks;
+    std::vector<EmuNetwork> networks;
     std::vector<EmuAndMid> input_mids;
     std::vector<Measurement> measurements;
     int measurements_count;

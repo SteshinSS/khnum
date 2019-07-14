@@ -6,13 +6,13 @@
 using Fraction = double;
 
 struct Mixture {
-  std::vector<Fraction> fractions;
-  double ratio;
+    std::vector<Fraction> fractions;
+    double ratio;
 };
 
 
 struct InputSubstrate {
-  std::string name;
-  std::vector<Mixture> mixtures;
+    std::string name;
+    std::vector<Mixture> mixtures;
 };
 

@@ -3,11 +3,10 @@
 #include <random>
 #include "alglib/optimization.h"
 
-#include "simulator/calculate_mids.h"
 #include "utilities/get_eigen_vec_from_alglib_vec.h"
 
 
-Solver* Solver::getSolver(const Problem &problem) {
+Solver *Solver::getSolver(const Problem &problem) {
     if (!instance) {
         instance = new Solver(problem);
     }
@@ -76,7 +75,7 @@ void Solver::SetOptimizationParameters() {
 }
 
 
-void Solver::GenerateInitialPoints(std::mt19937& random_source) {
+void Solver::GenerateInitialPoints(std::mt19937 &random_source) {
     std::uniform_real_distribution<> get_random_point(0.0, 1.0);
 
     for (int i = 0; i < nullity_; ++i) {
@@ -96,9 +95,6 @@ void Solver::PrintStartMessage() {
 }
 
 
-
-
-
 alglib::real_1d_array Solver::RunOptimization() {
     alglib::minlmoptimize(state, CalculateResidual);
 
@@ -112,10 +108,13 @@ alglib::real_1d_array Solver::RunOptimization() {
 
 
 void Solver::CalculateResidual(const alglib::real_1d_array &free_fluxes,
-                               alglib::real_1d_array &residuals, void* ptr) {
+                               alglib::real_1d_array &residuals, void *ptr) {
     std::vector<Flux> calculated_fluxes = CalculateAllFluxesFromFree(free_fluxes);
-    std::vector<EmuAndMid> simulated_mids = CalculateMids(calculated_fluxes, networks_,
-                                                          input_mids_, measured_isotopes_);
+
+    Simulator simulator(calculated_fluxes, networks_,
+                        input_mids_, measured_isotopes_);
+
+    std::vector<EmuAndMid> simulated_mids = simulator.CalculateMids();
     Fillf0Array(residuals, simulated_mids);
 }
 
@@ -172,10 +171,12 @@ double Solver::GetSSR(const alglib::real_1d_array &residuals) {
 
 void Solver::PrintFinalMessage(const alglib::real_1d_array &free_fluxes) {
     std::vector<Flux> final_all_fluxes = CalculateAllFluxesFromFree(free_fluxes);
-    std::vector<EmuAndMid> simulated_mids  = CalculateMids(final_all_fluxes,
-                                                           networks_,
-                                                           input_mids_,
-                                                           measured_isotopes_);
+    Simulator simulator(final_all_fluxes,
+                        networks_,
+                        input_mids_,
+                        measured_isotopes_);
+
+    std::vector<EmuAndMid> simulated_mids = simulator.CalculateMids();
     alglib::real_1d_array residuals;
     residuals.setlength(measurements_count_);
     Fillf0Array(residuals, simulated_mids);
@@ -192,7 +193,7 @@ void Solver::PrintFinalMessage(const alglib::real_1d_array &free_fluxes) {
 }
 
 
-Solver* Solver::instance;
+Solver *Solver::instance;
 
 
 int Solver::iteration_total_;
@@ -203,11 +204,10 @@ int Solver::reactions_num_;
 std::vector<Reaction> Solver::reactions_;
 std::vector<Emu> Solver::measured_isotopes_;
 Matrix Solver::nullspace_;
-std::vector<EMUNetwork> Solver::networks_;
+std::vector<EmuNetwork> Solver::networks_;
 std::vector<EmuAndMid> Solver::input_mids_;
 std::vector<Measurement> Solver::measurements_;
 int Solver::measurements_count_;
-
 
 
 alglib::real_1d_array Solver::free_fluxes_;

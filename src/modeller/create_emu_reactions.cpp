@@ -124,7 +124,7 @@ EmuReaction CreateOneEMUReaction(const Reaction &reaction,
                     auto precursor_iterator = std::find_if(included_substrates.begin(),
                                                            included_substrates.end(),
                                                            [&precursor](const std::pair<Substrate, int> pair) {
-                                                             return pair.first == precursor;
+                                                               return pair.first == precursor;
                                                            });
 
                     if (precursor_iterator != included_substrates.end()) {

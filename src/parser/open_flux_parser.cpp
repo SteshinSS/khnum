@@ -236,7 +236,8 @@ ChemicalEquation ParserOpenFlux::ParseChemicalEquation(std::stringstream &line) 
 }
 
 
-ChemicalEquationSide ParserOpenFlux::FillEquationSide(const std::string &substrate_equation, const std::string &atom_equation) {
+ChemicalEquationSide
+ParserOpenFlux::FillEquationSide(const std::string &substrate_equation, const std::string &atom_equation) {
     ChemicalEquationSide equation_side = ParseSubstrateEquationSide(substrate_equation);
     ParseAtomEquationSide(&equation_side, atom_equation);
     return equation_side;

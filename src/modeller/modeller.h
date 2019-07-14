@@ -9,9 +9,13 @@ public:
     Modeller(const ParserResults);
 
     void CreateEmuNetworks();
+
     void CalculateInputSubstrateMids();
+
     void CreateNullspaceMatrix();
+
     void CalculateFluxBounds();
+
     void CalculateMeasurementsCount();
 
     Problem GetProblem();
@@ -30,7 +34,7 @@ private:
 
     Matrix nullspace_;
     std::vector<EmuAndMid> input_substrate_mids_;
-    std::vector<EMUNetwork> emu_networks_;
+    std::vector<EmuNetwork> emu_networks_;
 
     int measurements_count_ = 0;
 };
