@@ -1,6 +1,4 @@
-#ifndef CFLEX_SOLVER_PACKAGE_H
-#define CFLEX_SOLVER_PACKAGE_H
-
+#pragma once
 
 struct SolverPackage {
     Matrix* const nullspace;
@@ -11,5 +9,3 @@ struct SolverPackage {
     std::vector<Measurement>* const measurements;
 };
 
-
-#endif //CFLEX_SOLVER_PACKAGE_H

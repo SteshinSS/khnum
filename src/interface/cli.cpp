@@ -1,13 +1,4 @@
-#include "cli.h"
-
-#include "file_system.h"
-
-#include "modeller/modeller.h"
-#include "parser/open_flux_parser.h"
-#include "solver/solver.h"
-
-
-#include "clusterizer/clusterizer.h"
+#include "interface/cli.h"
 
 #include <iostream>
 #include <fstream>
@@ -15,6 +6,12 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include "alglib/ap.h"
+
+#include "modeller/modeller.h"
+#include "parser/open_flux_parser.h"
+#include "solver/solver.h"
+#include "clusterizer/clusterizer.h"
 
 
 void RunCli() {

@@ -1,10 +1,11 @@
 #include "create_emu_list.h"
 
-#include "Emu.h"
-#include "input_substrate.h"
-
 #include <vector>
 #include <string>
+
+#include "utilities/emu.h"
+#include "utilities/input_substrate.h"
+
 
 std::vector<Emu> CreateInputEMUList(const std::vector<EMUReaction> &reactions,
                                     const std::vector<InputSubstrate> &input_substrates) {

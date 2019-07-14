@@ -1,10 +1,12 @@
-#include "MID.h"
+#include "emu_and_mid.h"
 
 #include <algorithm>
 #include <tuple>
 
-MID operator*(const MID &lhs, const MID &rhs) {
-    MID convolve_result(lhs.size() + rhs.size() - 1, 0.0);
+
+// convolution
+Mid operator*(const Mid &lhs, const Mid &rhs) {
+    Mid convolve_result(lhs.size() + rhs.size() - 1, 0.0);
     for (int mass_shift = 0; mass_shift < convolve_result.size(); ++mass_shift) {
         for (int lhs_mass_shift = 0; lhs_mass_shift < lhs.size(); ++lhs_mass_shift) {
             int rhs_mass_shift = mass_shift - lhs_mass_shift;

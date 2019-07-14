@@ -1,8 +1,6 @@
-#ifndef CFLEX_OPEN_FLUX_PARSER_H
-#define CFLEX_OPEN_FLUX_PARSER_H
+#pragma once
 
-#include "parser.h"
-
+#include "parser/parser.h"
 
 class ParserOpenFlux : public Parser {
 public:
@@ -49,5 +47,3 @@ private:
     std::vector<std::string> ParseEachLine(const std::string &path);
     inline std::string GetCell(std::stringstream &line);
 };
-
-#endif //CFLEX_OPEN_FLUX_PARSER_H

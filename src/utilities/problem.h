@@ -1,12 +1,11 @@
-#ifndef CFLEX_PROBLEM_H
-#define CFLEX_PROBLEM_H
+#pragma once
 
-#include "math_utilites.h"
+#include "matrix.h"
 #include "input_substrate.h"
-#include "MID.h"
-#include "Emu.h"
-#include "measurements_struct.h"
-#include "reaction_struct.h"
+#include "emu_and_mid.h"
+#include "emu.h"
+#include "measurement.h"
+#include "reaction.h"
 
 struct Problem {
     std::vector<Reaction> reactions;
@@ -16,7 +15,4 @@ struct Problem {
     std::vector<EmuAndMid> input_mids;
     std::vector<Measurement> measurements;
     int measurements_count;
-
 };
-
-#endif //CFLEX_PROBLEM_H

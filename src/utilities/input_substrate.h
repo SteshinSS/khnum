@@ -1,5 +1,4 @@
-#ifndef CFLEX_INPUT_SUBSTRATE_H
-#define CFLEX_INPUT_SUBSTRATE_H
+#pragma once
 
 #include <string>
 #include <vector>
@@ -11,9 +10,9 @@ struct Mixture {
   double ratio;
 };
 
+
 struct InputSubstrate {
   std::string name;
   std::vector<Mixture> mixtures;
 };
 
-#endif //CFLEX_INPUT_SUBSTRATE_H

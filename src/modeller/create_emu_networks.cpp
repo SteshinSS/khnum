@@ -1,11 +1,12 @@
 #include "create_emu_networks.h"
 
-#include "Emu.h"
-#include "MID.h"
-
 #include <vector>
 #include <queue>
 #include <algorithm>
+
+#include "utilities/emu.h"
+#include "utilities/emu_and_mid.h"
+
 
 std::vector<EMUNetwork> CreateEMUNetworks(const std::vector<EMUReaction> &reactions,
                                           const std::vector<Emu> &input_emu_list,

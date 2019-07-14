@@ -1,13 +1,13 @@
-#ifndef CFLEX_CREATE_EMU_REACTIONS_H
-#define CFLEX_CREATE_EMU_REACTIONS_H
-
-#include "reaction_struct.h"
-#include "Emu.h"
+#pragma once
 
 #include <vector>
 #include <string>
 #include <queue>
 #include <set>
+
+#include "utilities/reaction.h"
+#include "utilities/emu.h"
+
 
 std::vector<EMUReaction> CreateAllEMUReactions(const std::vector<Reaction> &reactions,
                                                const std::vector<Emu> &observable_emus);
@@ -33,5 +33,3 @@ std::vector<EMUReaction> SelectUniqueEMUReactions(const std::vector<EMUReaction>
 void AddNewEMUInQueue(std::queue<Emu> *queue,
                       const std::set<Emu> &emu_ignore_list,
                       const EmuReactionSide &reaction_side);
-
-#endif //CFLEX_CREATE_EMU_REACTIONS_H

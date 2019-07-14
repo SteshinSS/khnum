@@ -1,5 +1,8 @@
 #include "modeller.h"
 
+#include <math.h>
+
+#include "utilities/matrix.h"
 #include "modeller/create_emu_networks.h"
 #include "modeller/calculate_input_mid.h"
 #include "modeller/create_emu_reactions.h"

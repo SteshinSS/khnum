@@ -1,7 +1,6 @@
 #include "clusterizer.h"
 
-#include "stdafx.h"
-#include "dataanalysis.h"
+#include "alglib/dataanalysis.h"
 
 Clasterizer::Clasterizer(std::vector<alglib::real_1d_array> &allSolutions) {
     alglib::real_2d_array solutionsToClustering;
@@ -26,5 +25,4 @@ Clasterizer::Clasterizer(std::vector<alglib::real_1d_array> &allSolutions) {
     alglib::clusterizerrunahc(state, report);
 
     std::cout << report.z.tostring().c_str();
-
 }

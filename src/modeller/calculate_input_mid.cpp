@@ -1,10 +1,12 @@
 #include "calculate_input_mid.h"
-#include "Emu.h"
-#include "MID.h"
-#include "input_substrate.h"
 
 #include <vector>
 #include <algorithm>
+
+#include "utilities/emu.h"
+#include "utilities/emu_and_mid.h"
+#include "utilities/input_substrate.h"
+
 
 std::vector<EmuAndMid> CalculateInputMid(const std::vector<InputSubstrate> &input_substrates,
                                          const std::vector<Emu> &input_emus) {
@@ -41,9 +43,9 @@ EmuAndMid CalculateOneMid(const InputSubstrate &input_substrate,
     }
 
     int emu_size = included_atoms.size();
-    // MID is a vector which ith value equal fraction of such Emu with mass shift = i
+    // Mid is a vector which ith value equal fraction of such Emu with mass shift = i
     // For our example there are 3 posibilities of mass shifts: M + 0, M + 1, or M + 2
-    MID new_mid(emu_size + 1, 0.0);
+    Mid new_mid(emu_size + 1, 0.0);
     for (int mass_shift = 0; mass_shift < emu_size + 1; ++mass_shift) {
         double fraction = 0.0;
         for (const auto &mixture : input_substrate.mixtures) {

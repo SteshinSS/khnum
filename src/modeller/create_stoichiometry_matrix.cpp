@@ -1,11 +1,13 @@
 #include "create_stoichiometry_matrix.h"
-#include "math_utilites.h"
-#include "reaction_struct.h"
 
 #include <string>
 #include <vector>
 #include <iostream>
 #include <exception>
+
+#include "utilities/matrix.h"
+#include "utilities/reaction.h"
+
 
 Matrix CreateStoichiometryMatrix(const std::vector<Reaction> &reactions,
                                  const std::vector<std::string> &metabolite_list) {

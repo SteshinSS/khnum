@@ -1,7 +1,5 @@
 #include "open_flux_parser.h"
 
-#include "sort_reactions.h"
-
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -9,6 +7,9 @@
 #include <limits>
 #include <sstream>
 #include <tuple>
+
+#include "modeller/sort_reactions.h"
+
 
 ParserResults ParserOpenFlux::GetResults() {
     ParserResults results;

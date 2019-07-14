@@ -1,15 +1,12 @@
-
 #include "sort_reactions.h"
-
-
-#include "reaction_struct.h"
 
 #include <vector>
 #include <algorithm>
 #include <limits>
 #include <cmath>
-
 #include <iostream>
+
+#include "utilities/reaction.h"
 
 
 std::vector<Reaction> SortReactionsByType(std::vector<Reaction> reactions) {

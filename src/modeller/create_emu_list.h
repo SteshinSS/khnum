@@ -1,12 +1,11 @@
-#ifndef CFLEX_CREATE_EMU_LIST_H
-#define CFLEX_CREATE_EMU_LIST_H
-
-#include "Emu.h"
-#include "input_substrate.h"
+#pragma once
 
 #include <vector>
+
+#include "utilities/emu.h"
+#include "utilities/input_substrate.h"
+
 
 std::vector<Emu> CreateInputEMUList(const std::vector<EMUReaction> &reactions,
                                     const std::vector<InputSubstrate> &input_substrates);
 
-#endif //CFLEX_CREATE_EMU_LIST_H

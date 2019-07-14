@@ -1,11 +1,9 @@
-#ifndef CFLEX_CREATE_STOICHIOMETRY_MATRIX_H
-#define CFLEX_CREATE_STOICHIOMETRY_MATRIX_H
+#pragma once
 
-#include "math_utilites.h"
-#include "reaction_struct.h"
+#include "utilities/matrix.h"
+#include "utilities/reaction.h"
 
 Matrix CreateStoichiometryMatrix(const std::vector<Reaction> &reactions,
                                  const std::vector<std::string> &metabolite_list);
 
 double GetTotalCoefficient(const ChemicalEquation &chemical_equation, const std::string &metabolite, const int id);
-#endif //CFLEX_CREATE_STOICHIOMETRY_MATRIX_H

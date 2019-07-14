@@ -1,10 +1,12 @@
-#include "utilities/Emu.h"
+#include "utilities/emu.h"
 
 #include <tuple>
+
 
 bool operator<(const Emu &lhs, const Emu &rhs) {
     return tie(lhs.name, lhs.atom_states) < tie(rhs.name, rhs.atom_states);
 }
+
 
 bool operator==(const Emu &lhs, const Emu &rhs) {
     return !(lhs < rhs) && !(rhs < lhs);
@@ -18,6 +20,7 @@ bool operator==(EmuSubstrate const &lhs, EmuSubstrate const &rhs) {
         return false;
     }
 }
+
 
 bool operator!=(EmuSubstrate const &lhs, EmuSubstrate const &rhs) {
     return !(lhs == rhs);

@@ -1,14 +1,14 @@
 #include "calculate_mids.h"
 
-#include "Emu.h"
-#include "MID.h"
-#include "reaction_struct.h"
-#include "math_utilites.h"
-
 #include <vector>
 #include <algorithm>
 #include <iostream>
 #include <exception>
+
+#include "utilities/emu.h"
+#include "utilities/emu_and_mid.h"
+#include "utilities/reaction.h"
+#include "utilities/matrix.h"
 
 
 std::vector<EmuAndMid> CalculateMids(const std::vector<Flux>  &fluxes,
@@ -97,7 +97,7 @@ void FillEMULists(std::vector<Emu> &unknown_emus,
 
         // checking the left side
         if (reaction.left.size() == 1) {
-            const MID *mid = GetMID(reaction.left[0].emu, known_mids);
+            const Mid *mid = GetMID(reaction.left[0].emu, known_mids);
             if (mid) {
                 EmuAndMid new_known;
                 new_known.emu = reaction.left[0].emu;
@@ -112,7 +112,7 @@ void FillEMULists(std::vector<Emu> &unknown_emus,
         }
 
         // checking the right side
-        const MID *mid = GetMID(reaction.right.emu, known_emus);
+        const Mid *mid = GetMID(reaction.right.emu, known_emus);
         if (mid) {
             EmuAndMid new_known;
             new_known.emu = reaction.right.emu;
@@ -234,20 +234,20 @@ int FindKnownEMUsPosition(const Emu &emu,
 EmuAndMid ConvolveEMU(const EmuReactionSide &convolve_reaction,
                       const std::vector<EmuAndMid> &known_mids) {
     EmuAndMid convolve_result;
-    convolve_result.mid = MID(1, 1.0);
+    convolve_result.mid = Mid(1, 1.0);
     for (const EmuSubstrate &emu : convolve_reaction) {
         convolve_result.emu.name += emu.emu.name;
         for (const bool &state : emu.emu.atom_states) {
             convolve_result.emu.atom_states.push_back(state);
         }
-        MID new_mid = *GetMID(emu.emu, known_mids);
+        Mid new_mid = *GetMID(emu.emu, known_mids);
         convolve_result.mid = convolve_result.mid * new_mid;
     }
 
     return convolve_result;
 }
 
-const MID *GetMID(const Emu &emu,
+const Mid *GetMID(const Emu &emu,
                   const std::vector<EmuAndMid> &known_mids) {
     auto position = find_if(known_mids.begin(),
                             known_mids.end(),

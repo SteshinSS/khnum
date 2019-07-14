@@ -1,10 +1,8 @@
-#ifndef CFLEX_MODELLER_H
-#define CFLEX_MODELLER_H
-
+#pragma once
 
 #include "utilities/problem.h"
-
-#include "parser_results.h"
+#include "utilities/matrix.h"
+#include "parser/parser_results.h"
 
 class Modeller {
 public:
@@ -36,5 +34,3 @@ private:
 
     int measurements_count_ = 0;
 };
-
-#endif //CFLEX_MODELLER_H

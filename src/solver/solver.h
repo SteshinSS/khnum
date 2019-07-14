@@ -1,11 +1,11 @@
-#ifndef CFLEX_SOLVER_H
-#define CFLEX_SOLVER_H
+#pragma once
 
-#include <ap.h>
+#include "alglib/ap.h"
 #include <random>
 
-#include "optimization.h"
+#include "alglib/optimization.h"
 #include "utilities/problem.h"
+
 
 class Solver {
 public:
@@ -66,5 +66,3 @@ private:
 
     static std::vector<alglib::real_1d_array> allSolutions;
 };
-
-#endif //CFLEX_SOLVER_H

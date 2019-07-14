@@ -1,10 +1,7 @@
-#ifndef CFLEX_CREATE_NULLSPACE_H
-#define CFLEX_CREATE_NULLSPACE_H
+#pragma once
 
-#include "math_utilites.h"
+#include "utilities/matrix.h"
 
 Matrix GetRREF(const Matrix &item);
 
 Matrix GetNullspace (const Matrix &matrix);
-
-#endif //CFLEX_CREATE_NULLSPACE_H

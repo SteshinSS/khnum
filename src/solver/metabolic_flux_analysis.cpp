@@ -3,7 +3,7 @@
 
 #include "reaction_struct.h"
 #include "Emu.h"
-#include "MID.h"
+#include "Mid.h"
 #include "calculate_mids.h"
 #include "Eigen"
 #include "math_utilites.h"

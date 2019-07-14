@@ -1,13 +1,12 @@
-#ifndef CFLEX_CALCULATE_MIDS_H
-#define CFLEX_CALCULATE_MIDS_H
-
-
-#include "Emu.h"
-#include "MID.h"
-#include "reaction_struct.h"
-#include "math_utilites.h"
+#pragma once
 
 #include <vector>
+
+#include "utilities/emu.h"
+#include "utilities/emu_and_mid.h"
+#include "utilities/reaction.h"
+#include "utilities/matrix.h"
+
 
 std::vector<EmuAndMid> CalculateMids(const std::vector<Flux> &fluxes,
                                      const std::vector<EMUNetwork> &networks,
@@ -61,10 +60,8 @@ int FindUnknownEMUsPosition(const Emu &emu,
 int FindKnownEMUsPosition(const Emu &emu,
                           const std::vector<EmuAndMid> known_emus);
 
-const MID *GetMID(const Emu &emu,
+const Mid *GetMID(const Emu &emu,
                   const std::vector<EmuAndMid> &known_mids);
 
 EmuAndMid ConvolveEMU(const EmuReactionSide &convolve_reaction,
                       const std::vector<EmuAndMid> &known_mids);
-
-#endif //CFLEX_CALCULATE_MIDS_H

@@ -1,6 +1,4 @@
 #include "create_emu_reactions.h"
-#include "Emu.h"
-#include "reaction_struct.h"
 
 #include <vector>
 #include <string>
@@ -9,6 +7,10 @@
 #include <set>
 #include <algorithm>
 #include <iostream>
+
+#include "utilities/emu.h"
+#include "utilities/reaction.h"
+
 
 std::vector<EMUReaction> CreateAllEMUReactions(const std::vector<Reaction> &reactions,
                                                const std::vector<Emu> &observable_emus) {
@@ -41,6 +43,7 @@ std::vector<EMUReaction> CreateAllEMUReactions(const std::vector<Reaction> &reac
     return all_emu_reactions;
 }
 
+
 std::vector<Reaction> GetSynthesisReactions(const std::vector<Reaction> &reactions,
                                             const Emu &emu) {
     std::vector<Reaction> synthesis_reactions;
@@ -62,6 +65,7 @@ std::vector<Reaction> GetSynthesisReactions(const std::vector<Reaction> &reactio
     return synthesis_reactions;
 }
 
+
 // Creates set of Emu reactions which are produce the produced_emu
 std::vector<EMUReaction> CreateNewEMUReactions(const Reaction &reaction,
                                                const Emu &produced_emu) {
@@ -69,6 +73,7 @@ std::vector<EMUReaction> CreateNewEMUReactions(const Reaction &reaction,
     std::vector<EMUReaction> unique_emu_reactions = SelectUniqueEMUReactions(new_emu_reactions);
     return unique_emu_reactions;
 }
+
 
 // Creates set of all Emu reactions. Repetitions are possible
 std::vector<EMUReaction> CreateAllEMUReactions(const Reaction &reaction,
@@ -82,6 +87,7 @@ std::vector<EMUReaction> CreateAllEMUReactions(const Reaction &reaction,
     }
     return all_new_emu_reactions;
 }
+
 
 EMUReaction CreateOneEMUReaction(const Reaction &reaction,
                                  const Substrate &produced_emu_substrate,
@@ -150,6 +156,7 @@ EMUReaction CreateOneEMUReaction(const Reaction &reaction,
     return result_reaction;
 }
 
+
 std::vector<EMUReaction> SelectUniqueEMUReactions(const std::vector<EMUReaction> &all_new_emu_reactions) {
     std::vector<EMUReaction> unique_new_emu_reactions;
     for (const EMUReaction &reaction : all_new_emu_reactions) {
@@ -164,6 +171,7 @@ std::vector<EMUReaction> SelectUniqueEMUReactions(const std::vector<EMUReaction>
 
     return unique_new_emu_reactions;
 }
+
 
 void AddNewEMUInQueue(std::queue<Emu> *queue,
                       const std::set<Emu> &emu_ignore_list,

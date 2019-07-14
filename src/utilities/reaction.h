@@ -1,12 +1,10 @@
-#ifndef CFLEX_REACTION_STRUCT_H_
-#define CFLEX_REACTION_STRUCT_H_
+#pragma once
 
 #include <string>
 #include <vector>
 
 
 using AtomRepresentation = std::string;
-
 using SubstrateCoefficient = double;
 
 struct Substrate {
@@ -18,6 +16,7 @@ struct Substrate {
 // need for stl containers
 bool operator==(const Substrate &lhs, const Substrate &rhs);
 
+
 using ChemicalEquationSide = std::vector<Substrate>;
 
 struct ChemicalEquation {
@@ -26,10 +25,7 @@ struct ChemicalEquation {
 };
 
 
-
-
 using Rate = double;
-
 
 /// see FluxPyt User Guide page 3
 enum class ReactionType {
@@ -58,7 +54,3 @@ struct Reaction {
     Flux computed_lower_bound;
     Flux computed_upper_bound;
 };
-
-
-
-#endif

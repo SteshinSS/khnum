@@ -1,15 +1,10 @@
-#ifndef CFLEX_CLUSTERIZER_H
-#define CFLEX_CLUSTERIZER_H
+#pragma once
 
-#include <ap.h>
+#include "alglib/ap.h"
 
-#include "stdafx.h"
+#include <vector>
 
 class Clasterizer {
 public:
     Clasterizer(std::vector<alglib::real_1d_array>& allSolution);
-
-
 };
-
-#endif //CFLEX_CLUSTERIZER_H

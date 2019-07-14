@@ -1,8 +1,6 @@
-#ifndef CFLEX_SORT_REACTIONS_H
-#define CFLEX_SORT_REACTIONS_H
+#pragma once
 
-
-#include "reaction_struct.h"
+#include "utilities/reaction.h"
 
 #include <vector>
 #include <algorithm>
@@ -13,5 +11,3 @@ std::vector<Reaction> SortReactionsByType(std::vector<Reaction> reactions);
 std::vector<Reaction> SortReactionByID(std::vector<Reaction> reactions);
 
 int GetPriority(const Reaction &reaction);
-
-#endif //CFLEX_SORT_REACTIONS_H

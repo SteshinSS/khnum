@@ -1,6 +1,3 @@
-#ifndef CFLEX_CLI_H
-#define CFLEX_CLI_H
+#pragma once
 
 void RunCli();
-
-#endif //CFLEX_CLI_H

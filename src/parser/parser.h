@@ -1,10 +1,9 @@
-#ifndef CFLEX_PARSER_H
-#define CFLEX_PARSER_H
-
-
-#include "parser_results.h"
+#pragma once
 
 #include <string>
+
+#include "parser/parser_results.h"
+
 
 class Parser {
 public:
@@ -19,5 +18,3 @@ public:
     virtual ~Parser() {};
 
 };
-
-#endif //CFLEX_PARSER_H
