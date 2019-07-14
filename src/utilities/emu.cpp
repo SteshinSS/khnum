@@ -27,7 +27,7 @@ bool operator!=(EmuSubstrate const &lhs, EmuSubstrate const &rhs) {
 }
 
 
-bool operator==(const EMUReaction &lhs, const EMUReaction &rhs) {
+bool operator==(const EmuReaction &lhs, const EmuReaction &rhs) {
     if (lhs.id != rhs.id) {
         return false;
     } else {

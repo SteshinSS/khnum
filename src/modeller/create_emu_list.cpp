@@ -7,10 +7,10 @@
 #include "utilities/input_substrate.h"
 
 
-std::vector<Emu> CreateInputEMUList(const std::vector<EMUReaction> &reactions,
+std::vector<Emu> CreateInputEMUList(const std::vector<EmuReaction> &reactions,
                                     const std::vector<InputSubstrate> &input_substrates) {
     std::vector<Emu> input_emu_list;
-    for (const EMUReaction &reaction : reactions) {
+    for (const EmuReaction &reaction : reactions) {
         // check the left side
         for (const EmuSubstrate &emu_substrate : reaction.left) {
             std::string emu_name = emu_substrate.emu.name;

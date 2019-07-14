@@ -26,7 +26,7 @@ private:
     std::vector<std::string> excluded_metabolites_;
 
     std::vector<Emu> input_emu_list_;
-    std::vector<EMUReaction> all_emu_reactions_;
+    std::vector<EmuReaction> all_emu_reactions_;
 
     Matrix nullspace_;
     std::vector<EmuAndMid> input_substrate_mids_;

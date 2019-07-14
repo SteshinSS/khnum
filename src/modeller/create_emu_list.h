@@ -6,6 +6,6 @@
 #include "utilities/input_substrate.h"
 
 
-std::vector<Emu> CreateInputEMUList(const std::vector<EMUReaction> &reactions,
+std::vector<Emu> CreateInputEMUList(const std::vector<EmuReaction> &reactions,
                                     const std::vector<InputSubstrate> &input_substrates);
 

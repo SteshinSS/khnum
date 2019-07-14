@@ -12,9 +12,9 @@
 #include "utilities/reaction.h"
 
 
-std::vector<EMUReaction> CreateAllEMUReactions(const std::vector<Reaction> &reactions,
+std::vector<EmuReaction> CreateAllEMUReactions(const std::vector<Reaction> &reactions,
                                                const std::vector<Emu> &observable_emus) {
-    std::vector<EMUReaction> all_emu_reactions;
+    std::vector<EmuReaction> all_emu_reactions;
     std::queue<Emu> emu_to_check; // contains all EMUs for finding their synthesis reactions
     std::set<Emu> already_checked_emu; // contains checked EMUs
     for (const Emu &emu : observable_emus) { // initializing queue
@@ -31,8 +31,8 @@ std::vector<EMUReaction> CreateAllEMUReactions(const std::vector<Reaction> &reac
             std::vector<Reaction> synthesis_reactions = GetSynthesisReactions(reactions, next_emu);
 
             for (const Reaction &reaction : synthesis_reactions) {
-                std::vector<EMUReaction> new_emu_reactions = CreateNewEMUReactions(reaction, next_emu);
-                for (const EMUReaction &emu_reaction : new_emu_reactions) {
+                std::vector<EmuReaction> new_emu_reactions = CreateNewEMUReactions(reaction, next_emu);
+                for (const EmuReaction &emu_reaction : new_emu_reactions) {
                     all_emu_reactions.push_back(emu_reaction);
                     AddNewEMUInQueue(&emu_to_check, already_checked_emu, emu_reaction.left);
                 }
@@ -67,18 +67,18 @@ std::vector<Reaction> GetSynthesisReactions(const std::vector<Reaction> &reactio
 
 
 // Creates set of Emu reactions which are produce the produced_emu
-std::vector<EMUReaction> CreateNewEMUReactions(const Reaction &reaction,
+std::vector<EmuReaction> CreateNewEMUReactions(const Reaction &reaction,
                                                const Emu &produced_emu) {
-    std::vector<EMUReaction> new_emu_reactions = CreateAllEMUReactions(reaction, produced_emu);
-    std::vector<EMUReaction> unique_emu_reactions = SelectUniqueEMUReactions(new_emu_reactions);
+    std::vector<EmuReaction> new_emu_reactions = CreateAllEMUReactions(reaction, produced_emu);
+    std::vector<EmuReaction> unique_emu_reactions = SelectUniqueEMUReactions(new_emu_reactions);
     return unique_emu_reactions;
 }
 
 
 // Creates set of all Emu reactions. Repetitions are possible
-std::vector<EMUReaction> CreateAllEMUReactions(const Reaction &reaction,
+std::vector<EmuReaction> CreateAllEMUReactions(const Reaction &reaction,
                                                const Emu &produced_emu) {
-    std::vector<EMUReaction> all_new_emu_reactions;
+    std::vector<EmuReaction> all_new_emu_reactions;
     // find all occurrences of produced_emu in the reaction
     for (const Substrate &substrate : reaction.chemical_equation.right) {
         if (substrate.name == produced_emu.name) {
@@ -89,10 +89,10 @@ std::vector<EMUReaction> CreateAllEMUReactions(const Reaction &reaction,
 }
 
 
-EMUReaction CreateOneEMUReaction(const Reaction &reaction,
+EmuReaction CreateOneEMUReaction(const Reaction &reaction,
                                  const Substrate &produced_emu_substrate,
                                  const Emu &produced_emu) {
-    EMUReaction result_reaction;
+    EmuReaction result_reaction;
     result_reaction.id = reaction.id;
 
     // form right side
@@ -157,9 +157,9 @@ EMUReaction CreateOneEMUReaction(const Reaction &reaction,
 }
 
 
-std::vector<EMUReaction> SelectUniqueEMUReactions(const std::vector<EMUReaction> &all_new_emu_reactions) {
-    std::vector<EMUReaction> unique_new_emu_reactions;
-    for (const EMUReaction &reaction : all_new_emu_reactions) {
+std::vector<EmuReaction> SelectUniqueEMUReactions(const std::vector<EmuReaction> &all_new_emu_reactions) {
+    std::vector<EmuReaction> unique_new_emu_reactions;
+    for (const EmuReaction &reaction : all_new_emu_reactions) {
         auto reaction_position = std::find(unique_new_emu_reactions.begin(),
                                            unique_new_emu_reactions.end(), reaction);
         if (reaction_position == unique_new_emu_reactions.end()) {

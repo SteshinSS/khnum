@@ -21,13 +21,13 @@ struct EmuSubstrate {
 
 using EmuReactionSide = std::vector<EmuSubstrate>;
 
-struct EMUReaction {
+struct EmuReaction {
     int id;
     EmuReactionSide left;
     EmuSubstrate right;
 };
 
-using EMUNetwork = std::vector<EMUReaction>;
+using EMUNetwork = std::vector<EmuReaction>;
 
 // need this for stl containers
 bool operator<(const Emu &lhs, const Emu &rhs);
@@ -35,4 +35,4 @@ bool operator==(const Emu &lhs, const Emu &rhs);
 bool operator==(EmuSubstrate const &lhs, EmuSubstrate const &rhs);
 bool operator!=(EmuSubstrate const &lhs, EmuSubstrate const &rhs);
 
-bool operator==(const EMUReaction &lhs, const EMUReaction &rhs);
+bool operator==(const EmuReaction &lhs, const EmuReaction &rhs);

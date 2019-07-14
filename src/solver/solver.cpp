@@ -3,7 +3,6 @@
 #include <random>
 #include "alglib/optimization.h"
 
-#include "solver/solver_package.h"
 #include "simulator/calculate_mids.h"
 #include "utilities/get_eigen_vec_from_alglib_vec.h"
 

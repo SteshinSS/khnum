@@ -8,7 +8,7 @@
 #include "utilities/emu_and_mid.h"
 
 
-std::vector<EMUNetwork> CreateEMUNetworks(const std::vector<EMUReaction> &reactions,
+std::vector<EMUNetwork> CreateEMUNetworks(const std::vector<EmuReaction> &reactions,
                                           const std::vector<Emu> &input_emu_list,
                                           const std::vector<Emu> &measured_isotopes) {
     int max_size = FindTheLargestEMUSize(reactions);
@@ -37,7 +37,7 @@ std::vector<EMUNetwork> CreateEMUNetworks(const std::vector<EMUReaction> &reacti
             continue;
         }
 
-        for (const EMUReaction &emu_reaction : reactions) {
+        for (const EmuReaction &emu_reaction : reactions) {
             if (emu_reaction.right.emu == next_emu) {
 
                 emu_networks[emu_size - 1].push_back(emu_reaction);
@@ -62,9 +62,9 @@ std::vector<EMUNetwork> CreateEMUNetworks(const std::vector<EMUReaction> &reacti
     return emu_networks;
 }
 
-int FindTheLargestEMUSize(const std::vector<EMUReaction> &reactions) {
+int FindTheLargestEMUSize(const std::vector<EmuReaction> &reactions) {
     int max_size = -1;
-    for (const EMUReaction &reaction : reactions) {
+    for (const EmuReaction &reaction : reactions) {
         for (const EmuSubstrate &emu_substrate : reaction.left) {
             max_size = std::max(max_size, GetEMUSize(emu_substrate.emu));
         }
