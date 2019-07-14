@@ -15,6 +15,7 @@ struct Problem {
     std::vector<EMUNetwork> networks;
     std::vector<EmuAndMid> input_mids;
     std::vector<Measurement> measurements;
+    int measurements_count;
 
 };
 

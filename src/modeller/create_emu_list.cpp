@@ -11,7 +11,7 @@ std::vector<Emu> CreateInputEMUList(const std::vector<EMUReaction> &reactions,
     std::vector<Emu> input_emu_list;
     for (const EMUReaction &reaction : reactions) {
         // check the left side
-        for (const EMUSubstrate &emu_substrate : reaction.left) {
+        for (const EmuSubstrate &emu_substrate : reaction.left) {
             std::string emu_name = emu_substrate.emu.name;
             for (const InputSubstrate &input_substrate : input_substrates) {
                 if (input_substrate.name == emu_name) {

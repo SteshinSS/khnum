@@ -1,7 +1,6 @@
 #include "create_emu_reactions.h"
 #include "Emu.h"
 #include "reaction_struct.h"
-#include "debug_utilites.h"
 
 #include <vector>
 #include <string>
@@ -91,7 +90,7 @@ EMUReaction CreateOneEMUReaction(const Reaction &reaction,
     result_reaction.id = reaction.id;
 
     // form right side
-    EMUSubstrate product;
+    EmuSubstrate product;
     product.emu = produced_emu;
     product.coefficient = produced_emu_substrate.coefficient;
     result_reaction.right = product;
@@ -102,7 +101,7 @@ EMUReaction CreateOneEMUReaction(const Reaction &reaction,
 
     // form left side
     // find all atoms included in produced_emu
-    EMUReactionSide left;
+    EmuReactionSide left;
     for (int atom_position = 0; atom_position < produced_emu.atom_states.size(); ++atom_position) {
         if (produced_emu.atom_states[atom_position]) {
 
@@ -126,7 +125,7 @@ EMUReaction CreateOneEMUReaction(const Reaction &reaction,
                         int precursor_position = precursor_iterator->second;
                         left[precursor_position].emu.atom_states[substrate_atom_position] = true;
                     } else {
-                        EMUSubstrate new_precursor;
+                        EmuSubstrate new_precursor;
                         new_precursor.emu.name = precursor.name;
                         new_precursor.emu.atom_states = AtomStates(precursor.formula.size(), false);
                         new_precursor.emu.atom_states[substrate_atom_position] = true;
@@ -168,8 +167,8 @@ std::vector<EMUReaction> SelectUniqueEMUReactions(const std::vector<EMUReaction>
 
 void AddNewEMUInQueue(std::queue<Emu> *queue,
                       const std::set<Emu> &emu_ignore_list,
-                      const EMUReactionSide &reaction_side) {
-    for (EMUSubstrate const &substrate : reaction_side) {
+                      const EmuReactionSide &reaction_side) {
+    for (EmuSubstrate const &substrate : reaction_side) {
         if (emu_ignore_list.find(substrate.emu) == emu_ignore_list.end()) {
             queue->push(substrate.emu);
         }

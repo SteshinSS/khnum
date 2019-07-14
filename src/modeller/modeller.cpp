@@ -52,6 +52,16 @@ void Modeller::CreateNullspaceMatrix() {
     nullspace_ = GetNullspace(stoichiometry_matrix);
 }
 
+
+void Modeller::CalculateMeasurementsCount(){
+    measurements_count_ = 0;
+
+    for (const Measurement &measurement : measurements_) {
+        measurements_count_ += measurement.mid.size();
+    }
+}
+
+
 Problem Modeller::GetProblem() {
     Problem problem;
     problem.reactions = reactions_;
@@ -60,6 +70,9 @@ Problem Modeller::GetProblem() {
     problem.networks = emu_networks_;
     problem.input_mids = input_substrate_mids_;
     problem.measurements = measurements_;
+    problem.measurements_count = measurements_count_;
 
     return problem;
 }
+
+

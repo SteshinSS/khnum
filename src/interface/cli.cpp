@@ -4,10 +4,10 @@
 
 #include "modeller/modeller.h"
 #include "parser/open_flux_parser.h"
-#include "mfa_math.h"
-#include "utilities.h"
+#include "solver/solver.h"
 
-#include "clusterizer.h"
+
+#include "clusterizer/clusterizer.h"
 
 #include <iostream>
 #include <fstream>
@@ -32,12 +32,16 @@ void RunCli() {
         modeller.CreateEmuNetworks();
         modeller.CreateNullspaceMatrix();
         modeller.CalculateFluxBounds();
+        modeller.CalculateMeasurementsCount();
 
         Problem problem = modeller.GetProblem();
 
-        std::vector<alglib::real_1d_array> allSolutions = EstimateFluxes(problem, 10);
+        Solver* solver = Solver::getInstance(problem);
+        solver->Solve();
+        std::vector<alglib::real_1d_array> allSolutions = solver->getResult();
 
         Clasterizer a(allSolutions);
+
 /*
         reactions = SortReactionByID(reactions);
 

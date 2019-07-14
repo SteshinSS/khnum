@@ -1,4 +1,5 @@
-#include "Emu.h"
+#include "utilities/Emu.h"
+
 #include <tuple>
 
 bool operator<(const Emu &lhs, const Emu &rhs) {
@@ -10,7 +11,7 @@ bool operator==(const Emu &lhs, const Emu &rhs) {
 }
 
 
-bool operator==(EMUSubstrate const &lhs, EMUSubstrate const &rhs) {
+bool operator==(EmuSubstrate const &lhs, EmuSubstrate const &rhs) {
     if (lhs.emu == rhs.emu) {
         return lhs.coefficient == rhs.coefficient;
     } else {
@@ -18,7 +19,7 @@ bool operator==(EMUSubstrate const &lhs, EMUSubstrate const &rhs) {
     }
 }
 
-bool operator!=(EMUSubstrate const &lhs, EMUSubstrate const &rhs) {
+bool operator!=(EmuSubstrate const &lhs, EmuSubstrate const &rhs) {
     return !(lhs == rhs);
 }
 

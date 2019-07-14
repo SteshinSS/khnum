@@ -32,6 +32,6 @@ std::vector<EMUReaction> SelectUniqueEMUReactions(const std::vector<EMUReaction>
 
 void AddNewEMUInQueue(std::queue<Emu> *queue,
                       const std::set<Emu> &emu_ignore_list,
-                      const EMUReactionSide &reaction_side);
+                      const EmuReactionSide &reaction_side);
 
 #endif //CFLEX_CREATE_EMU_REACTIONS_H

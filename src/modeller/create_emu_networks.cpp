@@ -40,7 +40,7 @@ std::vector<EMUNetwork> CreateEMUNetworks(const std::vector<EMUReaction> &reacti
             if (emu_reaction.right.emu == next_emu) {
 
                 emu_networks[emu_size - 1].push_back(emu_reaction);
-                for (const EMUSubstrate &emu_substrate : emu_reaction.left) {
+                for (const EmuSubstrate &emu_substrate : emu_reaction.left) {
                     if (!IsEMUAlreadyChecked(emu_substrate.emu, already_checked_emus)) {
                         emus_to_check.push(emu_substrate.emu);
                     }
@@ -64,7 +64,7 @@ std::vector<EMUNetwork> CreateEMUNetworks(const std::vector<EMUReaction> &reacti
 int FindTheLargestEMUSize(const std::vector<EMUReaction> &reactions) {
     int max_size = -1;
     for (const EMUReaction &reaction : reactions) {
-        for (const EMUSubstrate &emu_substrate : reaction.left) {
+        for (const EmuSubstrate &emu_substrate : reaction.left) {
             max_size = std::max(max_size, GetEMUSize(emu_substrate.emu));
         }
         max_size = std::max(max_size, GetEMUSize(reaction.right.emu));

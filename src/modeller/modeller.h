@@ -14,10 +14,13 @@ public:
     void CalculateInputSubstrateMids();
     void CreateNullspaceMatrix();
     void CalculateFluxBounds();
-    
+    void CalculateMeasurementsCount();
+
     Problem GetProblem();
 
 private:
+
+
     std::vector<Reaction> reactions_;
     std::vector<Emu> measured_isotopes_;
     std::vector<Measurement> measurements_;
@@ -30,6 +33,8 @@ private:
     Matrix nullspace_;
     std::vector<EmuAndMid> input_substrate_mids_;
     std::vector<EMUNetwork> emu_networks_;
+
+    int measurements_count_ = 0;
 };
 
 #endif //CFLEX_MODELLER_H
