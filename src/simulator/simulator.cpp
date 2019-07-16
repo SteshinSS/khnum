@@ -1,5 +1,7 @@
 #include "simulator/simulator.h"
 
+#include <iostream>
+
 Simulator::Simulator(const std::vector<Flux> &fluxes, const std::vector<EmuNetwork> &networks,
                      const std::vector<EmuAndMid> &all_known_emus, const std::vector<Emu> &measured_isotopes) :
     fluxes_ {fluxes},
@@ -9,6 +11,7 @@ Simulator::Simulator(const std::vector<Flux> &fluxes, const std::vector<EmuNetwo
 {}
 
 std::vector<EmuAndMid> Simulator::CalculateMids() {
+    std::cout << "Start iteration..." << std::endl;
     for (const EmuNetwork &network : networks_) {
         SolveOneNetwork(network);
     }
@@ -56,7 +59,7 @@ void Simulator::SolveOneNetwork(const EmuNetwork &network) {
     // So known_emus contains EMUs with known MIDs for this network
     // Whereas all_known_emus has EMUs from other networks
 
-    FillEMULists(unknown_emus, known_emus, network);
+    FillEmuLists(unknown_emus, known_emus, network);
 
     Matrix A = Matrix::Zero(unknown_emus.size(), unknown_emus.size());
     Matrix B = Matrix::Zero(unknown_emus.size(), known_emus.size());
@@ -78,9 +81,9 @@ int Simulator::FindNetworkSize(const EmuNetwork &network) {
     return current_size;
 }
 
-void Simulator::FillEMULists(std::vector<Emu> &unknown_emus,
-                  std::vector<EmuAndMid> &known_emus,
-                  const EmuNetwork &network) {
+void Simulator::FillEmuLists(std::vector<Emu> &unknown_emus,
+                             std::vector<EmuAndMid> &known_emus,
+                             const EmuNetwork &network) {
     // Fills known_emus and unknown_emus
     for (const EmuReaction &reaction : network) {
         if (reaction.left.size() == 1) {

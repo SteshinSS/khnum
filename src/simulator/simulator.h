@@ -22,7 +22,7 @@ private:
     void SolveOneNetwork(const EmuNetwork &network);
 
 
-    void FillEMULists(std::vector<Emu> &unknown_emus,
+    void FillEmuLists(std::vector<Emu> &unknown_emus,
                       std::vector<EmuAndMid> &known_emus,
                       const EmuNetwork &network);
 

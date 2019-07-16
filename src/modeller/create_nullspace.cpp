@@ -2,8 +2,10 @@
 
 #include "utilities/matrix.h"
 
-Matrix GetNullspace(const Matrix &matrix) {
-    Matrix nullspace = matrix.fullPivLu().kernel();
+#include <iostream>
+
+Matrix GetNullspace(const Matrix& matrix) {
+    Matrix nullspace =  matrix.fullPivLu().kernel();
     nullspace = GetRREF(nullspace);
     return nullspace;
 }
@@ -17,6 +19,9 @@ Matrix GetNullspace(const Matrix &matrix) {
  * |  0   0   1  |
  *
  */
+
+// This is wrong algorithm. It supposes that all pivots are non null, which is
+// generally not true, though it works in modelTca
 Matrix GetRREF(const Matrix &item) {
     Matrix result = item;
     for (int pivot = item.cols() - 1; pivot > 0; --pivot) {

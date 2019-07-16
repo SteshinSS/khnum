@@ -8,7 +8,7 @@
 #include "simulator/simulator.h"
 
 // See http://www.alglib.net/optimization/levenbergmarquardt.php
-// and http://www.alglib.net/translator/man/manual.cpp.html#example_minlm_d_v before reading this
+// and http://www.alglib.net/translator/man/manual.cpp.html#example_minlm_d_v before reading this code
 
 class Solver {
 public:
