@@ -11,7 +11,6 @@ Simulator::Simulator(const std::vector<Flux> &fluxes, const std::vector<EmuNetwo
 {}
 
 std::vector<EmuAndMid> Simulator::CalculateMids() {
-    std::cout << "Start iteration..." << std::endl;
     for (const EmuNetwork &network : networks_) {
         SolveOneNetwork(network);
     }

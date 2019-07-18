@@ -1,7 +1,10 @@
 #pragma once
 
+#include "utilities/reaction.h"
 #include "utilities/matrix.h"
 
-Matrix GetRREF(const Matrix &item);
+Matrix GetNullspace(Matrix matrix, std::vector<Reaction>& reactions);
 
-Matrix GetNullspace(const Matrix& matrix);
+bool ExchangeRowsToMakePivotNotNull(Matrix& matrix, const int column);
+
+int FindNotNullColumn(const Matrix& matrix, const int currentRow);

@@ -121,16 +121,25 @@ void Solver::CalculateResidual(const alglib::real_1d_array &free_fluxes,
 
 std::vector<Flux> Solver::CalculateAllFluxesFromFree(const alglib::real_1d_array &free_fluxes_alglib) {
     Eigen::VectorXd free_fluxes = GetEigenVectorFromAlgLibVector(free_fluxes_alglib);
-    Matrix all_fluxes_matrix = nullspace_ * free_fluxes;
+    Matrix depended_fluxes_matrix = -nullspace_ * free_fluxes;
     std::vector<Flux> all_fluxes(reactions_num_);
-
     // non metabolite balance reactions
-    const int real_reactions_total = all_fluxes_matrix.rows();
+    const int depended_reactions_total = depended_fluxes_matrix.rows();
+    const int metabolite_balance_reactions_total = reactions_num_ - depended_reactions_total - free_fluxes_alglib.length();
 
-    // metabolite balance
-    const int fake_reactions_total = reactions_num_ - all_fluxes_matrix.rows();
+    for (int i = 0; i < metabolite_balance_reactions_total; ++i) {
+        all_fluxes[reactions_.at(i).id] = 1;
+    }
 
+    for (int i = 0; i < depended_reactions_total; ++i) {
+        all_fluxes[reactions_.at(i + metabolite_balance_reactions_total).id] = depended_fluxes_matrix(i, 0);
+    }
 
+    for (int i = 0; i < free_fluxes_alglib.length(); ++i) {
+        all_fluxes[reactions_.at(reactions_num_ - free_fluxes_alglib.length() + i).id] = free_fluxes[i];
+    }
+
+/*
     // Next lines are obscure
     // The reason of this is a reactions' order
     // ToDo try to clean it out
@@ -142,7 +151,7 @@ std::vector<Flux> Solver::CalculateAllFluxesFromFree(const alglib::real_1d_array
     for (int i = 0; i < fake_reactions_total; ++i) {
         all_fluxes[reactions_.at(i).id] = 1;
     }
-
+*/
     return all_fluxes;
 }
 

@@ -1,6 +1,7 @@
 #include "modeller.h"
 
 #include <math.h>
+#include <iostream>
 
 #include "utilities/matrix.h"
 #include "modeller/create_emu_networks.h"
@@ -52,7 +53,11 @@ void Modeller::CreateNullspaceMatrix() {
                                                                                  excluded_metabolites_);
 
     Matrix stoichiometry_matrix = CreateStoichiometryMatrix(reactions_, included_metabolites);
-    nullspace_ = GetNullspace(stoichiometry_matrix);
+    std::cout << stoichiometry_matrix << std::endl << std::endl;
+
+    nullspace_ = GetNullspace(stoichiometry_matrix, reactions_);
+
+    std::cout << nullspace_ << std::endl << std::endl;
 }
 
 
