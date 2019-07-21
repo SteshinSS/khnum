@@ -11,10 +11,10 @@
 namespace khnum {
 class Simulator {
 public:
-    Simulator(const std::vector<Flux> &fluxes, const std::vector<EmuNetwork> &networks,
-              const std::vector<EmuAndMid> &all_known_emus, const std::vector<Emu> &measured_isotopes);
+    Simulator(const std::vector<EmuNetwork> &networks, const std::vector<EmuAndMid> &all_known_emus,
+              const std::vector<Emu> &measured_isotopes);
 
-    std::vector<EmuAndMid> CalculateMids();
+    std::vector<EmuAndMid> CalculateMids(const std::vector<Flux>& fluxes);
 
 private:
 
@@ -54,8 +54,9 @@ private:
                        const int current_size);
 
 private:
-    const std::vector<Flux> fluxes_;
+    std::vector<Flux> fluxes_;
     const std::vector<EmuNetwork> networks_;
+    const std::vector<EmuAndMid> input_mids_;
     std::vector<EmuAndMid> all_known_emus_;
     const std::vector<Emu> measured_isotopes_;
 };

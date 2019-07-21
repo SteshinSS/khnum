@@ -7,21 +7,12 @@
 
 
 namespace khnum {
-Solver *Solver::getSolver(const Problem &problem) {
-    if (!instance) {
-        instance = new Solver(problem);
-    }
-
-    return instance;
-}
 
 
-Solver::Solver(const Problem &problem) {
+Solver::Solver(const Problem &problem) :
+            simulator_(problem.networks, problem.input_mids, problem.measured_isotopes) {
     reactions_ = problem.reactions;
-    measured_isotopes_ = problem.measured_isotopes;
     nullspace_ = problem.nullspace;
-    networks_ = problem.networks;
-    input_mids_ = problem.input_mids;
     measurements_ = problem.measurements;
     measurements_count_ = problem.measurements_count;
 
@@ -37,7 +28,7 @@ Solver::Solver(const Problem &problem) {
 
 
 std::vector<alglib::real_1d_array> Solver::getResult() {
-    return allSolutions;
+    return all_solutions_;
 }
 
 
@@ -50,10 +41,10 @@ void Solver::Solve() {
 
     for (iteration_ = 0; iteration_ < iteration_total_; ++iteration_) {
         GenerateInitialPoints(random_source);
-        alglib::minlmrestartfrom(state, free_fluxes_);
-        alglib::real_1d_array newSolution = RunOptimization();
+        alglib::minlmrestartfrom(state_, free_fluxes_);
+        alglib::real_1d_array new_solution = RunOptimization();
 
-        allSolutions.emplace_back(newSolution);
+        all_solutions_.emplace_back(new_solution);
     }
 }
 
@@ -70,9 +61,9 @@ void Solver::SetOptimizationParameters() {
     alglib::ae_int_t maxits = 0;
     const double epsx = 0.00000000001;
 
-    alglib::minlmcreatev(nullity_, measurements_count_, free_fluxes_, 0.0001, state);
-    alglib::minlmsetcond(state, epsx, maxits);
-    alglib::minlmsetbc(state, lower_bounds_, upper_bounds_);
+    alglib::minlmcreatev(nullity_, measurements_count_, free_fluxes_, 0.0001, state_);
+    alglib::minlmsetcond(state_, epsx, maxits);
+    alglib::minlmsetbc(state_, lower_bounds_, upper_bounds_);
 }
 
 
@@ -97,10 +88,10 @@ void Solver::PrintStartMessage() {
 
 
 alglib::real_1d_array Solver::RunOptimization() {
-    alglib::minlmoptimize(state, CalculateResidual);
+    alglib::minlmoptimize(state_, AlglibCallback, nullptr, this);
 
     alglib::real_1d_array final_free_fluxes;
-    alglib::minlmresults(state, final_free_fluxes, report);
+    alglib::minlmresults(state_, final_free_fluxes, report_);
 
     PrintFinalMessage(final_free_fluxes);
 
@@ -108,14 +99,16 @@ alglib::real_1d_array Solver::RunOptimization() {
 }
 
 
+void AlglibCallback(const alglib::real_1d_array &free_fluxes,
+                    alglib::real_1d_array &residuals, void *ptr) {
+    Solver* solver = static_cast<Solver*>(ptr);
+    solver->CalculateResidual(free_fluxes, residuals);
+}
+
 void Solver::CalculateResidual(const alglib::real_1d_array &free_fluxes,
-                               alglib::real_1d_array &residuals, void *ptr) {
+                               alglib::real_1d_array &residuals) {
     std::vector<Flux> calculated_fluxes = CalculateAllFluxesFromFree(free_fluxes);
-
-    Simulator simulator(calculated_fluxes, networks_,
-                        input_mids_, measured_isotopes_);
-
-    std::vector<EmuAndMid> simulated_mids = simulator.CalculateMids();
+    std::vector<EmuAndMid> simulated_mids = simulator_.CalculateMids(calculated_fluxes);
     Fillf0Array(residuals, simulated_mids);
 }
 
@@ -141,19 +134,6 @@ std::vector<Flux> Solver::CalculateAllFluxesFromFree(const alglib::real_1d_array
         all_fluxes[reactions_.at(reactions_num_ - free_fluxes_alglib.length() + i).id] = free_fluxes[i];
     }
 
-/*
-    // Next lines are obscure
-    // The reason of this is a reactions' order
-    // ToDo try to clean it out
-    for (int i = 0; i < real_reactions_total; ++i) {
-        all_fluxes[reactions_.at(reactions_num_ - real_reactions_total + i).id] = all_fluxes_matrix(i, 0);
-    }
-
-    // fill const fake fluxes
-    for (int i = 0; i < fake_reactions_total; ++i) {
-        all_fluxes[reactions_.at(i).id] = 1;
-    }
-*/
     return all_fluxes;
 }
 
@@ -182,12 +162,7 @@ double Solver::GetSSR(const alglib::real_1d_array &residuals) {
 
 void Solver::PrintFinalMessage(const alglib::real_1d_array &free_fluxes) {
     std::vector<Flux> final_all_fluxes = CalculateAllFluxesFromFree(free_fluxes);
-    Simulator simulator(final_all_fluxes,
-                        networks_,
-                        input_mids_,
-                        measured_isotopes_);
-
-    std::vector<EmuAndMid> simulated_mids = simulator.CalculateMids();
+    std::vector<EmuAndMid> simulated_mids = simulator_.CalculateMids(final_all_fluxes);
     alglib::real_1d_array residuals;
     residuals.setlength(measurements_count_);
     Fillf0Array(residuals, simulated_mids);
@@ -199,31 +174,6 @@ void Solver::PrintFinalMessage(const alglib::real_1d_array &free_fluxes) {
         std::cout << reactions_[reactions_num_ - free_fluxes.length() + i].name <<
                   " = " << free_fluxes[i] << std::endl;
     }
-    std::cout << "with SSR: " << ssr << " in " << report.iterationscount << " steps." << std::endl << std::endl;
+    std::cout << "with SSR: " << ssr << " in " << report_.iterationscount << " steps." << std::endl << std::endl;
 }
-
-
-Solver *Solver::instance;
-
-int Solver::iteration_total_;
-int Solver::iteration_;
-int Solver::nullity_;
-int Solver::reactions_num_;
-
-std::vector<Reaction> Solver::reactions_;
-std::vector<Emu> Solver::measured_isotopes_;
-Matrix Solver::nullspace_;
-std::vector<EmuNetwork> Solver::networks_;
-std::vector<EmuAndMid> Solver::input_mids_;
-std::vector<Measurement> Solver::measurements_;
-int Solver::measurements_count_;
-
-alglib::real_1d_array Solver::free_fluxes_;
-alglib::real_1d_array Solver::lower_bounds_;
-alglib::real_1d_array Solver::upper_bounds_;
-
-alglib::minlmstate Solver::state;
-alglib::minlmreport Solver::report;
-
-std::vector<alglib::real_1d_array> Solver::allSolutions;
 } // namespace khnum

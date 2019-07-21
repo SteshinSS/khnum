@@ -34,9 +34,9 @@ void RunCli() {
 
         Problem problem = modeller.GetProblem();
 
-        Solver *solver = Solver::getSolver(problem);
-        solver->Solve();
-        std::vector<alglib::real_1d_array> allSolutions = solver->getResult();
+        Solver solver(problem);
+        solver.Solve();
+        std::vector<alglib::real_1d_array> allSolutions = solver.getResult();
 
         Clasterizer clusterizer(allSolutions);
         clusterizer.Start();

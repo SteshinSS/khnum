@@ -4,15 +4,16 @@
 
 
 namespace khnum {
-Simulator::Simulator(const std::vector<Flux> &fluxes, const std::vector<EmuNetwork> &networks,
-                     const std::vector<EmuAndMid> &all_known_emus, const std::vector<Emu> &measured_isotopes) :
-    fluxes_{fluxes},
+Simulator::Simulator(const std::vector<EmuNetwork> &networks, const std::vector<EmuAndMid> &input_mids,
+                     const std::vector<Emu> &measured_isotopes) :
     networks_{networks},
-    all_known_emus_{all_known_emus},
+    input_mids_{input_mids},
     measured_isotopes_{measured_isotopes} {}
 
 
-std::vector<EmuAndMid> Simulator::CalculateMids() {
+std::vector<EmuAndMid> Simulator::CalculateMids(const std::vector<Flux>& fluxes) {
+    all_known_emus_ = input_mids_;
+    fluxes_ = fluxes;
     for (const EmuNetwork &network : networks_) {
         SolveOneNetwork(network);
     }
