@@ -36,7 +36,7 @@ void RunCli() {
 
         Solver solver(problem);
         solver.Solve();
-        std::vector<alglib::real_1d_array> allSolutions = solver.getResult();
+        std::vector<alglib::real_1d_array> allSolutions = solver.GetResult();
 
         Clasterizer clusterizer(allSolutions);
         clusterizer.Start();

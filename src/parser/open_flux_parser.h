@@ -65,20 +65,11 @@ private:
 
     void ParseAtomEquationSide(const std::string &atom_equation, ChemicalEquationSide *equation_side);
 
-    Rate ParseRate(const std::string &rate);
-
     ReactionType ParseReactionType(const std::string &type);
 
     std::tuple<Basis, bool> ParseBasis(const std::string &basis);
 
     Deviation ParseDeviation(const std::string &deviation);
-
-    Flux ParseLowerBound(const std::string &lower_bound);
-
-    Flux ParseUpperBound(const std::string &upper_bound);
-
-
-
 };
 
 } //namespace khnum

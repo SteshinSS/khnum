@@ -198,22 +198,12 @@ Reaction ParserOpenFlux::FillReaction(const std::string& raw_line) {
     reaction.id = reactions_.size();
     reaction.name = GetCell(line);
     reaction.chemical_equation = ParseChemicalEquation(line);
-    reaction.rate = ParseRate(GetCell(line));
+    GetCell(line); // we don't care about Rate
     reaction.type = ParseReactionType(GetCell(line));
     auto[new_basis, is_basis_x] = ParseBasis(GetCell(line));
     reaction.basis = new_basis;
     reaction.is_set_free = is_basis_x;
     reaction.deviation = ParseDeviation(GetCell(line));
-
-    // turn this code ON if UB and LB are available
-
-    reaction.setted_lower_bound = ParseLowerBound(GetCell(line));
-    reaction.setted_upper_bound = ParseUpperBound(GetCell(line));
-
-/*
-    reaction.setted_lower_bound = 0;
-    reaction.setted_upper_bound = 10;
-*/
 
     return reaction;
 }
@@ -342,15 +332,6 @@ void ParserOpenFlux::ParseAtomEquationSide(const std::string &atom_equation, Che
 }
 
 
-Rate ParserOpenFlux::ParseRate(const std::string &rate) {
-    if (rate.empty()) {
-        return std::numeric_limits<double>::quiet_NaN();  // no rate
-    } else {
-        return std::stod(rate);
-    }
-}
-
-
 ReactionType ParserOpenFlux::ParseReactionType(const std::string &type) {
     if (!type.empty()) {
         if (type == "F") {
@@ -380,16 +361,6 @@ std::tuple<Basis, bool> ParserOpenFlux::ParseBasis(const std::string &basis) {
     } else {
         return {std::stod(basis), true};
     }
-}
-
-
-Flux ParserOpenFlux::ParseLowerBound(const std::string &lower_bound) {
-    return std::stod(lower_bound);
-}
-
-
-Flux ParserOpenFlux::ParseUpperBound(const std::string &upper_bound) {
-    return std::stod(upper_bound);
 }
 
 

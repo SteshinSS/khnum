@@ -18,7 +18,7 @@ public:
 
     void Solve();
 
-    std::vector<alglib::real_1d_array> getResult();
+    std::vector<alglib::real_1d_array> GetResult();
 
 private:
     void FillBoundVectors();

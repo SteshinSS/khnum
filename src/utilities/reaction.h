@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <optional>
 #include <vector>
 
 
@@ -44,13 +45,12 @@ struct Reaction {
     int id;
     std::string name;
     ChemicalEquation chemical_equation;
-    Rate rate;
     ReactionType type;
     Basis basis;
     Deviation deviation;
     bool is_set_free;
-    Flux setted_lower_bound;
-    Flux setted_upper_bound;
+    std::optional<Flux> setted_lower_bound;
+    std::optional<Flux> setted_upper_bound;
     Flux computed_lower_bound;
     Flux computed_upper_bound;
 };

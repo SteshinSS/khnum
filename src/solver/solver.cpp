@@ -27,7 +27,7 @@ Solver::Solver(const Problem &problem) :
 }
 
 
-std::vector<alglib::real_1d_array> Solver::getResult() {
+std::vector<alglib::real_1d_array> Solver::GetResult() {
     return all_solutions_;
 }
 

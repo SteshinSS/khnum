@@ -184,7 +184,7 @@ void Simulator::FillABMatrices(Matrix &A, Matrix &B,
         }
 
         // Return nullptr if there is no substrate.emu in known_emus
-        bool is_emu_known = FindMid(substrate.emu, known_emus);
+        bool is_emu_known = static_cast<bool>(FindMid(substrate.emu, known_emus));
         if (!is_emu_known) {
             // Both substrate and product are unknown
             int position_of_substrate = FindUnknownEmuPosition(substrate.emu, unknown_emus);

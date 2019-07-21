@@ -38,8 +38,10 @@ void Modeller::CreateEmuNetworks() {
 void Modeller::CalculateFluxBounds() {
     for (Reaction &reaction : reactions_) {
         if (std::isnan(reaction.basis)) {
-            reaction.computed_upper_bound = reaction.setted_upper_bound;
-            reaction.computed_lower_bound = reaction.setted_lower_bound;
+            reaction.computed_upper_bound = reaction.setted_upper_bound ?
+                                            *reaction.setted_upper_bound : 10;
+            reaction.computed_lower_bound = reaction.setted_lower_bound ?
+                                            *reaction.setted_lower_bound : 0;
         } else {
             if (std::isnan(reaction.deviation)) {
                 reaction.computed_upper_bound = reaction.basis;
