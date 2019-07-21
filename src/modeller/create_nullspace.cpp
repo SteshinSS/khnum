@@ -58,8 +58,6 @@ Matrix GetNullspace(Matrix matrix, std::vector<Reaction>& reactions) {
         }
     }
 
-    std::cout << matrix << std::endl << std::endl;
-
     Matrix result = matrix.block(0, matrix.rows(), matrix.rows(), matrix.cols() - matrix.rows());
     return result;
 }

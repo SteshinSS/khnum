@@ -37,7 +37,8 @@ void RunCli() {
         solver->Solve();
         std::vector<alglib::real_1d_array> allSolutions = solver->getResult();
 
-        Clasterizer a(allSolutions);
+        Clasterizer clusterizer(allSolutions);
+        clusterizer.Start();
 
 /*
         reactions = SortReactionByID(reactions);
