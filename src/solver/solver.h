@@ -7,6 +7,8 @@
 #include "utilities/problem.h"
 #include "simulator/simulator.h"
 
+
+namespace khnum {
 // See http://www.alglib.net/optimization/levenbergmarquardt.php
 // and http://www.alglib.net/translator/man/manual.cpp.html#example_minlm_d_v before reading this code
 
@@ -68,3 +70,4 @@ private:
     static std::vector<alglib::real_1d_array> allSolutions;
 
 };
+} // namespace khnum

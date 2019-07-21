@@ -5,6 +5,9 @@
 
 #include "iostream"
 
+
+namespace khnum {
+namespace modelling_utills {
 // Transform stoichiometry matrix to form
 /*
  *
@@ -17,11 +20,10 @@
 // So Vdep = -A * Vfree
 // And return the A matrix
 
-Matrix GetNullspace(Matrix matrix, std::vector<Reaction>& reactions) {
+Matrix GetNullspace(Matrix matrix, std::vector<Reaction> &reactions) {
     // As we work with the diagonal elements, pivot.column == pivot.row
     // So below I use it as synonymous
     const int metabolite_balance_reactions_total = reactions.size() - matrix.cols();
-
 
     for (int column = 0; column < matrix.rows(); ++column) {
         if (matrix(column, column) == 0) {
@@ -32,11 +34,14 @@ Matrix GetNullspace(Matrix matrix, std::vector<Reaction>& reactions) {
                 // We need to exchange columns, so as the fluxes order
                 const int columnToSwap = FindNotNullColumn(matrix, column);
                 if (columnToSwap == -1) {
-                    throw std::runtime_error("Can't transform stoichiometry matrix at column number " + std::to_string(column));
+                    throw std::runtime_error(
+                        "Can't transform stoichiometry matrix at column number " + std::to_string(column));
                 }
                 matrix.col(column).swap(matrix.col(columnToSwap));
-                std::swap(reactions[metabolite_balance_reactions_total + column], reactions[metabolite_balance_reactions_total + columnToSwap]);
-                std::cout << "Reaction num " << metabolite_balance_reactions_total + column << " and num " << metabolite_balance_reactions_total + columnToSwap << " has swapped" << std::endl;
+                std::swap(reactions[metabolite_balance_reactions_total + column],
+                          reactions[metabolite_balance_reactions_total + columnToSwap]);
+                std::cout << "Reaction num " << metabolite_balance_reactions_total + column << " and num "
+                          << metabolite_balance_reactions_total + columnToSwap << " has swapped" << std::endl;
                 if (matrix(column, column) == 0) {
                     ExchangeRowsToMakePivotNotNull(matrix, column);
                 }
@@ -62,7 +67,8 @@ Matrix GetNullspace(Matrix matrix, std::vector<Reaction>& reactions) {
     return result;
 }
 
-bool ExchangeRowsToMakePivotNotNull(Matrix& matrix, const int column) {
+
+bool ExchangeRowsToMakePivotNotNull(Matrix &matrix, const int column) {
     for (int row = column + 1; row < matrix.rows(); ++row) {
         if (matrix(row, column) != 0) {
             matrix.row(column).swap(matrix.row(row));
@@ -72,7 +78,8 @@ bool ExchangeRowsToMakePivotNotNull(Matrix& matrix, const int column) {
     return false;
 }
 
-int FindNotNullColumn(const Matrix& matrix, const int currentRow) {
+
+int FindNotNullColumn(const Matrix &matrix, const int currentRow) {
     for (int column = matrix.rows() - 1; column < matrix.cols(); ++column) {
         for (int row = currentRow; row < matrix.rows(); ++row) {
             if (matrix(row, column) != 0) {
@@ -82,3 +89,5 @@ int FindNotNullColumn(const Matrix& matrix, const int currentRow) {
     }
     return -1;
 }
+} // namespace modelling_utills
+} // namespace khnum

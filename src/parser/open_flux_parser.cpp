@@ -11,6 +11,8 @@
 #include "modeller/sort_reactions.h"
 
 
+namespace khnum {
+
 ParserResults ParserOpenFlux::GetResults() {
     ParserResults results;
     results.reactions = reactions_;
@@ -23,16 +25,18 @@ ParserResults ParserOpenFlux::GetResults() {
 }
 
 
-void ParserOpenFlux::ReadExcludedMetabolites() {
+void ParserOpenFlux::ParseExcludedMetabolites() {
     const std::string excluded_metabolites_path = path_ + "/excluded_metabolites.txt";
-    excluded_metabolites_ = ParseEachLine(excluded_metabolites_path);
+    excluded_metabolites_ = ReadEachLine(excluded_metabolites_path);
 }
 
 
-void ParserOpenFlux::ReadMeasuredIsotopes() {
+void ParserOpenFlux::ParseMeasuredIsotopes() {
     const std::string measured_isotopes_path = path_ + "/measured_isotopes.txt";
 
-    std::vector<std::string> raw_measured_isotopes = ParseEachLine(measured_isotopes_path);
+    std::vector<std::string> raw_measured_isotopes = ReadEachLine(measured_isotopes_path);
+
+    // line_number need for error messages
     int line_number = 1;
     for (const std::string &raw_measured_isotope : raw_measured_isotopes) {
         std::stringstream line(raw_measured_isotope);
@@ -50,7 +54,7 @@ void ParserOpenFlux::ReadMeasuredIsotopes() {
                 new_emu.atom_states[atom_position] = false;
             } else {
                 throw std::runtime_error(
-                        "Line: " + std::to_string(line_number) + "There is strange atom states in measured isotope!");
+                    "Line: " + std::to_string(line_number) + "There is strange atom states in measured isotope!");
             }
         }
         ++line_number;
@@ -60,11 +64,11 @@ void ParserOpenFlux::ReadMeasuredIsotopes() {
 }
 
 
-void ParserOpenFlux::ReadMeasurements() {
+void ParserOpenFlux::ParseMeasurements() {
     const std::string measurements_path = path_ + "/measurements.csv";
 
     std::ifstream input(measurements_path);
-    // skip table head-line
+    // skip table's head line
     input.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
     std::string raw_line;
@@ -86,14 +90,7 @@ void ParserOpenFlux::ReadMeasurements() {
 }
 
 
-void ParserOpenFlux::ReadReactions() {
-    const std::string reactionsPath = path_ + "/model.csv";
-    reactions_ = ParseReactions(reactionsPath);
-    reactions_ = SortReactionsByType(reactions_);
-}
-
-
-void ParserOpenFlux::ReadSubstrateInput() {
+void ParserOpenFlux::ParseSubstrateInput() {
     const std::string input_substrates_path = path_ + "/substrate_input.csv";
 
     std::ifstream input(input_substrates_path);
@@ -105,7 +102,7 @@ void ParserOpenFlux::ReadSubstrateInput() {
     while (getline(input, raw_line)) {
         std::stringstream line(raw_line);
         std::string input_substrate_name;
-        getline(line, input_substrate_name, csv_delimiter);
+        getline(line, input_substrate_name, csv_delimiter_);
 
         auto input_substrate_iterator = std::find_if(input_substrates_.begin(),
                                                      input_substrates_.end(),
@@ -117,16 +114,17 @@ void ParserOpenFlux::ReadSubstrateInput() {
             InputSubstrate new_input_substrate;
             new_input_substrate.name = input_substrate_name;
             input_substrates_.push_back(new_input_substrate);
+
+            //move iterator back, so we can work with the new substrate
             input_substrate_iterator = input_substrates_.end();
             --input_substrate_iterator;
         }
 
-        // now input_substrate_iterator point to the entering substrate
-        std::vector<Fraction> fractions;
         std::string raw_labeling_pattern;
-        getline(line, raw_labeling_pattern, csv_delimiter);
-
+        getline(line, raw_labeling_pattern, csv_delimiter_);
         std::stringstream labeling_pattern(raw_labeling_pattern);
+
+        std::vector<Fraction> fractions;
         Fraction new_fraction;
         while (labeling_pattern >> new_fraction) {
             fractions.push_back(new_fraction);
@@ -145,70 +143,88 @@ void ParserOpenFlux::ReadSubstrateInput() {
 }
 
 
-std::vector<Reaction> ParserOpenFlux::ParseReactions(const std::string &model_path) {
-    std::ifstream model_file(model_path);
-    std::vector<Reaction> reactions;
+void ParserOpenFlux::ParseReactions() {
+    const std::string reactions_path = path_ + "/model.csv";
+
+    std::ifstream reaction_file(reactions_path);
 
     // skip table head-line
-    model_file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    reaction_file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
     std::string raw_line;
-    getline(model_file, raw_line);
-    int reaction_id = 0;
+    getline(reaction_file, raw_line);
     try {
         while (!raw_line.empty()) {
-            std::stringstream line(raw_line);
-            Reaction new_reaction;
-            new_reaction.id = reaction_id;
-            ++reaction_id;
-            FillReaction(&new_reaction, line);
-            reactions.emplace_back(new_reaction);
-            if (model_file.eof()) {
+            Reaction new_reaction = FillReaction(raw_line);
+            reactions_.emplace_back(new_reaction);
+            if (reaction_file.eof()) {
                 break;
             } else {
-                getline(model_file, raw_line);
+                getline(reaction_file, raw_line);
             }
         }
     } catch (std::runtime_error &parser_error) {
-        std::cerr << "Line: " << reaction_id << std::endl;
+        std::cerr << "Line: " << reactions_.size() << std::endl;
         throw (parser_error);
     }
 
-
-    return reactions;
+    reactions_ = modelling_utills::SortReactionsByType(reactions_);
 }
 
 
-void ParserOpenFlux::FillReaction(Reaction *reaction, std::stringstream &line) {
+std::vector<std::string> ParserOpenFlux::ReadEachLine(const std::string &path) {
+    std::vector<std::string> lines;
 
-    reaction->name = GetCell(line);
-    reaction->chemical_equation = ParseChemicalEquation(line);
-    reaction->rate = ParseRate(GetCell(line));
-    reaction->type = ParseReactionType(GetCell(line));
+    std::ifstream input(path);
+    std::string next_line;
+    while (getline(input, next_line)) {
+        lines.emplace_back(next_line);
+    }
+
+    return lines;
+}
+
+
+std::string ParserOpenFlux::GetCell(std::stringstream &line) {
+    std::string new_cell;
+    getline(line, new_cell, csv_delimiter_);
+    return new_cell;
+}
+
+
+Reaction ParserOpenFlux::FillReaction(const std::string& raw_line) {
+    Reaction reaction;
+    std::stringstream line(raw_line);
+    reaction.id = reactions_.size();
+    reaction.name = GetCell(line);
+    reaction.chemical_equation = ParseChemicalEquation(line);
+    reaction.rate = ParseRate(GetCell(line));
+    reaction.type = ParseReactionType(GetCell(line));
     auto[new_basis, is_basis_x] = ParseBasis(GetCell(line));
-    reaction->basis = new_basis;
-    reaction->is_set_free = is_basis_x;
-    reaction->deviation = ParseDeviation(GetCell(line));
+    reaction.basis = new_basis;
+    reaction.is_set_free = is_basis_x;
+    reaction.deviation = ParseDeviation(GetCell(line));
 
     // turn this code ON if UB and LB are available
-    /*
-    reaction->setted_lower_bound = ParseLowerBound(GetCell(line));
-    reaction->setted_upper_bound = ParseUpperBound(GetCell(line));
-     */
 
-    reaction->setted_lower_bound = 0;
-    reaction->setted_upper_bound = 10;
-    GetCell(line);
-    GetCell(line);
+    reaction.setted_lower_bound = ParseLowerBound(GetCell(line));
+    reaction.setted_upper_bound = ParseUpperBound(GetCell(line));
+
+/*
+    reaction.setted_lower_bound = 0;
+    reaction.setted_upper_bound = 10;
+*/
+
+    return reaction;
 }
 
 
 ChemicalEquation ParserOpenFlux::ParseChemicalEquation(std::stringstream &line) {
     const std::string substrate_equation = GetCell(line);
-    const size_t substrate_delimiter_position = substrate_equation.find(reaction_side_delimiter);
+    const int substrate_delimiter_position = substrate_equation.find(reaction_side_delimiter_);
 
     const std::string atom_equation = GetCell(line);
-    size_t atom_delimiter_position = atom_equation.find(reaction_side_delimiter);
+    int atom_delimiter_position = atom_equation.find(reaction_side_delimiter_);
 
     bool is_atom_equation_ok = (atom_delimiter_position != std::string::npos) || atom_equation.empty();
 
@@ -218,15 +234,15 @@ ChemicalEquation ParserOpenFlux::ParseChemicalEquation(std::stringstream &line) 
                                                     atom_equation.substr(0, atom_delimiter_position);
 
         ChemicalEquationSide left = FillEquationSide(
-                left_side_substrate_equation, left_side_atom_equation);
+            left_side_substrate_equation, left_side_atom_equation);
 
         const std::string right_side_substrate_equation = substrate_equation.substr(
-                substrate_delimiter_position + 2);
+            substrate_delimiter_position + 2);
         const std::string right_side_atom_equation = atom_equation.empty() ? "" :
                                                      atom_equation.substr(atom_delimiter_position + 2);
 
         ChemicalEquationSide right = FillEquationSide(
-                right_side_substrate_equation, right_side_atom_equation);
+            right_side_substrate_equation, right_side_atom_equation);
 
         return ChemicalEquation{left, right};
     } else {
@@ -239,7 +255,7 @@ ChemicalEquation ParserOpenFlux::ParseChemicalEquation(std::stringstream &line) 
 ChemicalEquationSide
 ParserOpenFlux::FillEquationSide(const std::string &substrate_equation, const std::string &atom_equation) {
     ChemicalEquationSide equation_side = ParseSubstrateEquationSide(substrate_equation);
-    ParseAtomEquationSide(&equation_side, atom_equation);
+    ParseAtomEquationSide(atom_equation, &equation_side);
     return equation_side;
 }
 
@@ -248,25 +264,29 @@ ChemicalEquationSide ParserOpenFlux::ParseSubstrateEquationSide(const std::strin
     ChemicalEquationSide result;
     std::stringstream equation{raw_equation};
     bool previous_token_is_coefficient{false}; // true, if previous iteration have found a coefficient
-    SubstrateCoefficient last_coefficient{}; // contain previous coefficient, if previous token is a coefficient
+    SubstrateCoefficient last_coefficient{}; // contains previous coefficient, if previous token is a coefficient
     std::string token;
     getline(equation, token, ' ');
     while (!token.empty()) {
         try {
+
+            // We are trying to convert token into a double
+            // std::stod throws an exception when token is a substrate name
             std::size_t position_of_not_number; // see second argument of std::stod
             last_coefficient = std::stod(token, &position_of_not_number);
 
-            if (position_of_not_number != token.size()) { // in case of substrate name starts with a number
-                throw std::invalid_argument("");
+            if (position_of_not_number != token.size()) { // because std::stod won't throw when substrate name
+                throw std::invalid_argument("");          // starts with digits
             }
+
+            // We found a coefficient
             if (!previous_token_is_coefficient) {
                 previous_token_is_coefficient = true;
-
             } else {
-                throw std::runtime_error("There is reaction with two coefficient in row!");
+                throw std::runtime_error("There is reaction with two coefficient in a row!");
             }
         } catch (std::invalid_argument) {
-            if (token != substrate_delimiter) {
+            if (token != substrate_delimiter_) {
                 if (!previous_token_is_coefficient) {
                     last_coefficient = 1.0;
                 }
@@ -274,7 +294,6 @@ ChemicalEquationSide ParserOpenFlux::ParseSubstrateEquationSide(const std::strin
                 Substrate new_substrate;
                 new_substrate.name = token;
                 new_substrate.coefficient = last_coefficient;
-                new_substrate.formula = "";
                 result.push_back(new_substrate);
             }
         }
@@ -291,19 +310,22 @@ ChemicalEquationSide ParserOpenFlux::ParseSubstrateEquationSide(const std::strin
             throw std::runtime_error("There is reaction with empty side!");
         }
     } else {
-        throw std::runtime_error("There is reaction with coefficient without a substrate!");
+        throw std::runtime_error("There is reaction with a coefficient without substrate!");
     }
 }
 
 
-void ParserOpenFlux::ParseAtomEquationSide(ChemicalEquationSide *equation_side, const std::string &atom_equation) {
+void ParserOpenFlux::ParseAtomEquationSide(const std::string &atom_equation, ChemicalEquationSide *equation_side) {
+    // It's ok if atom_equation is empty
     if (!atom_equation.empty()) {
         std::stringstream equation{atom_equation};
         std::string token;
         getline(equation, token, ' ');
         auto current_substance = equation_side->begin();
         while (!token.empty()) {
-            if (token != substrate_delimiter && !std::isdigit(token[0])) {
+
+            // We don't check coefficients
+            if (token != substrate_delimiter_ && !std::isdigit(token[0])) {
                 current_substance->formula = token;
                 ++current_substance;
             }
@@ -313,13 +335,9 @@ void ParserOpenFlux::ParseAtomEquationSide(ChemicalEquationSide *equation_side, 
                 getline(equation, token, ' ');
             }
         }
-        if (current_substance == equation_side->end()) {
-            return;
-        } else {
+        if (current_substance != equation_side->end()) {
             throw std::runtime_error("There is contradiction between substance and atom reactions!");
         }
-    } else { // reaction without tracer
-        return;
     }
 }
 
@@ -383,22 +401,4 @@ Deviation ParserOpenFlux::ParseDeviation(const std::string &deviation) {
     }
 }
 
-
-std::vector<std::string> ParserOpenFlux::ParseEachLine(const std::string &path) {
-    std::vector<std::string> lines;
-
-    std::ifstream input(path);
-    std::string next_line;
-    while (getline(input, next_line)) {
-        lines.emplace_back(next_line);
-    }
-
-    return lines;
-}
-
-
-std::string ParserOpenFlux::GetCell(std::stringstream &line) {
-    std::string new_cell;
-    getline(line, new_cell, csv_delimiter);
-    return new_cell;
-}
+} //namespace khnum

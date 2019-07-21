@@ -6,6 +6,7 @@
 #include "utilities/get_eigen_vec_from_alglib_vec.h"
 
 
+namespace khnum {
 Solver *Solver::getSolver(const Problem &problem) {
     if (!instance) {
         instance = new Solver(problem);
@@ -125,7 +126,8 @@ std::vector<Flux> Solver::CalculateAllFluxesFromFree(const alglib::real_1d_array
     std::vector<Flux> all_fluxes(reactions_num_);
     // non metabolite balance reactions
     const int depended_reactions_total = depended_fluxes_matrix.rows();
-    const int metabolite_balance_reactions_total = reactions_num_ - depended_reactions_total - free_fluxes_alglib.length();
+    const int
+        metabolite_balance_reactions_total = reactions_num_ - depended_reactions_total - free_fluxes_alglib.length();
 
     for (int i = 0; i < metabolite_balance_reactions_total; ++i) {
         all_fluxes[reactions_.at(i).id] = 1;
@@ -191,7 +193,6 @@ void Solver::PrintFinalMessage(const alglib::real_1d_array &free_fluxes) {
     Fillf0Array(residuals, simulated_mids);
     double ssr = GetSSR(residuals);
 
-
     std::cout << "Finish at: " << std::endl;
 
     for (int i = 0; i < free_fluxes.length(); ++i) {
@@ -203,7 +204,6 @@ void Solver::PrintFinalMessage(const alglib::real_1d_array &free_fluxes) {
 
 
 Solver *Solver::instance;
-
 
 int Solver::iteration_total_;
 int Solver::iteration_;
@@ -218,7 +218,6 @@ std::vector<EmuAndMid> Solver::input_mids_;
 std::vector<Measurement> Solver::measurements_;
 int Solver::measurements_count_;
 
-
 alglib::real_1d_array Solver::free_fluxes_;
 alglib::real_1d_array Solver::lower_bounds_;
 alglib::real_1d_array Solver::upper_bounds_;
@@ -227,3 +226,4 @@ alglib::minlmstate Solver::state;
 alglib::minlmreport Solver::report;
 
 std::vector<alglib::real_1d_array> Solver::allSolutions;
+} // namespace khnum

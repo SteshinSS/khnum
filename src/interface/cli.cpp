@@ -14,14 +14,15 @@
 #include "clusterizer/clusterizer.h"
 
 
+namespace khnum {
 void RunCli() {
     try {
         std::unique_ptr<Parser> parser(new ParserOpenFlux("../modelTca"));
-        parser->ReadExcludedMetabolites();
-        parser->ReadMeasuredIsotopes();
-        parser->ReadMeasurements();
-        parser->ReadReactions();
-        parser->ReadSubstrateInput();
+        parser->ParseExcludedMetabolites();
+        parser->ParseMeasuredIsotopes();
+        parser->ParseMeasurements();
+        parser->ParseReactions();
+        parser->ParseSubstrateInput();
 
         Modeller modeller(parser->GetResults());
 
@@ -54,3 +55,4 @@ void RunCli() {
 
     return;
 }
+} // namespace khnum

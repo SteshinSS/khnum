@@ -4,13 +4,15 @@
 #include "utilities/matrix.h"
 #include "parser/parser_results.h"
 
+
+namespace khnum {
 class Modeller {
 public:
     Modeller(const ParserResults);
 
-    void CreateEmuNetworks();
-
     void CalculateInputSubstrateMids();
+
+    void CreateEmuNetworks();
 
     void CreateNullspaceMatrix();
 
@@ -21,8 +23,6 @@ public:
     Problem GetProblem();
 
 private:
-
-
     std::vector<Reaction> reactions_;
     std::vector<Emu> measured_isotopes_;
     std::vector<Measurement> measurements_;
@@ -38,3 +38,4 @@ private:
 
     int measurements_count_ = 0;
 };
+} // namespace khnum

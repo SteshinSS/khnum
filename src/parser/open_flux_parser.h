@@ -2,22 +2,37 @@
 
 #include "parser/parser.h"
 
+
+namespace khnum {
+
+// Parse OpenFlux[2] input files
 class ParserOpenFlux : public Parser {
 public:
-
     ParserOpenFlux(const std::string &path) : path_(path) {}
 
     ParserResults GetResults() override;
 
-    void ReadExcludedMetabolites() override;
+    void ParseExcludedMetabolites() override;
 
-    void ReadMeasuredIsotopes() override;
+    void ParseMeasuredIsotopes() override;
 
-    void ReadMeasurements() override;
+    void ParseMeasurements() override;
 
-    void ReadReactions() override;
+    void ParseSubstrateInput() override;
 
-    void ReadSubstrateInput() override;
+    void ParseReactions() override;
+
+    inline void SetCsvDelimeter(char delimiter) {
+        csv_delimiter_ = delimiter;
+    }
+
+    inline void SetReactionSideDelimeter(const std::string &delimiter) {
+        reaction_side_delimiter_ = delimiter;
+    }
+
+    inline void SetSubstrateDelimiter(const std::string &delimiter) {
+        substrate_delimiter_ = delimiter;
+    }
 
 
 private:
@@ -29,17 +44,26 @@ private:
     std::vector<InputSubstrate> input_substrates_;
     std::vector<std::string> excluded_metabolites_;
 
-    char csv_delimiter{','};
-    std::string reaction_side_delimiter{"="};
-    std::string substrate_delimiter{"+"};
+    char csv_delimiter_{','};
 
+    // it is string in case of "->" delimiter
+    std::string reaction_side_delimiter_{"="};
+    std::string substrate_delimiter_{"+"};
 
 private:
-    std::vector<Reaction> ParseReactions(const std::string &model_path);
+    std::vector<std::string> ReadEachLine(const std::string &path);
 
-    void FillReaction(Reaction *reaction, std::stringstream &line);
+    inline std::string GetCell(std::stringstream &line);
+
+    Reaction FillReaction(const std::string& raw_line);
 
     ChemicalEquation ParseChemicalEquation(std::stringstream &line);
+
+    ChemicalEquationSide FillEquationSide(const std::string &substrate_equation, const std::string &atom_equation);
+
+    ChemicalEquationSide ParseSubstrateEquationSide(const std::string &raw_equation);
+
+    void ParseAtomEquationSide(const std::string &atom_equation, ChemicalEquationSide *equation_side);
 
     Rate ParseRate(const std::string &rate);
 
@@ -53,13 +77,8 @@ private:
 
     Flux ParseUpperBound(const std::string &upper_bound);
 
-    ChemicalEquationSide FillEquationSide(const std::string &substrate_equation, const std::string &atom_equation);
 
-    ChemicalEquationSide ParseSubstrateEquationSide(const std::string &raw_equation);
 
-    void ParseAtomEquationSide(ChemicalEquationSide *equation_side, const std::string &atom_equation);
-
-    std::vector<std::string> ParseEachLine(const std::string &path);
-
-    inline std::string GetCell(std::stringstream &line);
 };
+
+} //namespace khnum

@@ -3,6 +3,13 @@
 #include <tuple>
 
 
+namespace khnum {
+
+// need this for std containers
+bool comparator(const Emu& lhs, const Emu& rhs) {
+    return tie(lhs.name, lhs.atom_states) < tie(rhs.name, rhs.atom_states);
+}
+
 bool operator<(const Emu &lhs, const Emu &rhs) {
     return tie(lhs.name, lhs.atom_states) < tie(rhs.name, rhs.atom_states);
 }
@@ -38,3 +45,4 @@ bool operator==(const EmuReaction &lhs, const EmuReaction &rhs) {
         }
     }
 }
+} //namespace khnum

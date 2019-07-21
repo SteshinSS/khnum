@@ -3,6 +3,8 @@
 #include <vector>
 #include <string>
 
+
+namespace khnum {
 using AtomStates = std::vector<char>; // like a vector<bool> but iterable
 
 struct Emu {
@@ -30,6 +32,8 @@ struct EmuReaction {
 using EmuNetwork = std::vector<EmuReaction>;
 
 // need this for stl containers
+bool comparator(const Emu& lhs, const Emu& rhs);
+
 bool operator<(const Emu &lhs, const Emu &rhs);
 
 bool operator==(const Emu &lhs, const Emu &rhs);
@@ -39,3 +43,4 @@ bool operator==(EmuSubstrate const &lhs, EmuSubstrate const &rhs);
 bool operator!=(EmuSubstrate const &lhs, EmuSubstrate const &rhs);
 
 bool operator==(const EmuReaction &lhs, const EmuReaction &rhs);
+} //namespace khnum

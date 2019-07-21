@@ -5,20 +5,24 @@
 #include "parser/parser_results.h"
 
 
+namespace khnum {
+
+// Basic interface for parsers implementations
 class Parser {
 public:
     virtual ParserResults GetResults() = 0;
 
-    virtual void ReadExcludedMetabolites() = 0;
+    virtual void ParseExcludedMetabolites() = 0;
 
-    virtual void ReadMeasuredIsotopes() = 0;
+    virtual void ParseMeasuredIsotopes() = 0;
 
-    virtual void ReadMeasurements() = 0;
+    virtual void ParseMeasurements() = 0;
 
-    virtual void ReadReactions() = 0;
+    virtual void ParseReactions() = 0;
 
-    virtual void ReadSubstrateInput() = 0;
+    virtual void ParseSubstrateInput() = 0;
 
     virtual ~Parser() {};
 
 };
+} //namespace khnum

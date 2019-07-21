@@ -8,6 +8,8 @@
 #include "utilities/measurement.h"
 #include "utilities/input_substrate.h"
 
+
+namespace khnum {
 struct ParserResults {
     std::vector<Reaction> reactions;
     std::vector<Emu> measured_isotopes;
@@ -15,3 +17,4 @@ struct ParserResults {
     std::vector<InputSubstrate> input_substrate;
     std::vector<std::string> excluded_metabolites;
 };
+} //namespace khnum

@@ -2,13 +2,15 @@
 
 #include <iostream>
 
+
+namespace khnum {
 Simulator::Simulator(const std::vector<Flux> &fluxes, const std::vector<EmuNetwork> &networks,
                      const std::vector<EmuAndMid> &all_known_emus, const std::vector<Emu> &measured_isotopes) :
-    fluxes_ {fluxes},
-    networks_ {networks},
-    all_known_emus_ {all_known_emus},
-    measured_isotopes_ {measured_isotopes}
-{}
+    fluxes_{fluxes},
+    networks_{networks},
+    all_known_emus_{all_known_emus},
+    measured_isotopes_{measured_isotopes} {}
+
 
 std::vector<EmuAndMid> Simulator::CalculateMids() {
     for (const EmuNetwork &network : networks_) {
@@ -72,6 +74,7 @@ void Simulator::SolveOneNetwork(const EmuNetwork &network) {
     AppendNewMids(X, unknown_emus, current_size);
 }
 
+
 int Simulator::FindNetworkSize(const EmuNetwork &network) {
     int current_size = 0;
     for (const bool state : network[0].right.emu.atom_states) {
@@ -79,6 +82,7 @@ int Simulator::FindNetworkSize(const EmuNetwork &network) {
     }
     return current_size;
 }
+
 
 void Simulator::FillEmuLists(std::vector<Emu> &unknown_emus,
                              std::vector<EmuAndMid> &known_emus,
@@ -105,9 +109,8 @@ void Simulator::FillEmuLists(std::vector<Emu> &unknown_emus,
 }
 
 
-
 void Simulator::CheckIsEmuKnown(const Emu &emu, const std::vector<EmuAndMid> &where_find_emu_list,
-                     std::vector<EmuAndMid> &known_emus, std::vector<Emu> &unknown_emus) {
+                                std::vector<EmuAndMid> &known_emus, std::vector<Emu> &unknown_emus) {
     const Mid *mid = FindMid(emu, where_find_emu_list);
     if (mid) {
         EmuAndMid new_known;
@@ -120,8 +123,8 @@ void Simulator::CheckIsEmuKnown(const Emu &emu, const std::vector<EmuAndMid> &wh
 }
 
 
-const Mid* Simulator::FindMid(const Emu &emu,
-                   const std::vector<EmuAndMid> &mids) {
+const Mid *Simulator::FindMid(const Emu &emu,
+                              const std::vector<EmuAndMid> &mids) {
     auto position = find_if(mids.begin(),
                             mids.end(),
                             [&emu](const EmuAndMid &known_mid) {
@@ -134,7 +137,6 @@ const Mid* Simulator::FindMid(const Emu &emu,
         return &(position->mid);
     }
 }
-
 
 
 EmuAndMid Simulator::ConvolveEmu(const EmuReactionSide &convolve_reaction) {
@@ -155,7 +157,7 @@ EmuAndMid Simulator::ConvolveEmu(const EmuReactionSide &convolve_reaction) {
 
 
 Matrix Simulator::FormYMatrix(const std::vector<EmuAndMid> &known_emus,
-                   const int current_size) {
+                              const int current_size) {
     Matrix Y(known_emus.size(), current_size + 1);
     for (int known_emu_index = 0; known_emu_index < known_emus.size(); ++known_emu_index) {
         for (int mass_shift = 0; mass_shift < current_size + 1; ++mass_shift) {
@@ -166,11 +168,10 @@ Matrix Simulator::FormYMatrix(const std::vector<EmuAndMid> &known_emus,
 }
 
 
-
 void Simulator::FillABMatrices(Matrix &A, Matrix &B,
-                    const EmuNetwork &network,
-                    const std::vector<EmuAndMid> &known_emus,
-                    const std::vector<Emu> &unknown_emus) {
+                               const EmuNetwork &network,
+                               const std::vector<EmuAndMid> &known_emus,
+                               const std::vector<Emu> &unknown_emus) {
     for (const EmuReaction &reaction : network) {
         EmuSubstrate substrate;
         if (reaction.left.size() > 1) {
@@ -198,16 +199,14 @@ void Simulator::FillABMatrices(Matrix &A, Matrix &B,
             A(position_of_product, position_of_product) += (-reaction.right.coefficient) * fluxes_.at(reaction.id);
 
             B(position_of_product, position_of_substrate) +=
-                    (-substrate.coefficient) * fluxes_.at(reaction.id);
+                (-substrate.coefficient) * fluxes_.at(reaction.id);
         }
     }
 }
 
 
-
-
 int Simulator::FindUnknownEmuPosition(const Emu &emu,
-                           const std::vector<Emu> unknown_emus) {
+                                      const std::vector<Emu> unknown_emus) {
     auto position = find(unknown_emus.begin(),
                          unknown_emus.end(),
                          emu);
@@ -215,8 +214,9 @@ int Simulator::FindUnknownEmuPosition(const Emu &emu,
     return position - unknown_emus.begin();
 }
 
+
 int Simulator::FindKnownEmuPosition(const Emu &emu,
-                         const std::vector<EmuAndMid> known_emus) {
+                                    const std::vector<EmuAndMid> known_emus) {
     auto position = find_if(known_emus.begin(),
                             known_emus.end(),
                             [&emu](const EmuAndMid &known_mid) {
@@ -226,9 +226,10 @@ int Simulator::FindKnownEmuPosition(const Emu &emu,
     return position - known_emus.begin();
 }
 
+
 void Simulator::AppendNewMids(const Matrix &X,
-                   const std::vector<Emu> &unknown_emus,
-                   const int current_size) {
+                              const std::vector<Emu> &unknown_emus,
+                              const int current_size) {
     for (int previously_unknown_index = 0; previously_unknown_index < unknown_emus.size(); ++previously_unknown_index) {
         EmuAndMid new_known_emu;
         new_known_emu.emu = unknown_emus[previously_unknown_index];
@@ -239,7 +240,4 @@ void Simulator::AppendNewMids(const Matrix &X,
         all_known_emus_.push_back(new_known_emu);
     }
 }
-
-
-
-
+} // namespace khnum

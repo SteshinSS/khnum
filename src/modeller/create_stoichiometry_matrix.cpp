@@ -9,6 +9,8 @@
 #include "utilities/reaction.h"
 
 
+namespace khnum {
+namespace modelling_utills {
 Matrix CreateStoichiometryMatrix(const std::vector<Reaction> &reactions,
                                  const std::vector<std::string> &metabolite_list) {
 
@@ -29,9 +31,9 @@ Matrix CreateStoichiometryMatrix(const std::vector<Reaction> &reactions,
             for (int metabolite = 0; metabolite < metabolite_number; ++metabolite) {
                 std::string current_metabolite_name = metabolite_list.at(metabolite);
                 stoichiometry_matrix(metabolite, stoichiometry_reaction_number) = GetTotalCoefficient(
-                        reaction.chemical_equation,
-                        current_metabolite_name,
-                        reaction.id);
+                    reaction.chemical_equation,
+                    current_metabolite_name,
+                    reaction.id);
             }
             ++stoichiometry_reaction_number;
         }
@@ -39,6 +41,7 @@ Matrix CreateStoichiometryMatrix(const std::vector<Reaction> &reactions,
 
     return stoichiometry_matrix;
 }
+
 
 double GetTotalCoefficient(const ChemicalEquation &chemical_equation, const std::string &metabolite, const int id) {
     double result{0.0};
@@ -55,9 +58,11 @@ double GetTotalCoefficient(const ChemicalEquation &chemical_equation, const std:
                 result += substrate.coefficient;
             } else {
                 throw std::runtime_error("There is reaction with the same substrate in both sides! " +
-                                         std::to_string(id));
+                    std::to_string(id));
             }
         }
     }
     return result;
 }
+} // namespace modelling_utills
+} // namespace khnum

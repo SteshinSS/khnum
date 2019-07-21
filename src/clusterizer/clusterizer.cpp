@@ -5,8 +5,10 @@
 
 #include "alglib/dataanalysis.h"
 
+
+namespace khnum {
 Clasterizer::Clasterizer(const std::vector<alglib::real_1d_array> &allSolutions) :
-        allSolutions_{allSolutions} {
+    allSolutions_{allSolutions} {
 
 }
 
@@ -40,12 +42,13 @@ void Clasterizer::Start() {
         ++clasters_size[find_set(cluster)];
     }
 
-    for (auto [cluster, size] : clasters_size) {
+    for (auto[cluster, size] : clasters_size) {
         std::cout << allSolutions_[cluster].tostring(3) << ", size: " << size << std::endl;
     }
 }
 
-alglib::real_2d_array Clasterizer::FillSolutionArray(const std::vector<alglib::real_1d_array>& allSolutions) {
+
+alglib::real_2d_array Clasterizer::FillSolutionArray(const std::vector<alglib::real_1d_array> &allSolutions) {
     alglib::real_2d_array solutionsToClustering;
     solutionsToClustering.setlength(allSolutions.size(), allSolutions.at(0).length());
 
@@ -57,12 +60,14 @@ alglib::real_2d_array Clasterizer::FillSolutionArray(const std::vector<alglib::r
     return solutionsToClustering;
 }
 
+
 void Clasterizer::InitilizeParents() {
     parents_.resize(allSolutions_.size());
     for (int i = 0; i < allSolutions_.size(); ++i) {
         parents_[i] = i;
     }
 }
+
 
 int Clasterizer::find_set(int v) {
     while (v >= allSolutions_.size()) {
@@ -75,3 +80,4 @@ int Clasterizer::find_set(int v) {
         return parents_[v] = find_set(parents_[v]);
     }
 }
+} // namespace khnum

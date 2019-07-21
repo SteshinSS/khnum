@@ -9,6 +9,8 @@
 #include "utilities/reaction.h"
 
 
+namespace khnum {
+namespace modelling_utills {
 std::vector<Reaction> SortReactionsByType(std::vector<Reaction> reactions) {
     std::sort(reactions.begin(), reactions.end(), [](const Reaction &lhs, const Reaction &rhs) {
         int lhs_priority = GetPriority(lhs);
@@ -22,6 +24,7 @@ std::vector<Reaction> SortReactionsByType(std::vector<Reaction> reactions) {
 
     return reactions;
 }
+
 
 int GetPriority(const Reaction &reaction) {
     int priority = -1;
@@ -54,4 +57,5 @@ std::vector<Reaction> SortReactionByID(std::vector<Reaction> reactions) {
 
     return reactions;
 }
-
+} // namespace modelling_utills
+} // namespace khnum

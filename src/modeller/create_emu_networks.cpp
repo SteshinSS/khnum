@@ -8,6 +8,8 @@
 #include "utilities/emu_and_mid.h"
 
 
+namespace khnum {
+namespace modelling_utills {
 std::vector<EmuNetwork> CreateEMUNetworks(const std::vector<EmuReaction> &reactions,
                                           const std::vector<Emu> &input_emu_list,
                                           const std::vector<Emu> &measured_isotopes) {
@@ -54,13 +56,14 @@ std::vector<EmuNetwork> CreateEMUNetworks(const std::vector<EmuReaction> &reacti
     // remove empty networks
 
     emu_networks.erase(
-            std::remove_if(emu_networks.begin(), emu_networks.end(), [](const EmuNetwork &network) {
-                return network.empty();
-            }),
-            emu_networks.end());
+        std::remove_if(emu_networks.begin(), emu_networks.end(), [](const EmuNetwork &network) {
+            return network.empty();
+        }),
+        emu_networks.end());
 
     return emu_networks;
 }
+
 
 int FindTheLargestEMUSize(const std::vector<EmuReaction> &reactions) {
     int max_size = -1;
@@ -73,12 +76,14 @@ int FindTheLargestEMUSize(const std::vector<EmuReaction> &reactions) {
     return max_size;
 }
 
+
 bool IsEMUAlreadyChecked(const Emu &emu, const std::vector<Emu> &already_checked_emus) {
     auto emu_position = find(already_checked_emus.begin(),
                              already_checked_emus.end(),
                              emu);
     return emu_position != already_checked_emus.end();
 }
+
 
 int GetEMUSize(const Emu &emu) {
     int size = 0;
@@ -90,3 +95,5 @@ int GetEMUSize(const Emu &emu) {
 
     return size;
 }
+} // namespace modelling_utills
+} // namespace khnum

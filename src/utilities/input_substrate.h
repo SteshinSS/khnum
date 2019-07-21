@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 
+
+namespace khnum {
 using Fraction = double;
 
 struct Mixture {
@@ -10,9 +12,8 @@ struct Mixture {
     double ratio;
 };
 
-
 struct InputSubstrate {
     std::string name;
     std::vector<Mixture> mixtures;
 };
-
+} // namespace khnum

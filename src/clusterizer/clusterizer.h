@@ -5,6 +5,8 @@
 
 #include <vector>
 
+
+namespace khnum {
 class Clasterizer {
 public:
     Clasterizer(const std::vector<alglib::real_1d_array> &allSolution);
@@ -12,7 +14,7 @@ public:
 
 private:
 
-    alglib::real_2d_array FillSolutionArray(const std::vector<alglib::real_1d_array>& allSolutions);
+    alglib::real_2d_array FillSolutionArray(const std::vector<alglib::real_1d_array> &allSolutions);
 
     int find_set(int v);
 
@@ -25,3 +27,4 @@ private:
     std::vector<int> parents_;
     alglib::ahcreport report_;
 };
+} // namespace khnum

@@ -5,6 +5,7 @@
 #include <vector>
 
 
+namespace khnum {
 using Mid = std::vector<double>;
 
 struct EmuAndMid {
@@ -19,3 +20,4 @@ Mid operator*(const Mid &lhs, const Mid &rhs);
 bool operator==(const EmuAndMid &lhs, const EmuAndMid &rhs);
 
 bool operator<(const EmuAndMid &lhs, const EmuAndMid &rhs);
+} //namespace khnum

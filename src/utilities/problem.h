@@ -7,6 +7,8 @@
 #include "measurement.h"
 #include "reaction.h"
 
+
+namespace khnum {
 struct Problem {
     std::vector<Reaction> reactions;
     std::vector<Emu> measured_isotopes;
@@ -16,3 +18,4 @@ struct Problem {
     std::vector<Measurement> measurements;
     int measurements_count;
 };
+} //namesapce khnum

@@ -4,6 +4,7 @@
 #include <tuple>
 
 
+namespace khnum {
 // convolution
 Mid operator*(const Mid &lhs, const Mid &rhs) {
     Mid convolve_result(lhs.size() + rhs.size() - 1, 0.0);
@@ -24,6 +25,8 @@ bool operator==(const EmuAndMid &lhs, const EmuAndMid &rhs) {
     return std::tie(lhs.emu, lhs.mid) == std::tie(rhs.emu, rhs.mid);
 }
 
+
 bool operator<(const EmuAndMid &lhs, const EmuAndMid &rhs) {
     return std::tie(lhs.emu, lhs.mid) < std::tie(rhs.emu, rhs.mid);
 }
+} //namespace khnum

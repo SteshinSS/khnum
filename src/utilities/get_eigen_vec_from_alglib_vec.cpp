@@ -3,6 +3,8 @@
 #include "alglib/ap.h"
 #include "eigen/Eigen"
 
+
+namespace khnum {
 Eigen::VectorXd GetEigenVectorFromAlgLibVector(const alglib::real_1d_array &alglib_vector) {
     Eigen::VectorXd eigen_vector(alglib_vector.length());
     for (int i = 0; i < alglib_vector.length(); ++i) {
@@ -11,3 +13,4 @@ Eigen::VectorXd GetEigenVectorFromAlgLibVector(const alglib::real_1d_array &algl
 
     return eigen_vector;
 }
+} //namespace khnum

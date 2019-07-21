@@ -4,6 +4,7 @@
 #include <vector>
 
 
+namespace khnum {
 using AtomRepresentation = std::string;
 using SubstrateCoefficient = double;
 
@@ -15,7 +16,6 @@ struct Substrate {
 
 // need for stl containers
 bool operator==(const Substrate &lhs, const Substrate &rhs);
-
 
 using ChemicalEquationSide = std::vector<Substrate>;
 
@@ -54,3 +54,4 @@ struct Reaction {
     Flux computed_lower_bound;
     Flux computed_upper_bound;
 };
+} // namespace khnum

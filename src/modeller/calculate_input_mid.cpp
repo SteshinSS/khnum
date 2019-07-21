@@ -8,6 +8,8 @@
 #include "utilities/input_substrate.h"
 
 
+namespace khnum {
+namespace modelling_utills {
 std::vector<EmuAndMid> CalculateInputMid(const std::vector<InputSubstrate> &input_substrates,
                                          const std::vector<Emu> &input_emus) {
     std::vector<EmuAndMid> input_mids;
@@ -24,6 +26,7 @@ std::vector<EmuAndMid> CalculateInputMid(const std::vector<InputSubstrate> &inpu
     }
     return input_mids;
 }
+
 
 EmuAndMid CalculateOneMid(const InputSubstrate &input_substrate,
                           const Emu &input_emu) {
@@ -80,3 +83,5 @@ EmuAndMid CalculateOneMid(const InputSubstrate &input_substrate,
 
     return new_emu_mid;
 }
+} // namespace modelling_utills
+} // namespace khnum

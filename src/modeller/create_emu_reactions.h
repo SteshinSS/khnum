@@ -9,27 +9,28 @@
 #include "utilities/emu.h"
 
 
-std::vector<EmuReaction> CreateAllEMUReactions(const std::vector<Reaction> &reactions,
-                                               const std::vector<Emu> &observable_emus);
+namespace khnum {
+namespace modelling_utills {
+// Creates all EMU reactions required for calculation MID of the measured_isotopes
+std::vector<EmuReaction> CreateAllEmuReactions(const std::vector<Reaction> &reactions,
+                                               const std::vector<Emu> &measured_isotopes);
 
-
+// Returns every reaction that produce the emu
 std::vector<Reaction> GetSynthesisReactions(const std::vector<Reaction> &reactions,
                                             const Emu &emu);
 
+// Creates set of Emu reactions which are produce the emu
+std::vector<EmuReaction> CreateNewEmuReactions(const Reaction &reaction,
+                                               const Emu &emu);
 
-std::vector<EmuReaction> CreateNewEMUReactions(const Reaction &reaction,
-                                               const Emu &produced_emu);
+EmuReaction CreateOneEmuReaction(const Reaction &reaction,
+                                 const Substrate &substrate,
+                                 const Emu &emu);
 
+std::vector<EmuReaction> SelectUniqueEmuReactions(const std::vector<EmuReaction> &all_new_emu_reactions);
 
-std::vector<EmuReaction> CreateAllEMUReactions(const Reaction &reaction,
-                                               const Emu &produced_emu);
-
-EmuReaction CreateOneEMUReaction(const Reaction &reaction,
-                                 const Substrate &produced_emu_substrate,
-                                 const Emu &produced_emu);
-
-std::vector<EmuReaction> SelectUniqueEMUReactions(const std::vector<EmuReaction> &all_new_emu_reactions);
-
-void AddNewEMUInQueue(std::queue<Emu> *queue,
-                      const std::set<Emu> &emu_ignore_list,
+void AddNewEmuInQueue(std::queue<Emu> *queue,
+                      const std::set<Emu, decltype(&comparator)> &emu_ignore_list,
                       const EmuReactionSide &reaction_side);
+} // namespace modelling_utills
+} // namespace khnum

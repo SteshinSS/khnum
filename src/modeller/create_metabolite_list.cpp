@@ -4,6 +4,9 @@
 #include <string>
 #include <algorithm>
 
+
+namespace khnum {
+namespace modelling_utills {
 std::vector<std::string> CreateFullMetaboliteList(const std::vector<Reaction> &reactions) {
     std::vector<std::string> metabolite_list;
     for (const Reaction &reaction : reactions) {
@@ -22,6 +25,7 @@ std::vector<std::string> CreateFullMetaboliteList(const std::vector<Reaction> &r
     return metabolite_list;
 }
 
+
 std::vector<std::string> CreateIncludedMetaboliteList(const std::vector<std::string> &metabolite_list,
                                                       const std::vector<std::string> &excluded_metabolites) {
     std::vector<std::string> included_metabolite_list;
@@ -33,3 +37,5 @@ std::vector<std::string> CreateIncludedMetaboliteList(const std::vector<std::str
     }
     return included_metabolite_list;
 }
+} // namespace modelling_utills
+} // namespace khnum

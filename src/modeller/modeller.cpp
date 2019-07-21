@@ -12,6 +12,8 @@
 #include "modeller/create_stoichiometry_matrix.h"
 #include "modeller/create_nullspace.h"
 
+
+namespace khnum {
 Modeller::Modeller(ParserResults parser_results) {
     reactions_ = std::move(parser_results.reactions);
     measured_isotopes_ = std::move(parser_results.measured_isotopes);
@@ -20,15 +22,18 @@ Modeller::Modeller(ParserResults parser_results) {
     input_substrate_ = std::move(parser_results.input_substrate);
 }
 
+
 void Modeller::CalculateInputSubstrateMids() {
-    all_emu_reactions_ = CreateAllEMUReactions(reactions_, measured_isotopes_);
-    input_emu_list_ = CreateInputEMUList(all_emu_reactions_, input_substrate_);
-    input_substrate_mids_ = CalculateInputMid(input_substrate_, input_emu_list_);
+    all_emu_reactions_ = modelling_utills::CreateAllEmuReactions(reactions_, measured_isotopes_);
+    input_emu_list_ = modelling_utills::CreateInputEmuList(all_emu_reactions_, input_substrate_);
+    input_substrate_mids_ = modelling_utills::CalculateInputMid(input_substrate_, input_emu_list_);
 }
 
+
 void Modeller::CreateEmuNetworks() {
-    emu_networks_ = CreateEMUNetworks(all_emu_reactions_, input_emu_list_, measured_isotopes_);
+    emu_networks_ = modelling_utills::CreateEMUNetworks(all_emu_reactions_, input_emu_list_, measured_isotopes_);
 }
+
 
 void Modeller::CalculateFluxBounds() {
     for (Reaction &reaction : reactions_) {
@@ -47,13 +52,14 @@ void Modeller::CalculateFluxBounds() {
     }
 }
 
+
 void Modeller::CreateNullspaceMatrix() {
-    std::vector<std::string> full_metabolite_list = CreateFullMetaboliteList(reactions_);
-    std::vector<std::string> included_metabolites = CreateIncludedMetaboliteList(full_metabolite_list,
+    std::vector<std::string> full_metabolite_list = modelling_utills::CreateFullMetaboliteList(reactions_);
+    std::vector<std::string> included_metabolites = modelling_utills::CreateIncludedMetaboliteList(full_metabolite_list,
                                                                                  excluded_metabolites_);
 
-    Matrix stoichiometry_matrix = CreateStoichiometryMatrix(reactions_, included_metabolites);
-    nullspace_ = GetNullspace(stoichiometry_matrix, reactions_);
+    Matrix stoichiometry_matrix = modelling_utills::CreateStoichiometryMatrix(reactions_, included_metabolites);
+    nullspace_ = modelling_utills::GetNullspace(stoichiometry_matrix, reactions_);
 }
 
 
@@ -78,5 +84,4 @@ Problem Modeller::GetProblem() {
 
     return problem;
 }
-
-
+} // namespace khnum

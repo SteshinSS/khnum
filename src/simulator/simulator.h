@@ -7,6 +7,8 @@
 #include "utilities/reaction.h"
 #include "utilities/matrix.h"
 
+
+namespace khnum {
 class Simulator {
 public:
     Simulator(const std::vector<Flux> &fluxes, const std::vector<EmuNetwork> &networks,
@@ -21,7 +23,6 @@ private:
 
     void SolveOneNetwork(const EmuNetwork &network);
 
-
     void FillEmuLists(std::vector<Emu> &unknown_emus,
                       std::vector<EmuAndMid> &known_emus,
                       const EmuNetwork &network);
@@ -29,15 +30,13 @@ private:
     void CheckIsEmuKnown(const Emu &emu, const std::vector<EmuAndMid> &where_find_emu_list,
                          std::vector<EmuAndMid> &known_emus, std::vector<Emu> &unknown_emus);
 
-
     static const Mid *FindMid(const Emu &emu,
-                       const std::vector<EmuAndMid> &mids);
-
+                              const std::vector<EmuAndMid> &mids);
 
     EmuAndMid ConvolveEmu(const EmuReactionSide &convolve_reaction);
 
     static Matrix FormYMatrix(const std::vector<EmuAndMid> &known_emus,
-                       const int current_size);
+                              const int current_size);
 
     void FillABMatrices(Matrix &A, Matrix &B,
                         const EmuNetwork &network,
@@ -45,16 +44,14 @@ private:
                         const std::vector<Emu> &unknown_emus);
 
     static int FindUnknownEmuPosition(const Emu &emu,
-                               const std::vector<Emu> unknown_emus);
-
+                                      const std::vector<Emu> unknown_emus);
 
     static int FindKnownEmuPosition(const Emu &emu,
-                             const std::vector<EmuAndMid> known_emus);
+                                    const std::vector<EmuAndMid> known_emus);
 
     void AppendNewMids(const Matrix &X,
                        const std::vector<Emu> &unknown_emus,
                        const int current_size);
-
 
 private:
     const std::vector<Flux> fluxes_;
@@ -62,3 +59,4 @@ private:
     std::vector<EmuAndMid> all_known_emus_;
     const std::vector<Emu> measured_isotopes_;
 };
+} // namespace khnum

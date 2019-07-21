@@ -1,7 +1,8 @@
 #include "interface/cli.h"
 #include <iostream>
 
+
 int main() {
-    RunCli();
+    khnum::RunCli();
     return 0;
-}
+} //namespace khnum

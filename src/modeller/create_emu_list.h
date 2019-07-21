@@ -6,6 +6,9 @@
 #include "utilities/input_substrate.h"
 
 
-std::vector<Emu> CreateInputEMUList(const std::vector<EmuReaction> &reactions,
+namespace khnum {
+namespace modelling_utills {
+std::vector<Emu> CreateInputEmuList(const std::vector<EmuReaction> &reactions,
                                     const std::vector<InputSubstrate> &input_substrates);
-
+} // namespace modelling_utills
+} // namespace khnum
