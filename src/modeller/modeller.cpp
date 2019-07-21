@@ -31,7 +31,7 @@ void Modeller::CalculateInputSubstrateMids() {
 
 
 void Modeller::CreateEmuNetworks() {
-    emu_networks_ = modelling_utills::CreateEMUNetworks(all_emu_reactions_, input_emu_list_, measured_isotopes_);
+    emu_networks_ = modelling_utills::CreateEmuNetworks(all_emu_reactions_, input_emu_list_, measured_isotopes_);
 }
 
 

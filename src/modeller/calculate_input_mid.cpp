@@ -46,7 +46,7 @@ EmuAndMid CalculateOneMid(const InputSubstrate &input_substrate,
     }
 
     int emu_size = included_atoms.size();
-    // Mid is a vector which ith value equal fraction of such Emu with mass shift = i
+    // Mid is a vector which i'th value equal fraction of such Emu with mass shift = i
     // For our example there are 3 posibilities of mass shifts: M + 0, M + 1, or M + 2
     Mid new_mid(emu_size + 1, 0.0);
     for (int mass_shift = 0; mass_shift < emu_size + 1; ++mass_shift) {
@@ -57,7 +57,7 @@ EmuAndMid CalculateOneMid(const InputSubstrate &input_substrate,
 
             // create bitmask with possible isotope atoms
             // for our example, when mass_shift = 1, we could choose either first or second atoms of PYR:1010
-            // so chosen_positions either [0,1] or [1,0] as well
+            // so chosen_positions is either [0,1] or [1,0] as well
             std::vector<bool> chosen_positions(emu_size, false);
             for (int position = 0; position < mass_shift; ++position) {
                 chosen_positions[emu_size - position - 1] = true;

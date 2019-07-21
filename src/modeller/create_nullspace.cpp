@@ -28,20 +28,20 @@ Matrix GetNullspace(Matrix matrix, std::vector<Reaction> &reactions) {
     for (int column = 0; column < matrix.rows(); ++column) {
         if (matrix(column, column) == 0) {
             // Try to exchange with row below
-            bool isFoundNotNullPivot = ExchangeRowsToMakePivotNotNull(matrix, column);
+            bool is_found_not_null_pivot = ExchangeRowsToMakePivotNotNull(matrix, column);
 
-            if (!isFoundNotNullPivot) {
+            if (!is_found_not_null_pivot) {
                 // We need to exchange columns, so as the fluxes order
-                const int columnToSwap = FindNotNullColumn(matrix, column);
-                if (columnToSwap == -1) {
+                const int column_to_swap = FindNotNullColumn(matrix, column);
+                if (column_to_swap == -1) {
                     throw std::runtime_error(
                         "Can't transform stoichiometry matrix at column number " + std::to_string(column));
                 }
-                matrix.col(column).swap(matrix.col(columnToSwap));
+                matrix.col(column).swap(matrix.col(column_to_swap));
                 std::swap(reactions[metabolite_balance_reactions_total + column],
-                          reactions[metabolite_balance_reactions_total + columnToSwap]);
+                          reactions[metabolite_balance_reactions_total + column_to_swap]);
                 std::cout << "Reaction num " << metabolite_balance_reactions_total + column << " and num "
-                          << metabolite_balance_reactions_total + columnToSwap << " has swapped" << std::endl;
+                          << metabolite_balance_reactions_total + column_to_swap << " has swapped" << std::endl;
                 if (matrix(column, column) == 0) {
                     ExchangeRowsToMakePivotNotNull(matrix, column);
                 }

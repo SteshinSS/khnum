@@ -8,14 +8,14 @@
 
 namespace khnum {
 namespace modelling_utills {
-std::vector<EmuNetwork> CreateEMUNetworks(const std::vector<EmuReaction> &reactions,
+std::vector<EmuNetwork> CreateEmuNetworks(const std::vector<EmuReaction> &reactions,
                                           const std::vector<Emu> &input_emu_list,
                                           const std::vector<Emu> &measured_isotopes);
 
-int FindTheLargestEMUSize(const std::vector<EmuReaction> &reactions);
+int FindLargestEmuSize(const std::vector<EmuReaction> &reactions);
 
-bool IsEMUAlreadyChecked(const Emu &emu, const std::vector<Emu> &already_checked_emus);
+int GetEmuSize(const Emu &emu);
 
-int GetEMUSize(const Emu &emu);
+bool IsEmuAlreadyChecked(const Emu &emu, const std::vector<Emu> &already_checked_emus);
 } // namespace modelling_utills
 } // namespace khnum

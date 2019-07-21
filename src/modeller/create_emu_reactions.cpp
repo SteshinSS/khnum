@@ -40,7 +40,7 @@ std::vector<EmuReaction> CreateAllEmuReactions(const std::vector<Reaction> &reac
                 std::vector<EmuReaction> new_emu_reactions = CreateNewEmuReactions(reaction, next_emu);
                 for (const EmuReaction &emu_reaction : new_emu_reactions) {
                     all_emu_reactions.push_back(emu_reaction);
-                    AddNewEmuInQueue(&emu_to_check, already_checked_emu, emu_reaction.left);
+                    AddNewEmusInQueue(&emu_to_check, already_checked_emu, emu_reaction.left);
                 }
             }
             already_checked_emu.insert(next_emu);
@@ -156,27 +156,27 @@ EmuReaction CreateOneEmuReaction(const Reaction &reaction,
 }
 
 
-std::vector<EmuReaction> SelectUniqueEmuReactions(const std::vector<EmuReaction> &all_new_emu_reactions) {
-    std::vector<EmuReaction> unique_new_emu_reactions;
-    for (const EmuReaction &reaction : all_new_emu_reactions) {
-        auto reaction_position = std::find(unique_new_emu_reactions.begin(),
-                                           unique_new_emu_reactions.end(), reaction);
-        if (reaction_position == unique_new_emu_reactions.end()) {
-            unique_new_emu_reactions.push_back(reaction);
+std::vector<EmuReaction> SelectUniqueEmuReactions(const std::vector<EmuReaction> &emu_reactions) {
+    std::vector<EmuReaction> unique_emu_reactions;
+    for (const EmuReaction &reaction : emu_reactions) {
+        auto reaction_position = std::find(unique_emu_reactions.begin(),
+                                           unique_emu_reactions.end(), reaction);
+        if (reaction_position == unique_emu_reactions.end()) {
+            unique_emu_reactions.push_back(reaction);
         } else {
             (reaction_position->right).coefficient += reaction.right.coefficient;
         }
     }
 
-    return unique_new_emu_reactions;
+    return unique_emu_reactions;
 }
 
 
-void AddNewEmuInQueue(std::queue<Emu> *queue,
-                      const std::set<Emu, decltype(&comparator)> &emu_ignore_list,
-                      const EmuReactionSide &reaction_side) {
+void AddNewEmusInQueue(std::queue<Emu> *queue,
+                       const std::set<Emu, decltype(&comparator)> &already_checked_emu,
+                       const EmuReactionSide &reaction_side) {
     for (EmuSubstrate const &substrate : reaction_side) {
-        if (emu_ignore_list.find(substrate.emu) == emu_ignore_list.end()) {
+        if (already_checked_emu.find(substrate.emu) == already_checked_emu.end()) {
             queue->push(substrate.emu);
         }
     }

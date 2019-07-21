@@ -10,10 +10,10 @@
 
 namespace khnum {
 namespace modelling_utills {
-std::vector<EmuNetwork> CreateEMUNetworks(const std::vector<EmuReaction> &reactions,
+std::vector<EmuNetwork> CreateEmuNetworks(const std::vector<EmuReaction> &reactions,
                                           const std::vector<Emu> &input_emu_list,
                                           const std::vector<Emu> &measured_isotopes) {
-    int max_size = FindTheLargestEMUSize(reactions);
+    int max_size = FindLargestEmuSize(reactions);
 
     // emu_networks[i] contains Emu network of i + 1 size
     std::vector<EmuNetwork> emu_networks(max_size);
@@ -24,7 +24,6 @@ std::vector<EmuNetwork> CreateEMUNetworks(const std::vector<EmuReaction> &reacti
         emus_to_check.push(measured_isotope);
     }
 
-    // visited
     std::vector<Emu> already_checked_emus;
     for (const Emu &emu : input_emu_list) {
         already_checked_emus.push_back(emu);
@@ -33,18 +32,17 @@ std::vector<EmuNetwork> CreateEMUNetworks(const std::vector<EmuReaction> &reacti
     while (!emus_to_check.empty()) {
         Emu next_emu = emus_to_check.front();
         emus_to_check.pop();
-        int emu_size = GetEMUSize(next_emu);
+        int emu_size = GetEmuSize(next_emu);
 
-        if (IsEMUAlreadyChecked(next_emu, already_checked_emus)) {
+        if (IsEmuAlreadyChecked(next_emu, already_checked_emus)) {
             continue;
         }
 
         for (const EmuReaction &emu_reaction : reactions) {
             if (emu_reaction.right.emu == next_emu) {
-
                 emu_networks[emu_size - 1].push_back(emu_reaction);
                 for (const EmuSubstrate &emu_substrate : emu_reaction.left) {
-                    if (!IsEMUAlreadyChecked(emu_substrate.emu, already_checked_emus)) {
+                    if (!IsEmuAlreadyChecked(emu_substrate.emu, already_checked_emus)) {
                         emus_to_check.push(emu_substrate.emu);
                     }
                 }
@@ -65,27 +63,19 @@ std::vector<EmuNetwork> CreateEMUNetworks(const std::vector<EmuReaction> &reacti
 }
 
 
-int FindTheLargestEMUSize(const std::vector<EmuReaction> &reactions) {
+int FindLargestEmuSize(const std::vector<EmuReaction> &reactions) {
     int max_size = -1;
     for (const EmuReaction &reaction : reactions) {
         for (const EmuSubstrate &emu_substrate : reaction.left) {
-            max_size = std::max(max_size, GetEMUSize(emu_substrate.emu));
+            max_size = std::max(max_size, GetEmuSize(emu_substrate.emu));
         }
-        max_size = std::max(max_size, GetEMUSize(reaction.right.emu));
+        max_size = std::max(max_size, GetEmuSize(reaction.right.emu));
     }
     return max_size;
 }
 
 
-bool IsEMUAlreadyChecked(const Emu &emu, const std::vector<Emu> &already_checked_emus) {
-    auto emu_position = find(already_checked_emus.begin(),
-                             already_checked_emus.end(),
-                             emu);
-    return emu_position != already_checked_emus.end();
-}
-
-
-int GetEMUSize(const Emu &emu) {
+int GetEmuSize(const Emu &emu) {
     int size = 0;
     for (const bool &state : emu.atom_states) {
         if (state) {
@@ -94,6 +84,14 @@ int GetEMUSize(const Emu &emu) {
     }
 
     return size;
+}
+
+
+bool IsEmuAlreadyChecked(const Emu &emu, const std::vector<Emu> &already_checked_emus) {
+    auto emu_position = find(already_checked_emus.begin(),
+                             already_checked_emus.end(),
+                             emu);
+    return emu_position != already_checked_emus.end();
 }
 } // namespace modelling_utills
 } // namespace khnum
