@@ -3,9 +3,11 @@
 #include <vector>
 #include <queue>
 #include <algorithm>
+#include <iostream>
 
 #include "utilities/emu.h"
 #include "utilities/emu_and_mid.h"
+#include "utilities/debug_utills/debug_prints.h"
 
 
 namespace khnum {

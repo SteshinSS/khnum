@@ -10,10 +10,10 @@ namespace khnum {
 
 
 Solver::Solver(const Problem &problem) :
-            simulator_(problem.networks, problem.input_mids, problem.measured_isotopes) {
+            simulator_(problem.networks, problem.input_substrate_mids, problem.measured_isotopes) {
     reactions_ = problem.reactions;
     nullspace_ = problem.nullspace;
-    measurements_ = problem.measurements;
+    measured_mids_ = problem.measurements;
     measurements_count_ = problem.measurements_count;
 
     nullity_ = nullspace_.cols();
@@ -22,7 +22,7 @@ Solver::Solver(const Problem &problem) :
     upper_bounds_.setlength(nullity_);
 
     iteration_ = 0;
-    iteration_total_ = 10;
+    iteration_total_ = 200;
     reactions_num_ = reactions_.size();
 }
 
@@ -34,13 +34,14 @@ std::vector<alglib::real_1d_array> Solver::GetResult() {
 
 void Solver::Solve() {
     FillBoundVectors();
-    SetOptimizationParameters();
 
     std::random_device randomizer;
     std::mt19937 random_source(randomizer());
-
     for (iteration_ = 0; iteration_ < iteration_total_; ++iteration_) {
         GenerateInitialPoints(random_source);
+        if (iteration_ == 0) {
+            SetOptimizationParameters();
+        }
         alglib::minlmrestartfrom(state_, free_fluxes_);
         alglib::real_1d_array new_solution = RunOptimization();
 
@@ -59,9 +60,9 @@ void Solver::FillBoundVectors() {
 
 void Solver::SetOptimizationParameters() {
     alglib::ae_int_t maxits = 0;
-    const double epsx = 0.00000000001;
+    const double epsx = 0.00000000000001;
 
-    alglib::minlmcreatev(nullity_, measurements_count_, free_fluxes_, 0.0001, state_);
+    alglib::minlmcreatev(nullity_, measurements_count_, free_fluxes_, 0.01, state_);
     alglib::minlmsetcond(state_, epsx, maxits);
     alglib::minlmsetbc(state_, lower_bounds_, upper_bounds_);
 }
@@ -92,7 +93,6 @@ alglib::real_1d_array Solver::RunOptimization() {
 
     alglib::real_1d_array final_free_fluxes;
     alglib::minlmresults(state_, final_free_fluxes, report_);
-
     PrintFinalMessage(final_free_fluxes);
 
     return final_free_fluxes;
@@ -104,6 +104,7 @@ void AlglibCallback(const alglib::real_1d_array &free_fluxes,
     Solver* solver = static_cast<Solver*>(ptr);
     solver->CalculateResidual(free_fluxes, residuals);
 }
+
 
 void Solver::CalculateResidual(const alglib::real_1d_array &free_fluxes,
                                alglib::real_1d_array &residuals) {
@@ -143,8 +144,8 @@ void Solver::Fillf0Array(alglib::real_1d_array &residuals, const std::vector<Emu
     for (int isotope = 0; isotope < simulated_mids.size(); ++isotope) {
         for (int mass_shift = 0; mass_shift < simulated_mids[isotope].mid.size(); ++mass_shift) {
             residuals[total_residuals] = simulated_mids[isotope].mid[mass_shift];
-            residuals[total_residuals] -= (measurements_[isotope].mid[mass_shift]);
-            residuals[total_residuals] /= 1 + measurements_[isotope].errors[mass_shift];
+            residuals[total_residuals] -= (measured_mids_[isotope].mid[mass_shift]);
+            residuals[total_residuals] /= measured_mids_[isotope].errors[mass_shift];
             ++total_residuals;
         }
     }

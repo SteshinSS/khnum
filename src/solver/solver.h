@@ -56,7 +56,7 @@ private:
 
      std::vector<Reaction> reactions_;
      Matrix nullspace_;
-     std::vector<Measurement> measurements_;
+     std::vector<Measurement> measured_mids_;
 
      alglib::real_1d_array free_fluxes_;
      alglib::real_1d_array lower_bounds_;

@@ -12,6 +12,7 @@
 #include "modeller/create_stoichiometry_matrix.h"
 #include "modeller/create_nullspace.h"
 
+#include "utilities/debug_utills/debug_prints.h"
 
 namespace khnum {
 Modeller::Modeller(ParserResults parser_results) {
@@ -80,7 +81,7 @@ Problem Modeller::GetProblem() {
     problem.measured_isotopes = measured_isotopes_;
     problem.nullspace = nullspace_;
     problem.networks = emu_networks_;
-    problem.input_mids = input_substrate_mids_;
+    problem.input_substrate_mids = input_substrate_mids_;
     problem.measurements = measurements_;
     problem.measurements_count = measurements_count_;
 

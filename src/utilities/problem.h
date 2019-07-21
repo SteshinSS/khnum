@@ -14,7 +14,7 @@ struct Problem {
     std::vector<Emu> measured_isotopes;
     Matrix nullspace;
     std::vector<EmuNetwork> networks;
-    std::vector<EmuAndMid> input_mids;
+    std::vector<EmuAndMid> input_substrate_mids;
     std::vector<Measurement> measurements;
     int measurements_count;
 };

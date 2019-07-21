@@ -28,7 +28,7 @@ struct ChemicalEquation {
 
 using Rate = double;
 
-/// see FluxPyt User Guide page 3
+/// see OpenFlux paper
 enum class ReactionType {
     Irreversible,      ///< Irreversible reaction used for both metabolite and isotopomer balance (F)
     Forward,           ///< Forward reaction of reversible one (FR)

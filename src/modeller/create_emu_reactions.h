@@ -12,7 +12,7 @@
 namespace khnum {
 namespace modelling_utills {
 // Creates all EMU reactions required for calculation MID of the measured_isotopes
-// Basically, it is bfs algorithm
+// Basically, it is a bfs algorithm
 std::vector<EmuReaction> CreateAllEmuReactions(const std::vector<Reaction> &reactions,
                                                const std::vector<Emu> &measured_isotopes);
 
