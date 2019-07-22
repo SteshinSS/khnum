@@ -59,15 +59,19 @@ void Simulator::SolveOneNetwork(const EmuNetwork &network) {
     std::vector<EmuAndMid> known_emus;
 
     // So known_emus contains EMUs with known MIDs for this network
-    // Whereas all_known_emus has EMUs from other networks
+    // Whereas the all_known_emus_ has EMUs from other networks
 
     FillEmuLists(unknown_emus, known_emus, network);
 
     Matrix A = Matrix::Zero(unknown_emus.size(), unknown_emus.size());
     Matrix B = Matrix::Zero(unknown_emus.size(), known_emus.size());
 
+
     Matrix Y = FormYMatrix(known_emus, current_size);
     FillABMatrices(A, B, network, known_emus, unknown_emus);
+
+    std::cout << A << std::endl << std::endl << std::endl;
+    std::cout << B << std::endl << std::endl << std::endl;
 
     Matrix BY = B * Y;
     Matrix X = A.colPivHouseholderQr().solve(BY);
@@ -96,9 +100,8 @@ void Simulator::FillEmuLists(std::vector<Emu> &unknown_emus,
             EmuAndMid convolution = ConvolveEmu(reaction.left);
             known_emus.push_back(convolution);
         }
-        // NB: we looking for right emu in known_emus, whereas we looking for left emus in the all_known_emus
-        // ToDo recall why so
-        CheckIsEmuKnown(reaction.right.emu, known_emus, known_emus, unknown_emus);
+
+        unknown_emus.push_back(reaction.right.emu);
     }
 
     // delete repeated emus
@@ -107,6 +110,8 @@ void Simulator::FillEmuLists(std::vector<Emu> &unknown_emus,
 
     std::sort(unknown_emus.begin(), unknown_emus.end());
     unknown_emus.erase(std::unique(unknown_emus.begin(), unknown_emus.end()), unknown_emus.end());
+
+
 }
 
 
@@ -141,6 +146,7 @@ const Mid *Simulator::FindMid(const Emu &emu,
 
 
 EmuAndMid Simulator::ConvolveEmu(const EmuReactionSide &convolve_reaction) {
+    // ToDo test function for reaction with 3 and more substrate
     EmuAndMid convolution;
     convolution.mid = Mid(1, 1.0); // MID = [1.0]
     for (const EmuSubstrate &emu_substrate : convolve_reaction) {
@@ -183,25 +189,21 @@ void Simulator::FillABMatrices(Matrix &A, Matrix &B,
             substrate = reaction.left[0];
         }
 
+
+        int position_of_product = FindUnknownEmuPosition(reaction.right.emu, unknown_emus);
+        A(position_of_product, position_of_product) += 1; //(-reaction.right.coefficient) * fluxes_.at(reaction.id);
+
         // Return nullptr if there is no substrate.emu in known_emus
         bool is_emu_known = static_cast<bool>(FindMid(substrate.emu, known_emus));
         if (!is_emu_known) {
-            // Both substrate and product are unknown
             int position_of_substrate = FindUnknownEmuPosition(substrate.emu, unknown_emus);
-            int position_of_product = FindUnknownEmuPosition(reaction.right.emu, unknown_emus);
-            A(position_of_product, position_of_product) += (-reaction.right.coefficient) * fluxes_.at(reaction.id);
-            A(position_of_product, position_of_substrate) += reaction.right.coefficient * fluxes_.at(reaction.id);
-
+            A(position_of_product, position_of_substrate) += 1; //reaction.right.coefficient * fluxes_.at(reaction.id);
         } else {
-            // Product is unknown, substrate is known
             int position_of_substrate = FindKnownEmuPosition(substrate.emu, known_emus);
-            int position_of_product = FindUnknownEmuPosition(reaction.right.emu, unknown_emus);
-
-            A(position_of_product, position_of_product) += (-reaction.right.coefficient) * fluxes_.at(reaction.id);
-
-            B(position_of_product, position_of_substrate) +=
-                (-substrate.coefficient) * fluxes_.at(reaction.id);
+            B(position_of_product, position_of_substrate) += 1;
+                // (-substrate.coefficient) * fluxes_.at(reaction.id);
         }
+
     }
 }
 

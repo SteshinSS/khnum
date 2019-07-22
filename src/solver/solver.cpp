@@ -1,6 +1,8 @@
 #include "solver.h"
 
 #include <random>
+#include <chrono>
+#include <ctime>
 #include "alglib/optimization.h"
 
 #include "utilities/get_eigen_vec_from_alglib_vec.h"
@@ -22,7 +24,7 @@ Solver::Solver(const Problem &problem) :
     upper_bounds_.setlength(nullity_);
 
     iteration_ = 0;
-    iteration_total_ = 200;
+    iteration_total_ = 10;
     reactions_num_ = reactions_.size();
 }
 
@@ -37,6 +39,9 @@ void Solver::Solve() {
 
     std::random_device randomizer;
     std::mt19937 random_source(randomizer());
+
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    start = std::chrono::system_clock::now();
     for (iteration_ = 0; iteration_ < iteration_total_; ++iteration_) {
         GenerateInitialPoints(random_source);
         if (iteration_ == 0) {
@@ -47,6 +52,14 @@ void Solver::Solve() {
 
         all_solutions_.emplace_back(new_solution);
     }
+    end = std::chrono::system_clock::now();
+    double elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>
+        (end-start).count();
+
+    elapsed_milliseconds /= 1000;
+
+    std::cout << "Average time: " << static_cast<double>(elapsed_milliseconds) / iteration_total_
+        << " seconds per iteration" << std::endl;
 }
 
 
