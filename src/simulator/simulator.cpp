@@ -70,8 +70,6 @@ void Simulator::SolveOneNetwork(const EmuNetwork &network) {
     Matrix Y = FormYMatrix(known_emus, current_size);
     FillABMatrices(A, B, network, known_emus, unknown_emus);
 
-    std::cout << A << std::endl << std::endl << std::endl;
-    std::cout << B << std::endl << std::endl << std::endl;
 
     Matrix BY = B * Y;
     Matrix X = A.colPivHouseholderQr().solve(BY);
@@ -110,8 +108,6 @@ void Simulator::FillEmuLists(std::vector<Emu> &unknown_emus,
 
     std::sort(unknown_emus.begin(), unknown_emus.end());
     unknown_emus.erase(std::unique(unknown_emus.begin(), unknown_emus.end()), unknown_emus.end());
-
-
 }
 
 
@@ -136,24 +132,24 @@ const Mid *Simulator::FindMid(const Emu &emu,
                             [&emu](const EmuAndMid &known_mid) {
                                 return known_mid.emu == emu;
                             });
-
-    if (position == mids.end()) {
-        return nullptr;
-    } else {
-        return &(position->mid);
-    }
-}
-
-
-EmuAndMid Simulator::ConvolveEmu(const EmuReactionSide &convolve_reaction) {
-    // ToDo test function for reaction with 3 and more substrate
-    EmuAndMid convolution;
-    convolution.mid = Mid(1, 1.0); // MID = [1.0]
-    for (const EmuSubstrate &emu_substrate : convolve_reaction) {
-        const Emu emu = emu_substrate.emu;
-        convolution.emu.name += emu.name;
-        for (const bool &state : emu.atom_states) {
-            convolution.emu.atom_states.push_back(state);
+                                                                                              
+    if (position == mids.end()) {                                                             
+        return nullptr;                                                                       
+    } else {                                                                                  
+        return &(position->mid);                                                              
+    }                                                                                         
+}                                                                                             
+                                                                                              
+                                                                                              
+EmuAndMid Simulator::ConvolveEmu(const EmuReactionSide &convolve_reaction) {                  
+    // ToDo test function for reaction with 3 and more substrate                              
+    EmuAndMid convolution;                                                                    
+    convolution.mid = Mid(1, 1.0); // MID = [1.0]                                             
+    for (const EmuSubstrate &emu_substrate : convolve_reaction) {                             
+        const Emu emu = emu_substrate.emu;                                                    
+        convolution.emu.name += emu.name;                                                     
+        for (const bool &state : emu.atom_states) {                                           
+            convolution.emu.atom_states.push_back(state);                                     
         }
         Mid new_mid = *FindMid(emu, all_known_emus_);
         convolution.mid = convolution.mid * new_mid;
@@ -191,17 +187,16 @@ void Simulator::FillABMatrices(Matrix &A, Matrix &B,
 
 
         int position_of_product = FindUnknownEmuPosition(reaction.right.emu, unknown_emus);
-        A(position_of_product, position_of_product) += 1; //(-reaction.right.coefficient) * fluxes_.at(reaction.id);
+        A(position_of_product, position_of_product) += (-reaction.right.coefficient) * fluxes_.at(reaction.id);
 
         // Return nullptr if there is no substrate.emu in known_emus
         bool is_emu_known = static_cast<bool>(FindMid(substrate.emu, known_emus));
         if (!is_emu_known) {
             int position_of_substrate = FindUnknownEmuPosition(substrate.emu, unknown_emus);
-            A(position_of_product, position_of_substrate) += 1; //reaction.right.coefficient * fluxes_.at(reaction.id);
+            A(position_of_product, position_of_substrate) += reaction.right.coefficient * fluxes_.at(reaction.id);
         } else {
             int position_of_substrate = FindKnownEmuPosition(substrate.emu, known_emus);
-            B(position_of_product, position_of_substrate) += 1;
-                // (-substrate.coefficient) * fluxes_.at(reaction.id);
+            B(position_of_product, position_of_substrate) += (-substrate.coefficient) * fluxes_.at(reaction.id);
         }
 
     }
@@ -209,7 +204,7 @@ void Simulator::FillABMatrices(Matrix &A, Matrix &B,
 
 
 int Simulator::FindUnknownEmuPosition(const Emu &emu,
-                                      const std::vector<Emu> unknown_emus) {
+                                      const std::vector<Emu>& unknown_emus) {
     auto position = find(unknown_emus.begin(),
                          unknown_emus.end(),
                          emu);
@@ -219,7 +214,7 @@ int Simulator::FindUnknownEmuPosition(const Emu &emu,
 
 
 int Simulator::FindKnownEmuPosition(const Emu &emu,
-                                    const std::vector<EmuAndMid> known_emus) {
+                                    const std::vector<EmuAndMid>& known_emus) {
     auto position = find_if(known_emus.begin(),
                             known_emus.end(),
                             [&emu](const EmuAndMid &known_mid) {

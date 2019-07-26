@@ -44,10 +44,10 @@ private:
                         const std::vector<Emu> &unknown_emus);
 
     static int FindUnknownEmuPosition(const Emu &emu,
-                                      const std::vector<Emu> unknown_emus);
+                                      const std::vector<Emu>& unknown_emus);
 
     static int FindKnownEmuPosition(const Emu &emu,
-                                    const std::vector<EmuAndMid> known_emus);
+                                    const std::vector<EmuAndMid>& known_emus);
 
     void AppendNewMids(const Matrix &X,
                        const std::vector<Emu> &unknown_emus,
