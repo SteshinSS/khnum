@@ -21,7 +21,7 @@ struct FluxCombination {
 bool compare(const FluxCombination& lhs, const FluxCombination& rhs);
 
 
-// Y contains of emus from the known_emus_[network][position]
+// Y contains of emus from the mids_Yi_[network][position]
 struct PositionOfKnownEmu {
     int network;
     int position;
@@ -40,4 +40,12 @@ struct NetworkEmu {
     bool is_usefull;
     int order_in_usefull_emus;
 };
+
+struct FinalEmu {
+    Emu emu;
+    int network;
+    int order_in_X;
+};
+
+bool operator==(const PositionOfKnownEmu& lhs, const PositionOfKnownEmu& rhs);
 } // namespace khnum

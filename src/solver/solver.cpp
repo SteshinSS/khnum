@@ -12,7 +12,8 @@ namespace khnum {
 
 
 Solver::Solver(const Problem &problem) :
-            simulator_(problem.networks, problem.input_substrate_mids, problem.measured_isotopes) {
+            simulator_(problem.networks, problem.input_substrate_mids, problem.measured_isotopes),
+            new_simulator_(problem.networks, problem.input_substrate_mids, problem.measured_isotopes) {
     reactions_ = problem.reactions;
     nullspace_ = problem.nullspace;
     measured_mids_ = problem.measurements;
@@ -122,7 +123,8 @@ void AlglibCallback(const alglib::real_1d_array &free_fluxes,
 void Solver::CalculateResidual(const alglib::real_1d_array &free_fluxes,
                                alglib::real_1d_array &residuals) {
     std::vector<Flux> calculated_fluxes = CalculateAllFluxesFromFree(free_fluxes);
-    std::vector<EmuAndMid> simulated_mids = simulator_.CalculateMids(calculated_fluxes);
+    // std::vector<EmuAndMid> simulated_mids = simulator_.CalculateMids(calculated_fluxes);
+    std::vector<EmuAndMid> simulated_mids = new_simulator_.CalculateMids(calculated_fluxes);
     Fillf0Array(residuals, simulated_mids);
 }
 
@@ -176,7 +178,8 @@ double Solver::GetSSR(const alglib::real_1d_array &residuals) {
 
 void Solver::PrintFinalMessage(const alglib::real_1d_array &free_fluxes) {
     std::vector<Flux> final_all_fluxes = CalculateAllFluxesFromFree(free_fluxes);
-    std::vector<EmuAndMid> simulated_mids = simulator_.CalculateMids(final_all_fluxes);
+    // std::vector<EmuAndMid> simulated_mids = simulator_.CalculateMids(final_all_fluxes);
+    std::vector<EmuAndMid> simulated_mids = new_simulator_.CalculateMids(final_all_fluxes);
     alglib::real_1d_array residuals;
     residuals.setlength(measurements_count_);
     Fillf0Array(residuals, simulated_mids);

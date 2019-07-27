@@ -6,6 +6,7 @@
 #include "alglib/optimization.h"
 #include "utilities/problem.h"
 #include "simulator/simulator.h"
+#include "simulator/new_simulator.h"
 
 
 namespace khnum {
@@ -68,6 +69,7 @@ private:
      std::vector<alglib::real_1d_array> all_solutions_;
 
      Simulator simulator_;
+     NewSimulator new_simulator_;
 };
 
 void AlglibCallback(const alglib::real_1d_array &free_fluxes,
