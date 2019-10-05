@@ -45,6 +45,7 @@ struct FinalEmu {
     Emu emu;
     int network;
     int order_in_X;
+    int position_in_result;
 };
 
 bool operator==(const PositionOfKnownEmu& lhs, const PositionOfKnownEmu& rhs);

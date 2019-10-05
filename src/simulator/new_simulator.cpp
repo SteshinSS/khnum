@@ -256,6 +256,7 @@ void NewSimulator::FillFinalEmu(const std::vector<Emu>& unknown_emus) {
             final_emu.emu = emu;
             final_emu.network = network_;
             final_emu.order_in_X = i;
+            final_emu.position_in_result = it - measured_isotopes_.begin();
             final_emus_[network_].push_back(final_emu);
         }
     }
@@ -285,15 +286,15 @@ int NewSimulator::FindNetworkSize() {
 
 
 std::vector<EmuAndMid> NewSimulator::CalculateMids(const std::vector<Flux>& fluxes) {
-    std::vector<EmuAndMid> result;
+    std::vector<EmuAndMid> result(measured_isotopes_.size());
     std::vector<std::vector<Mid>> known_mids(networks_.size());
     for (network_ = 0; network_ < networks_.size(); ++network_) {
         Matrix A = GenerateFluxMatrix(symbolic_Ai_[network_], fluxes, unknown_size_[network_]);
         Matrix B = GenerateFluxMatrix(symbolic_Bi_[network_], fluxes, known_size_[network_] + convolutions_[network_].size());
         Matrix Y = GenerateYMatrix(known_mids);
         Matrix BY = B * Y;
-        // Matrix X = A.householderQr().solve(BY);
-        Matrix X = A.colPivHouseholderQr().solve(BY);
+        Matrix X = A.householderQr().solve(BY);
+        // Matrix X = A.colPivHouseholderQr().solve(BY);
         SaveNewEmus(X, known_mids, result);
     }
     return result;
@@ -369,7 +370,7 @@ void NewSimulator::SaveNewEmus(const Matrix& X,
         EmuAndMid result_emu;
         result_emu.emu = final_emu.emu;
         result_emu.mid = result_mid;
-        result.push_back(result_emu);
+        result[final_emu.position_in_result] = result_emu;
     }
 }
 
