@@ -5,6 +5,7 @@
 #include <ctime>
 #include "alglib/optimization.h"
 
+#include "utilities/debug_utills/debug_prints.h"
 #include "utilities/get_eigen_vec_from_alglib_vec.h"
 
 
@@ -125,6 +126,7 @@ void Solver::CalculateResidual(const alglib::real_1d_array &free_fluxes,
     std::vector<Flux> calculated_fluxes = CalculateAllFluxesFromFree(free_fluxes);
     // std::vector<EmuAndMid> simulated_mids = simulator_.CalculateMids(calculated_fluxes);
     std::vector<EmuAndMid> simulated_mids = new_simulator_.CalculateMids(calculated_fluxes);
+
     Fillf0Array(residuals, simulated_mids);
 }
 

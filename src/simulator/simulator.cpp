@@ -1,4 +1,5 @@
 #include "simulator/simulator.h"
+#include "utilities/debug_utills/debug_prints.h"
 
 #include <iostream>
 

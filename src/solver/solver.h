@@ -50,7 +50,6 @@ private:
      int iteration_total_;
      int iteration_;
 
-
      int nullity_;
      int reactions_num_;
      int measurements_count_;

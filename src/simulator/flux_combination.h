@@ -21,7 +21,7 @@ struct FluxCombination {
 bool compare(const FluxCombination& lhs, const FluxCombination& rhs);
 
 
-// Y contains of emus from the mids_Yi_[network][position]
+// Yi contains of emus from the mids_Yi_[network][position]
 struct PositionOfKnownEmu {
     int network;
     int position;

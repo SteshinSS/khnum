@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <set>
 
 #include "simulator/flux_combination.h"
 #include "utilities/emu.h"
@@ -26,17 +27,17 @@ private:
     void CheckAndInsertEmu(const Emu &emu, std::vector<NetworkEmu> &all_known_emus,
                            std::vector<Emu> &known_emus, std::vector<Emu> &unknown_emus);
 
-    void CheckIfEmuFinal(const NetworkEmu& emu);
+    void InsertIntoAllKnownEmus(std::vector<Emu>& unknown_emus,
+                                std::vector<NetworkEmu> &all_known_emus);
 
-    Convolution ConvolveReaction(const EmuReaction& reaction, std::vector<NetworkEmu> &all_known_emus);
+    void FillFinalEmu(const std::vector<Emu>& unknown_emus);
 
-    void DeleteRepetitions(std::vector<Emu> &unknown_emus, std::vector<Emu> &known_emus,
-                           std::vector<Convolution> &convolutions);
+    void ConvolveReaction(const EmuReaction& reaction, std::vector<NetworkEmu> &all_known_emus,
+                                 std::set<Emu>& seen_emus, std::vector<Convolution>& convolutions);
 
     void CreateSymbolicMatrices(const std::vector<Emu>& unknown_emus,
                                 const std::vector<Emu>& known_emus,
                                 const std::vector<Convolution>& convolutions);
-
 
     int FindUnknownEmuPosition(const Emu &emu,
                                const std::vector<Emu>& unknown_emus);

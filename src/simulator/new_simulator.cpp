@@ -1,7 +1,10 @@
 #include "new_simulator.h"
 
+#include "utilities/debug_utills/debug_prints.h"
+
 #include <iostream>
 #include <tuple>
+#include <set>
 
 
 namespace khnum {
@@ -37,6 +40,8 @@ NewSimulator::NewSimulator(const std::vector<EmuNetwork> &networks, const std::v
         std::vector<Convolution> convolutions;
         FillEmuLists(unknown_emus, known_emus, convolutions, all_known_emus);
         CreateSymbolicMatrices(unknown_emus, known_emus, convolutions);
+        FillFinalEmu(unknown_emus);
+        InsertIntoAllKnownEmus(unknown_emus, all_known_emus);
         unknown_size_[network_] = unknown_emus.size();
         known_size_[network_] = known_emus.size();
         convolutions_.emplace_back(convolutions);
@@ -47,18 +52,22 @@ NewSimulator::NewSimulator(const std::vector<EmuNetwork> &networks, const std::v
 
 void NewSimulator::FillEmuLists(std::vector<Emu> &unknown_emus, std::vector<Emu> &known_emus,
                                 std::vector<Convolution> &convolutions, std::vector<NetworkEmu> &all_known_emus) {
+    std::set<Emu> seen_emus;
     for (const EmuReaction &reaction : networks_[network_]) {
         if (reaction.left.size() == 1) {
-            CheckAndInsertEmu(reaction.left[0].emu, all_known_emus, known_emus, unknown_emus);
+            if (seen_emus.find(reaction.left[0].emu) == seen_emus.end()) {
+                CheckAndInsertEmu(reaction.left[0].emu, all_known_emus, known_emus, unknown_emus);
+                seen_emus.insert(reaction.left[0].emu);
+            }
         } else {
-            Convolution new_convolution = ConvolveReaction(reaction, all_known_emus);
-            convolutions.push_back(new_convolution);
+            ConvolveReaction(reaction, all_known_emus, seen_emus, convolutions);
         }
 
-        unknown_emus.push_back(reaction.right.emu);
+        if (seen_emus.find(reaction.right.emu) == seen_emus.end()) {
+            unknown_emus.push_back(reaction.right.emu);
+            seen_emus.insert(reaction.right.emu);
+        }
     }
-
-    DeleteRepetitions(unknown_emus, known_emus, convolutions);
 }
 
 
@@ -74,39 +83,36 @@ void NewSimulator::CheckAndInsertEmu(const Emu &emu, std::vector<NetworkEmu> &al
         if (!it->is_usefull) {
             it->is_usefull = true;
             usefull_emus_[it->network].push_back(it->order_in_X);
-            it->order_in_usefull_emus = usefull_emus_.size() - 1;
+            it->order_in_usefull_emus = usefull_emus_[it->network].size() - 1;
         }
         known_emus.push_back(it->emu);
         mids_Yi_[network_].push_back({it->network, it->order_in_usefull_emus});
-
     } else {
         unknown_emus.push_back(emu);
-        CheckIfEmuFinal(emu);
     }
 }
 
 
-void NewSimulator::CheckIfEmuFinal(const Emu& emu) {
-    auto it = std::find_if(measured_isotopes_.begin(),
-                            measured_isotopes_.end(),
-                            [&emu](const Emu& measured_emu) {
-                                return measured_emu == emu;
+void NewSimulator::ConvolveReaction(const EmuReaction& reaction, std::vector<NetworkEmu> &all_known_emus,
+                                           std::set<Emu>& seen_emus, std::vector<Convolution>& convolutions) {
+    int reaction_id = reaction.id;
+
+    auto it = std::find_if(convolutions.begin(), convolutions.end(),
+                            [reaction_id](const Convolution& convolution) {
+                                return convolution.flux_id == reaction_id;
                             });
-
-    if (it != measured_isotopes_.end()) {
-        FinalEmu final_emu;
-        final_emu.emu = emu.emu;
-        final_emu.network = emu.network;
-        final_emu.order_in_X = emu.order_in_X;
-        final_emus_[network_].push_back(final_emu);
+    if (it != convolutions.end()) {
+        return;
     }
-}
 
-
-Convolution NewSimulator::ConvolveReaction(const EmuReaction& reaction, std::vector<NetworkEmu> &all_known_emus) {
     Convolution convolution;
     convolution.flux_id = reaction.id;
     for (const EmuSubstrate& emu : reaction.left) {
+        if (seen_emus.find(emu.emu) != seen_emus.end()) {
+            continue;
+        }
+        seen_emus.insert(emu.emu);
+
         auto it = std::find_if(all_known_emus.begin(),
                                all_known_emus.end(),
                                [&emu](const NetworkEmu& known_emu) {
@@ -116,7 +122,7 @@ Convolution NewSimulator::ConvolveReaction(const EmuReaction& reaction, std::vec
         if (!it->is_usefull) {
             it->is_usefull = true;
             usefull_emus_[it->network].push_back(it->order_in_X);
-            it->order_in_usefull_emus = usefull_emus_.size() - 1;
+            it->order_in_usefull_emus = usefull_emus_[it->network].size() - 1;
         }
 
         PositionOfKnownEmu new_known_emu;
@@ -125,37 +131,7 @@ Convolution NewSimulator::ConvolveReaction(const EmuReaction& reaction, std::vec
         convolution.elements.emplace_back(new_known_emu);
     }
 
-    return convolution;
-}
-
-
-void NewSimulator::DeleteRepetitions(std::vector<Emu> &unknown_emus, std::vector<Emu> &known_emus,
-                       std::vector<Convolution> &convolutions) {
-    std::sort(known_emus.begin(), known_emus.end());
-    known_emus.erase(std::unique(known_emus.begin(), known_emus.end()), known_emus.end());
-
-
-    std::sort(unknown_emus.begin(), unknown_emus.end());
-    unknown_emus.erase(std::unique(unknown_emus.begin(), unknown_emus.end()), unknown_emus.end());
-
-
-    std::sort(mids_Yi_[network_].begin(), mids_Yi_[network_].end(),
-              [](const PositionOfKnownEmu& lhs, const PositionOfKnownEmu& rhs) {
-                  return std::tie(lhs.network, lhs.position) < std::tie(rhs.network, rhs.position);
-              });
-    auto known_last = std::unique(mids_Yi_.begin(), mids_Yi_.end());
-    mids_Yi_.erase(known_last, mids_Yi_.end());
-
-
-    std::sort(convolutions.begin(), convolutions.end(),
-              [](const Convolution& lhs, const Convolution& rhs) {
-                  return lhs.flux_id < rhs.flux_id;
-              });
-    auto last = std::unique(convolutions.begin(), convolutions.end(),
-                            [](const Convolution& lhs, const Convolution& rhs) {
-                                return lhs.flux_id == rhs.flux_id;
-                            });
-    convolutions.erase(last, convolutions.end());
+    convolutions.push_back(convolution);
 }
 
 
@@ -184,7 +160,7 @@ void NewSimulator::CreateSymbolicMatrices(const std::vector<Emu>& unknown_emus,
         if (reaction.left.size() > 1) {
             int position_of_convolution = FindConvolutionPosition(reaction.id, convolutions);
             FluxAndCoefficient convolution_element;
-            convolution_element.coefficient = 1.0;
+            convolution_element.coefficient = -reaction.right.coefficient;
             convolution_element.id = reaction.id;
             B[position_of_product][known_emus.size() + position_of_convolution].fluxes.emplace_back(convolution_element);
         } else {
@@ -266,6 +242,39 @@ void NewSimulator::ConvertToSparseMatrix(const std::vector<std::vector<FluxCombi
 }
 
 
+void NewSimulator::FillFinalEmu(const std::vector<Emu>& unknown_emus) {
+    for (int i = 0; i < unknown_emus.size(); ++i) {
+        Emu emu = unknown_emus[i];
+        auto it = std::find_if(measured_isotopes_.begin(),
+                               measured_isotopes_.end(),
+                               [&emu](const Emu& measured_emu) {
+                                   return measured_emu == emu;
+                               });
+
+        if (it != measured_isotopes_.end()) {
+            FinalEmu final_emu;
+            final_emu.emu = emu;
+            final_emu.network = network_;
+            final_emu.order_in_X = i;
+            final_emus_[network_].push_back(final_emu);
+        }
+    }
+}
+
+
+void NewSimulator::InsertIntoAllKnownEmus(std::vector<Emu>& unknown_emus,
+                                          std::vector<NetworkEmu> &all_known_emus) {
+    for (int i = 0; i < unknown_emus.size(); ++i) {
+        NetworkEmu new_emu;
+        new_emu.order_in_X = i;
+        new_emu.emu = unknown_emus[i];
+        new_emu.is_usefull = false;
+        new_emu.network = network_;
+        all_known_emus.push_back(new_emu);
+    }
+}
+
+
 int NewSimulator::FindNetworkSize() {
     int current_size = 0;
     for (const bool state : networks_[network_][0].right.emu.atom_states) {
@@ -280,10 +289,11 @@ std::vector<EmuAndMid> NewSimulator::CalculateMids(const std::vector<Flux>& flux
     std::vector<std::vector<Mid>> known_mids(networks_.size());
     for (network_ = 0; network_ < networks_.size(); ++network_) {
         Matrix A = GenerateFluxMatrix(symbolic_Ai_[network_], fluxes, unknown_size_[network_]);
-        Matrix B = GenerateFluxMatrix(symbolic_Bi_[network_], fluxes, known_size_[network_]);
+        Matrix B = GenerateFluxMatrix(symbolic_Bi_[network_], fluxes, known_size_[network_] + convolutions_[network_].size());
         Matrix Y = GenerateYMatrix(known_mids);
         Matrix BY = B * Y;
-        Matrix X = A.householderQr().solve(BY);
+        // Matrix X = A.householderQr().solve(BY);
+        Matrix X = A.colPivHouseholderQr().solve(BY);
         SaveNewEmus(X, known_mids, result);
     }
     return result;
@@ -342,6 +352,7 @@ Matrix NewSimulator::GenerateYMatrix(const std::vector<std::vector<Mid>>& known_
 void NewSimulator::SaveNewEmus(const Matrix& X,
                                std::vector<std::vector<Mid>>& known_mids,
                                std::vector<EmuAndMid>& result) {
+
     for (int position : usefull_emus_[network_]) {
         Mid new_mid;
         for (int mass_shift = 0; mass_shift < network_size_[network_] + 1; ++mass_shift) {

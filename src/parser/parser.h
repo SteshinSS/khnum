@@ -8,7 +8,7 @@
 namespace khnum {
 
 // Basic interface for parsers implementations
-class Parser {
+class IParser {
 public:
     virtual ParserResults GetResults() = 0;
 
@@ -22,7 +22,7 @@ public:
 
     virtual void ParseSubstrateInput() = 0;
 
-    virtual ~Parser() {};
+    virtual ~IParser() {};
 
 };
 } //namespace khnum

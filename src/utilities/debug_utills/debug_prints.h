@@ -11,4 +11,6 @@ namespace khnum {
     void PrintEmuReaction(const EmuReaction& reaction);
 
     void PrintEmuAndMid(const EmuAndMid& emu_and_mid);
+
+    void PrintVectorOfEmu(const std::vector<Emu>& vec);
 } // namespace khnum

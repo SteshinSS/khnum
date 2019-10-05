@@ -40,12 +40,18 @@ void PrintEmu(const Emu& emu) {
 
 void PrintEmuAndMid(const EmuAndMid& emu_and_mid) {
     PrintEmu(emu_and_mid.emu);
-    std::cout << std::endl;
-    std::cout << "[ ";
+    std::cout << " [";
     for (double fraction : emu_and_mid.mid) {
         std::cout << fraction << ", ";
     }
-    std::cout << "]";
+    std::cout << "]" << std::endl;
+}
+
+void PrintVectorOfEmu(const std::vector<Emu>& vec) {
+    for (const Emu& emu : vec) {
+        PrintEmu(emu);
+        std::cout << std::endl;
+    }
 }
 
 } // namespace khnum

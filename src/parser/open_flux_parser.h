@@ -6,7 +6,7 @@
 namespace khnum {
 
 // Parse OpenFlux[2] input files
-class ParserOpenFlux : public Parser {
+class ParserOpenFlux : public IParser {
 public:
     ParserOpenFlux(const std::string &path) : path_(path) {}
 
