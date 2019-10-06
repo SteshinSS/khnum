@@ -8,6 +8,7 @@
 
 namespace khnum {
 namespace modelling_utills {
+const double epsilon = 1.e-12;
 // Transform stoichiometry matrix to form
 /*
  *
@@ -23,10 +24,12 @@ namespace modelling_utills {
 Matrix GetNullspace(Matrix matrix, std::vector<Reaction> &reactions) {
     // As we work with the diagonal elements, pivot.column == pivot.row
     // So below I use it as synonymous
+
+
     const int metabolite_balance_reactions_total = reactions.size() - matrix.cols();
 
     for (int column = 0; column < matrix.rows(); ++column) {
-        if (matrix(column, column) == 0) {
+        if (abs(matrix(column, column)) < epsilon) {
             // Try to exchange with row below
             bool is_found_not_null_pivot = ExchangeRowsToMakePivotNotNull(matrix, column);
 
@@ -70,7 +73,7 @@ Matrix GetNullspace(Matrix matrix, std::vector<Reaction> &reactions) {
 
 bool ExchangeRowsToMakePivotNotNull(Matrix &matrix, const int column) {
     for (int row = column + 1; row < matrix.rows(); ++row) {
-        if (matrix(row, column) != 0) {
+        if (abs(matrix(row, column)) > epsilon) {
             matrix.row(column).swap(matrix.row(row));
             return true;
         }
@@ -82,7 +85,7 @@ bool ExchangeRowsToMakePivotNotNull(Matrix &matrix, const int column) {
 int FindNotNullColumn(const Matrix &matrix, const int currentRow) {
     for (int column = matrix.rows() - 1; column < matrix.cols(); ++column) {
         for (int row = currentRow; row < matrix.rows(); ++row) {
-            if (matrix(row, column) != 0) {
+            if (abs(matrix(row, column)) > epsilon) {
                 return column;
             }
         }

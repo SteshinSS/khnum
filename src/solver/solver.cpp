@@ -26,7 +26,7 @@ Solver::Solver(const Problem &problem) :
     upper_bounds_.setlength(nullity_);
 
     iteration_ = 0;
-    iteration_total_ = 10;
+    iteration_total_ = 5;
     reactions_num_ = reactions_.size();
 }
 

@@ -8,8 +8,8 @@ file(GLOB_RECURSE libs lib/*.cpp lib/*.h)
 add_executable(CFlex ${sources} ${libs} src/clusterizer/clusterizer.cpp src/clusterizer/clusterizer.h src/parser/parser_results.h src/parser/open_flux_parser.cpp src/parser/open_flux_parser.h src/modeller/modeller.cpp src/modeller/modeller.h src/solver/solver.cpp src/solver/solver.h src/simulator/simulator.cpp src/simulator/simulator.h src/utilities/get_eigen_vec_from_alglib_vec.cpp src/utilities/get_eigen_vec_from_alglib_vec.h src/utilities/debug_utills/debug_prints.cpp src/utilities/debug_utills/debug_prints.h src/simulator/new_simulator.cpp src/simulator/new_simulator.h)
 
 target_compile_options(CFlex PUBLIC -std=c++17)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 
 target_include_directories(CFlex PUBLIC src lib)
 
