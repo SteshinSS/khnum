@@ -6,7 +6,7 @@
 
 namespace khnum {
 namespace modelling_utills {
-Matrix GetNullspace(Matrix matrix, std::vector<Reaction> &reactions);
+Matrix GetNullspace(const Matrix& original_matrix, std::vector<Reaction> &reactions);
 
 bool ExchangeRowsToMakePivotNotNull(Matrix &matrix, const int column);
 

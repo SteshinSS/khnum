@@ -13,7 +13,7 @@ struct FluxAndCoefficient {
 };
 
 struct FluxCombination {
-    int i, j;
+    size_t i, j;
     std::vector<FluxAndCoefficient> fluxes;
 };
 

@@ -31,15 +31,15 @@ void Clasterizer::Start() {
             break;
         }
 
-        int a = find_set(report_.z(i, 0));
-        int b = find_set(report_.z(i, 1));
+        int a = FindSet(report_.z(i, 0));
+        int b = FindSet(report_.z(i, 1));
 
         parents_[b] = a;
     }
 
     std::unordered_map<int, int> clasters_size;
     for (int cluster : parents_) {
-        ++clasters_size[find_set(cluster)];
+        ++clasters_size[FindSet(cluster)];
     }
 
     for (auto[cluster, size] : clasters_size) {
@@ -52,7 +52,7 @@ alglib::real_2d_array Clasterizer::FillSolutionArray(const std::vector<alglib::r
     alglib::real_2d_array solutionsToClustering;
     solutionsToClustering.setlength(allSolutions.size(), allSolutions.at(0).length());
 
-    for (int solutionNum = 0; solutionNum < allSolutions.size(); ++solutionNum) {
+    for (size_t solutionNum = 0; solutionNum < allSolutions.size(); ++solutionNum) {
         for (int fluxNum = 0; fluxNum < allSolutions[solutionNum].length(); ++fluxNum) {
             solutionsToClustering[solutionNum][fluxNum] = allSolutions[solutionNum][fluxNum];
         }
@@ -63,13 +63,13 @@ alglib::real_2d_array Clasterizer::FillSolutionArray(const std::vector<alglib::r
 
 void Clasterizer::InitilizeParents() {
     parents_.resize(allSolutions_.size());
-    for (int i = 0; i < allSolutions_.size(); ++i) {
+    for (size_t i = 0; i < allSolutions_.size(); ++i) {
         parents_[i] = i;
     }
 }
 
 
-int Clasterizer::find_set(int v) {
+int Clasterizer::FindSet(int v) {
     while (v >= allSolutions_.size()) {
         v = report_.z(v - allSolutions_.size(), 0);
     }
@@ -77,7 +77,7 @@ int Clasterizer::find_set(int v) {
     if (v == parents_[v]) {
         return v;
     } else {
-        return parents_[v] = find_set(parents_[v]);
+        return parents_[v] = FindSet(parents_[v]);
     }
 }
 } // namespace khnum

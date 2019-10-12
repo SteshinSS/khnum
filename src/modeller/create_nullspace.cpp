@@ -21,10 +21,10 @@ const double epsilon = 1.e-12;
 // So Vdep = -A * Vfree
 // And return the A matrix
 
-Matrix GetNullspace(Matrix matrix, std::vector<Reaction> &reactions) {
+Matrix GetNullspace(const Matrix& original_matrix, std::vector<Reaction> &reactions) {
     // As we work with the diagonal elements, pivot.column == pivot.row
     // So below I use it as synonymous
-
+    Matrix matrix = original_matrix;
 
     const int metabolite_balance_reactions_total = reactions.size() - matrix.cols();
 

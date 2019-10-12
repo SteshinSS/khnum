@@ -7,6 +7,7 @@
 #include <string>
 #include <memory>
 #include "alglib/ap.h"
+#include "utilities/matrix.h"
 
 #include "modeller/modeller.h"
 #include "parser/open_flux_parser.h"

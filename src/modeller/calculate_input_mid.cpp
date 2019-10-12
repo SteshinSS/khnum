@@ -39,7 +39,7 @@ EmuAndMid CalculateOneMid(const InputSubstrate &input_substrate,
     // Find atom positions included in input_emu
     // For our example included_atoms = [0, 2]
     std::vector<int> included_atoms;
-    for (int i = 0; i < input_emu.atom_states.size(); ++i) {
+    for (size_t i = 0; i < input_emu.atom_states.size(); ++i) {
         if (input_emu.atom_states[i]) {
             included_atoms.push_back(i);
         }

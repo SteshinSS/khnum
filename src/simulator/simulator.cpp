@@ -163,7 +163,7 @@ EmuAndMid Simulator::ConvolveEmu(const EmuReactionSide &convolve_reaction) {
 Matrix Simulator::FormYMatrix(const std::vector<EmuAndMid> &known_emus,
                               const int current_size) {
     Matrix Y(known_emus.size(), current_size + 1);
-    for (int known_emu_index = 0; known_emu_index < known_emus.size(); ++known_emu_index) {
+    for (size_t known_emu_index = 0; known_emu_index < known_emus.size(); ++known_emu_index) {
         for (int mass_shift = 0; mass_shift < current_size + 1; ++mass_shift) {
             Y(known_emu_index, mass_shift) = known_emus[known_emu_index].mid[mass_shift];
         }
@@ -229,7 +229,7 @@ int Simulator::FindKnownEmuPosition(const Emu &emu,
 void Simulator::AppendNewMids(const Matrix &X,
                               const std::vector<Emu> &unknown_emus,
                               const int current_size) {
-    for (int previously_unknown_index = 0; previously_unknown_index < unknown_emus.size(); ++previously_unknown_index) {
+    for (size_t previously_unknown_index = 0; previously_unknown_index < unknown_emus.size(); ++previously_unknown_index) {
         EmuAndMid new_known_emu;
         new_known_emu.emu = unknown_emus[previously_unknown_index];
         for (int mass_shift = 0; mass_shift < current_size + 1; ++mass_shift) {

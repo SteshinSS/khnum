@@ -24,7 +24,7 @@ NewSimulator::NewSimulator(const std::vector<EmuNetwork> &networks, const std::v
     final_emus_.resize(networks_.size());
 
     std::vector<NetworkEmu> all_known_emus;
-    for (int i = 0; i < input_mids_.size(); ++i) {
+    for (size_t i = 0; i < input_mids_.size(); ++i) {
         NetworkEmu input_emu;
         input_emu.emu = input_mids_[i].emu;
         input_emu.network = -1;
@@ -229,8 +229,8 @@ int NewSimulator::FindConvolutionPosition(const int reaction_id,
 
 void NewSimulator::ConvertToSparseMatrix(const std::vector<std::vector<FluxCombination>>& dense_matrix,
                                          std::vector<FluxCombination>& sparse_matrix) {
-    for (int i = 0; i < dense_matrix.size(); ++i) {
-        for (int j = 0; j < dense_matrix[0].size(); ++j) {
+    for (size_t i = 0; i < dense_matrix.size(); ++i) {
+        for (size_t j = 0; j < dense_matrix[0].size(); ++j) {
             if (!dense_matrix[i][j].fluxes.empty()) {
                 FluxCombination matrix_element = dense_matrix[i][j];
                 matrix_element.i = i;
@@ -243,7 +243,7 @@ void NewSimulator::ConvertToSparseMatrix(const std::vector<std::vector<FluxCombi
 
 
 void NewSimulator::FillFinalEmu(const std::vector<Emu>& unknown_emus) {
-    for (int i = 0; i < unknown_emus.size(); ++i) {
+    for (size_t i = 0; i < unknown_emus.size(); ++i) {
         Emu emu = unknown_emus[i];
         auto it = std::find_if(measured_isotopes_.begin(),
                                measured_isotopes_.end(),
@@ -265,7 +265,7 @@ void NewSimulator::FillFinalEmu(const std::vector<Emu>& unknown_emus) {
 
 void NewSimulator::InsertIntoAllKnownEmus(std::vector<Emu>& unknown_emus,
                                           std::vector<NetworkEmu> &all_known_emus) {
-    for (int i = 0; i < unknown_emus.size(); ++i) {
+    for (size_t i = 0; i < unknown_emus.size(); ++i) {
         NetworkEmu new_emu;
         new_emu.order_in_X = i;
         new_emu.emu = unknown_emus[i];
@@ -293,6 +293,7 @@ std::vector<EmuAndMid> NewSimulator::CalculateMids(const std::vector<Flux>& flux
         Matrix B = GenerateFluxMatrix(symbolic_Bi_[network_], fluxes, known_size_[network_] + convolutions_[network_].size());
         Matrix Y = GenerateYMatrix(known_mids);
         Matrix BY = B * Y;
+        // Matrix X = A.lu().solve(BY); // need to add -fopenmp to flags
         Matrix X = A.householderQr().solve(BY);
         // Matrix X = A.colPivHouseholderQr().solve(BY);
         SaveNewEmus(X, known_mids, result);
@@ -319,7 +320,7 @@ Matrix NewSimulator::GenerateFluxMatrix(const std::vector<FluxCombination>& symb
 
 Matrix NewSimulator::GenerateYMatrix(const std::vector<std::vector<Mid>>& known_mids) {
     Matrix Y(known_size_[network_] + convolutions_[network_].size(), network_size_[network_] + 1);
-    for (int i = 0; i < mids_Yi_[network_].size(); ++i) {
+    for (size_t i = 0; i < mids_Yi_[network_].size(); ++i) {
         PositionOfKnownEmu known_emu = mids_Yi_[network_][i];
         Mid mid;
         if (known_emu.network == -1) {
@@ -327,12 +328,12 @@ Matrix NewSimulator::GenerateYMatrix(const std::vector<std::vector<Mid>>& known_
         } else {
             mid = known_mids[known_emu.network][known_emu.position];
         }
-        for (int mass_shift = 0; mass_shift < mid.size(); ++mass_shift) {
+        for (size_t mass_shift = 0; mass_shift < mid.size(); ++mass_shift) {
             Y(i, mass_shift) = mid[mass_shift];
         }
     }
 
-    for (int i = 0; i < convolutions_[network_].size(); ++i) {
+    for (size_t i = 0; i < convolutions_[network_].size(); ++i) {
         Mid mid(1, 1.0); // MID = [1.0]
         for (const PositionOfKnownEmu& emu : convolutions_[network_][i].elements) {
             if (emu.network == -1) {
@@ -341,7 +342,7 @@ Matrix NewSimulator::GenerateYMatrix(const std::vector<std::vector<Mid>>& known_
                 mid = mid * known_mids[emu.network][emu.position];
             }
         }
-        for (int mass_shift = 0; mass_shift < mid.size(); ++mass_shift) {
+        for (size_t mass_shift = 0; mass_shift < mid.size(); ++mass_shift) {
             Y(i + known_size_[network_], mass_shift) = mid[mass_shift];
         }
     }

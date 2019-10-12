@@ -47,7 +47,7 @@ void ParserOpenFlux::ParseMeasuredIsotopes() {
         getline(line, row_atom_states);
 
         new_emu.atom_states.resize(row_atom_states.size());
-        for (int atom_position = 0; atom_position < row_atom_states.size(); ++atom_position) {
+        for (size_t atom_position = 0; atom_position < row_atom_states.size(); ++atom_position) {
             if (row_atom_states[atom_position] == '1') {
                 new_emu.atom_states[atom_position] = true;
             } else if (row_atom_states[atom_position] == '0') {
@@ -75,7 +75,7 @@ void ParserOpenFlux::ParseMeasurements() {
     for (const Emu &isotope : measured_isotopes_) {
         Measurement new_measurement;
         new_measurement.emu = isotope;
-        for (int mass_shift = 0; mass_shift < isotope.atom_states.size() + 1; ++mass_shift) {
+        for (size_t mass_shift = 0; mass_shift < isotope.atom_states.size() + 1; ++mass_shift) {
             getline(input, raw_line);
             std::stringstream line(raw_line);
 
@@ -211,10 +211,10 @@ Reaction ParserOpenFlux::FillReaction(const std::string& raw_line) {
 
 ChemicalEquation ParserOpenFlux::ParseChemicalEquation(std::stringstream &line) {
     const std::string substrate_equation = GetCell(line);
-    const int substrate_delimiter_position = substrate_equation.find(reaction_side_delimiter_);
+    const size_t substrate_delimiter_position = substrate_equation.find(reaction_side_delimiter_);
 
     const std::string atom_equation = GetCell(line);
-    int atom_delimiter_position = atom_equation.find(reaction_side_delimiter_);
+    size_t atom_delimiter_position = atom_equation.find(reaction_side_delimiter_);
 
     bool is_atom_equation_ok = (atom_delimiter_position != std::string::npos) || atom_equation.empty();
 

@@ -26,7 +26,7 @@ Solver::Solver(const Problem &problem) :
     upper_bounds_.setlength(nullity_);
 
     iteration_ = 0;
-    iteration_total_ = 5;
+    iteration_total_ = 100;
     reactions_num_ = reactions_.size();
 }
 
@@ -158,8 +158,8 @@ std::vector<Flux> Solver::CalculateAllFluxesFromFree(const alglib::real_1d_array
 
 void Solver::Fillf0Array(alglib::real_1d_array &residuals, const std::vector<EmuAndMid> &simulated_mids) {
     int total_residuals = 0;
-    for (int isotope = 0; isotope < simulated_mids.size(); ++isotope) {
-        for (int mass_shift = 0; mass_shift < simulated_mids[isotope].mid.size(); ++mass_shift) {
+    for (size_t isotope = 0; isotope < simulated_mids.size(); ++isotope) {
+        for (size_t mass_shift = 0; mass_shift < simulated_mids[isotope].mid.size(); ++mass_shift) {
             residuals[total_residuals] = simulated_mids[isotope].mid[mass_shift];
             residuals[total_residuals] -= (measured_mids_[isotope].mid[mass_shift]);
             residuals[total_residuals] /= measured_mids_[isotope].errors[mass_shift];

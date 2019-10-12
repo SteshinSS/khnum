@@ -63,7 +63,7 @@ private:
     void SaveNewEmus(const Matrix &X, std::vector<std::vector<Mid>> &known_mids, std::vector<EmuAndMid>& result);
 
 private:
-    int network_;
+    size_t network_;
 
 
 

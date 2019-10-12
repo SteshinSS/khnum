@@ -1,16 +1,31 @@
-cmake_minimum_required(VERSION 3.12)
-project(CFlex)
+cmake_minimum_required(VERSION 3.0)
+project(khnum)
+set(CMAKE_CXX_STANDARD 17)
 
-file(GLOB_RECURSE sources      src/*.cpp src/*.h)
-file(GLOB_RECURSE test test/*.cpp)
-file(GLOB_RECURSE libs lib/*.cpp lib/*.h)
 
-add_executable(CFlex ${sources} ${libs} src/clusterizer/clusterizer.cpp src/clusterizer/clusterizer.h src/parser/parser_results.h src/parser/open_flux_parser.cpp src/parser/open_flux_parser.h src/modeller/modeller.cpp src/modeller/modeller.h src/solver/solver.cpp src/solver/solver.h src/simulator/simulator.cpp src/simulator/simulator.h src/utilities/get_eigen_vec_from_alglib_vec.cpp src/utilities/get_eigen_vec_from_alglib_vec.h src/utilities/debug_utills/debug_prints.cpp src/utilities/debug_utills/debug_prints.h src/simulator/new_simulator.cpp src/simulator/new_simulator.h)
+if(" ${CMAKE_SOURCE_DIR}" STREQUAL " ${CMAKE_BINARY_DIR}")
+    message(FATAL_ERROR "FATAL: In-source builds are not allowed. You should create a separate directory for build files.")
+endif()
 
-target_compile_options(CFlex PUBLIC -std=c++17)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+file(GLOB_RECURSE khnum_sources src/*.cpp src/*.h)
+add_executable(khnum ${khnum_sources})
 
-target_include_directories(CFlex PUBLIC src lib)
+if (CMAKE_BUILD_TYPE MATCHES Debug)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Og -ggdb")
+ELSE()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+ENDIF()
+
+target_include_directories(khnum PUBLIC src)
+set_source_files_properties(${sources} PROPERTIES COMPILE_FLAGS "-Wall -Wpedantic -Wextra")
+
+
+# Build libraries
+
+add_subdirectory(lib/alglib)
+add_subdirectory(lib/eigen)
+target_link_libraries(khnum eigen alglib)
+
+
 
 

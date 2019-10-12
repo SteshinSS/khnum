@@ -108,14 +108,14 @@ EmuReaction CreateOneEmuReaction(const Reaction &reaction,
 
     // form left side
     // find sources of all atoms included in the emu
-    for (int atom_position = 0; atom_position < emu.atom_states.size(); ++atom_position) {
+    for (size_t atom_position = 0; atom_position < emu.atom_states.size(); ++atom_position) {
         if (emu.atom_states[atom_position]) {
             char atom = substrate.formula[atom_position]; // letter represents atom in the formula
 
             // finding precursor substrate that produces this atom
             bool is_atom_found = false;
             for (const Substrate &precursor : reaction.chemical_equation.left) {
-                int substrate_atom_position = precursor.formula.find(atom);
+                size_t substrate_atom_position = precursor.formula.find(atom);
                 if (substrate_atom_position != std::string::npos) {
                     is_atom_found = true;
 

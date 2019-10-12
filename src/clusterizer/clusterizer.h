@@ -16,7 +16,7 @@ private:
 
     alglib::real_2d_array FillSolutionArray(const std::vector<alglib::real_1d_array> &allSolutions);
 
-    int find_set(int v);
+    int FindSet(int v);
 
     void InitilizeParents();
 
