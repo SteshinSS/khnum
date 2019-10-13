@@ -1,127 +1,123 @@
-#include "parser/open_flux_parser.h"
+#include "parser/open_flux_parser/open_flux_utills.h"
 
-#include <algorithm>
+#include <vector>
+#include <string>
 #include <fstream>
-#include <iostream>
-#include <utility>
-#include <limits>
 #include <sstream>
-#include <tuple>
-
-#include "modeller/sort_reactions.h"
+#include <algorithm>
+#include <cmath>
 
 
 namespace khnum {
+namespace open_flux_parser {
+std::vector<std::string> GetLines(const std::string &path) {
+    std::vector<std::string> lines;
 
-ParserResults ParserOpenFlux::GetResults() {
-    ParserResults results;
-    results.reactions = reactions_;
-    results.measured_isotopes = measured_isotopes_;
-    results.measurements = measurements_;
-    results.input_substrate = input_substrates_;
-    results.excluded_metabolites = excluded_metabolites_;
+    std::ifstream input(path);
+    std::string next_line;
+    while (getline(input, next_line)) {
+        lines.emplace_back(next_line);
+    }
 
-    return results;
+    return lines;
 }
 
-
-void ParserOpenFlux::ParseExcludedMetabolites() {
-    const std::string excluded_metabolites_path = path_ + "/excluded_metabolites.txt";
-    excluded_metabolites_ = ReadEachLine(excluded_metabolites_path);
-}
-
-
-void ParserOpenFlux::ParseMeasuredIsotopes() {
-    const std::string measured_isotopes_path = path_ + "/measured_isotopes.txt";
-
-    std::vector<std::string> raw_measured_isotopes = ReadEachLine(measured_isotopes_path);
+std::vector<Emu> ParseMeasuredIsotopes(const std::vector<std::string> &raw_measured_isotopes) {
+    std::vector<Emu> measured_isotopes;
 
     // line_number need for error messages
     int line_number = 1;
     for (const std::string &raw_measured_isotope : raw_measured_isotopes) {
-        std::stringstream line(raw_measured_isotope);
-        Emu new_emu;
-        getline(line, new_emu.name, ':');
-
-        std::string row_atom_states;
-        getline(line, row_atom_states);
-
-        new_emu.atom_states.resize(row_atom_states.size());
-        for (size_t atom_position = 0; atom_position < row_atom_states.size(); ++atom_position) {
-            if (row_atom_states[atom_position] == '1') {
-                new_emu.atom_states[atom_position] = true;
-            } else if (row_atom_states[atom_position] == '0') {
-                new_emu.atom_states[atom_position] = false;
-            } else {
-                throw std::runtime_error(
-                    "Line: " + std::to_string(line_number) + "There is strange atom states in measured isotope!");
-            }
-        }
+        Emu measured_isotope = ParseOneMeasuredIsotope(raw_measured_isotope, line_number);
+        measured_isotopes.emplace_back(measured_isotope);
         ++line_number;
-
-        measured_isotopes_.push_back(new_emu);
     }
+
+    return measured_isotopes;
 }
 
+Emu ParseOneMeasuredIsotope(const std::string& raw_measured_isotope, int line_number /* = -1 */) {
+    std::stringstream line(raw_measured_isotope);
+    Emu measured_isotope;
+    getline(line, measured_isotope.name, ':');
 
-void ParserOpenFlux::ParseMeasurements() {
-    const std::string measurements_path = path_ + "/measurements.csv";
+    std::string row_atom_states;
+    getline(line, row_atom_states);
 
-    std::ifstream input(measurements_path);
-    // skip table's head line
-    input.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    measured_isotope.atom_states.resize(row_atom_states.size());
+    for (size_t atom_position = 0; atom_position < row_atom_states.size(); ++atom_position) {
+        if (row_atom_states[atom_position] == '1') {
+            measured_isotope.atom_states[atom_position] = true;
+        } else if (row_atom_states[atom_position] == '0') {
+            measured_isotope.atom_states[atom_position] = false;
+        } else {
+            throw std::runtime_error(
+                "Line: " + std::to_string(line_number) + " There is strange atom states in measured isotope!");
+        }
+    }
 
-    std::string raw_line;
-    for (const Emu &isotope : measured_isotopes_) {
+    return measured_isotope;
+}
+
+std::vector<Measurement> ParseMeasurements(const std::vector<std::string>& raw_measurements,
+                                           const std::vector<Emu>& measured_isotopes,
+                                           const Delimiters& delimiters) {
+    std::vector<Measurement> measurements;
+
+    size_t line_number = 1;
+    for (const Emu &isotope : measured_isotopes) {
         Measurement new_measurement;
         new_measurement.emu = isotope;
         for (size_t mass_shift = 0; mass_shift < isotope.atom_states.size() + 1; ++mass_shift) {
-            getline(input, raw_line);
-            std::stringstream line(raw_line);
+            std::stringstream line(raw_measurements.at(line_number));
+            ++line_number;
 
-            double value = std::stod(GetCell(line));
+            double value = std::stod(GetCell(line, delimiters));
             new_measurement.mid.push_back(value);
 
-            double error = std::stod(GetCell(line));
+            double error = std::stod(GetCell(line, delimiters));
             new_measurement.errors.push_back(error);
         }
-        measurements_.push_back(new_measurement);
+        measurements.push_back(new_measurement);
     }
+
+    return measurements;
+}
+
+std::string GetCell(std::stringstream &line, const Delimiters& delimiters) {
+    std::string new_cell;
+    getline(line, new_cell, delimiters.csv_delimiter);
+    return new_cell;
 }
 
 
-void ParserOpenFlux::ParseSubstrateInput() {
-    const std::string input_substrates_path = path_ + "/substrate_input.csv";
+std::vector<InputSubstrate> ParseInputSubstrates(const std::vector<std::string>& raw_input_substrates,
+                                                 const Delimiters& delimiters) {
+    std::vector<InputSubstrate> input_substrates;
 
-    std::ifstream input(input_substrates_path);
-
-    // skip table head-line
-    input.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
-    std::string raw_line;
-    while (getline(input, raw_line)) {
-        std::stringstream line(raw_line);
+    for (size_t line_number = 1; line_number < raw_input_substrates.size(); ++line_number) {
+        std::stringstream line(raw_input_substrates.at(line_number));
         std::string input_substrate_name;
-        getline(line, input_substrate_name, csv_delimiter_);
+        getline(line, input_substrate_name, delimiters.csv_delimiter);
 
-        auto input_substrate_iterator = std::find_if(input_substrates_.begin(),
-                                                     input_substrates_.end(),
+        auto input_substrate_iterator = std::find_if(input_substrates.begin(),
+                                                     input_substrates.end(),
                                                      [&input_substrate_name](InputSubstrate &input_substrate) {
                                                          return input_substrate.name == input_substrate_name;
                                                      });
 
-        if (input_substrate_iterator == input_substrates_.end()) {
+        if (input_substrate_iterator == input_substrates.end()) {
             InputSubstrate new_input_substrate;
             new_input_substrate.name = input_substrate_name;
-            input_substrates_.push_back(new_input_substrate);
+            input_substrates.push_back(new_input_substrate);
 
             //move iterator back, so we can work with the new substrate
-            input_substrate_iterator = input_substrates_.end();
+            input_substrate_iterator = input_substrates.end();
             --input_substrate_iterator;
         }
 
         std::string raw_labeling_pattern;
-        getline(line, raw_labeling_pattern, csv_delimiter_);
+        getline(line, raw_labeling_pattern, delimiters.csv_delimiter);
         std::stringstream labeling_pattern(raw_labeling_pattern);
 
         std::vector<Fraction> fractions;
@@ -140,12 +136,16 @@ void ParserOpenFlux::ParseSubstrateInput() {
 
         input_substrate_iterator->mixtures.push_back(new_mixture);
     }
+
+    return input_substrates;
 }
 
 
-void ParserOpenFlux::ParseReactions() {
-    const std::string reactions_path = path_ + "/model.csv";
 
+
+std::vector<Reaction> ParseReactions(const std::string& reactions_path,
+                                     const Delimiters& delimiters) {
+    std::vector<Reaction> reactions;
     std::ifstream reaction_file(reactions_path);
 
     // skip table head-line
@@ -153,68 +153,48 @@ void ParserOpenFlux::ParseReactions() {
 
     std::string raw_line;
     getline(reaction_file, raw_line);
-    try {
-        while (!raw_line.empty()) {
-            Reaction new_reaction = FillReaction(raw_line);
-            reactions_.emplace_back(new_reaction);
-            if (reaction_file.eof()) {
-                break;
-            } else {
-                getline(reaction_file, raw_line);
-            }
+    int current_id = 0;
+    while (!raw_line.empty()) {
+        Reaction new_reaction = FillReaction(raw_line, current_id, delimiters);
+        ++current_id;
+        reactions.emplace_back(new_reaction);
+        if (reaction_file.eof()) {
+            break;
+        } else {
+            getline(reaction_file, raw_line);
         }
-    } catch (std::runtime_error &parser_error) {
-        std::cerr << "Line: " << reactions_.size() << std::endl;
-        throw (parser_error);
     }
 
-    reactions_ = modelling_utills::SortReactionsByType(reactions_);
+    return reactions;
 }
 
-
-std::vector<std::string> ParserOpenFlux::ReadEachLine(const std::string &path) {
-    std::vector<std::string> lines;
-
-    std::ifstream input(path);
-    std::string next_line;
-    while (getline(input, next_line)) {
-        lines.emplace_back(next_line);
-    }
-
-    return lines;
-}
-
-
-std::string ParserOpenFlux::GetCell(std::stringstream &line) {
-    std::string new_cell;
-    getline(line, new_cell, csv_delimiter_);
-    return new_cell;
-}
-
-
-Reaction ParserOpenFlux::FillReaction(const std::string& raw_line) {
+Reaction FillReaction(const std::string& raw_line, int id, const Delimiters& delimiters) {
     Reaction reaction;
     std::stringstream line(raw_line);
-    reaction.id = reactions_.size();
-    reaction.name = GetCell(line);
-    reaction.chemical_equation = ParseChemicalEquation(line);
-    GetCell(line); // we don't care about Rate
-    reaction.type = ParseReactionType(GetCell(line));
-    auto[new_basis, is_basis_x] = ParseBasis(GetCell(line));
-    reaction.basis = new_basis;
-    reaction.is_set_free = is_basis_x;
-    reaction.deviation = ParseDeviation(GetCell(line));
+    reaction.id = id;
+    reaction.name = GetCell(line, delimiters);
+    reaction.chemical_equation = ParseChemicalEquation(line, delimiters);
+    GetCell(line, delimiters); // we don't care about Rate
+    reaction.type = ParseReactionType(GetCell(line, delimiters));
+    std::optional<Basis> basis = ParseBasis(GetCell(line, delimiters));
+    if (basis) {
+        reaction.basis = *basis;
+        reaction.is_set_free = std::isnan(*basis);
+    } else {
+        reaction.basis = false;
+    }
+    reaction.deviation = ParseDeviation(GetCell(line, delimiters));
 
     return reaction;
 }
 
 
-ChemicalEquation ParserOpenFlux::ParseChemicalEquation(std::stringstream &line) {
-    const std::string substrate_equation = GetCell(line);
-    const size_t substrate_delimiter_position = substrate_equation.find(reaction_side_delimiter_);
+ChemicalEquation ParseChemicalEquation(std::stringstream &line, const Delimiters& delimiters) {
+    const std::string substrate_equation = GetCell(line, delimiters);
+    const size_t substrate_delimiter_position = substrate_equation.find(delimiters.reaction_side_delimiter);
 
-    const std::string atom_equation = GetCell(line);
-    size_t atom_delimiter_position = atom_equation.find(reaction_side_delimiter_);
+    const std::string atom_equation = GetCell(line, delimiters);
+    size_t atom_delimiter_position = atom_equation.find(delimiters.reaction_side_delimiter);
 
     bool is_atom_equation_ok = (atom_delimiter_position != std::string::npos) || atom_equation.empty();
 
@@ -224,7 +204,7 @@ ChemicalEquation ParserOpenFlux::ParseChemicalEquation(std::stringstream &line) 
                                                     atom_equation.substr(0, atom_delimiter_position);
 
         ChemicalEquationSide left = FillEquationSide(
-            left_side_substrate_equation, left_side_atom_equation);
+            left_side_substrate_equation, left_side_atom_equation, delimiters);
 
         const std::string right_side_substrate_equation = substrate_equation.substr(
             substrate_delimiter_position + 2);
@@ -232,7 +212,7 @@ ChemicalEquation ParserOpenFlux::ParseChemicalEquation(std::stringstream &line) 
                                                      atom_equation.substr(atom_delimiter_position + 2);
 
         ChemicalEquationSide right = FillEquationSide(
-            right_side_substrate_equation, right_side_atom_equation);
+            right_side_substrate_equation, right_side_atom_equation, delimiters);
 
         return ChemicalEquation{left, right};
     } else {
@@ -242,15 +222,15 @@ ChemicalEquation ParserOpenFlux::ParseChemicalEquation(std::stringstream &line) 
 }
 
 
-ChemicalEquationSide
-ParserOpenFlux::FillEquationSide(const std::string &substrate_equation, const std::string &atom_equation) {
-    ChemicalEquationSide equation_side = ParseSubstrateEquationSide(substrate_equation);
-    ParseAtomEquationSide(atom_equation, &equation_side);
+ChemicalEquationSide FillEquationSide(const std::string &substrate_equation, const std::string &atom_equation,
+                                      const Delimiters& delimiters) {
+    ChemicalEquationSide equation_side = ParseSubstrateEquationSide(substrate_equation, delimiters);
+    ParseAtomEquationSide(atom_equation, &equation_side, delimiters);
     return equation_side;
 }
 
 
-ChemicalEquationSide ParserOpenFlux::ParseSubstrateEquationSide(const std::string &raw_equation) {
+ChemicalEquationSide ParseSubstrateEquationSide(const std::string &raw_equation, const Delimiters& delimiters) {
     ChemicalEquationSide result;
     std::stringstream equation{raw_equation};
     bool previous_token_is_coefficient{false}; // true, if previous iteration have found a coefficient
@@ -276,7 +256,7 @@ ChemicalEquationSide ParserOpenFlux::ParseSubstrateEquationSide(const std::strin
                 throw std::runtime_error("There is reaction with two coefficient in a row!");
             }
         } catch (std::invalid_argument) {
-            if (token != substrate_delimiter_) {
+            if (token != delimiters.substrate_delimiter) {
                 if (!previous_token_is_coefficient) {
                     last_coefficient = 1.0;
                 }
@@ -305,7 +285,8 @@ ChemicalEquationSide ParserOpenFlux::ParseSubstrateEquationSide(const std::strin
 }
 
 
-void ParserOpenFlux::ParseAtomEquationSide(const std::string &atom_equation, ChemicalEquationSide *equation_side) {
+void ParseAtomEquationSide(const std::string &atom_equation, ChemicalEquationSide *equation_side,
+                           const Delimiters& delimiters) {
     // It's ok if atom_equation is empty
     if (!atom_equation.empty()) {
         std::stringstream equation{atom_equation};
@@ -315,7 +296,7 @@ void ParserOpenFlux::ParseAtomEquationSide(const std::string &atom_equation, Che
         while (!token.empty()) {
 
             // We don't check coefficients
-            if (token != substrate_delimiter_ && !std::isdigit(token[0])) {
+            if (token != delimiters.substrate_delimiter && !std::isdigit(token[0])) {
                 current_substance->formula = token;
                 ++current_substance;
             }
@@ -332,7 +313,7 @@ void ParserOpenFlux::ParseAtomEquationSide(const std::string &atom_equation, Che
 }
 
 
-ReactionType ParserOpenFlux::ParseReactionType(const std::string &type) {
+ReactionType ParseReactionType(const std::string &type) {
     if (!type.empty()) {
         if (type == "F") {
             return ReactionType::Irreversible;
@@ -353,18 +334,18 @@ ReactionType ParserOpenFlux::ParseReactionType(const std::string &type) {
 }
 
 
-std::tuple<Basis, bool> ParserOpenFlux::ParseBasis(const std::string &basis) {
+std::optional<Basis> ParseBasis(const std::string &basis) {
     if (basis == "X" || basis == "x") {
-        return {std::numeric_limits<double>::quiet_NaN(), true};
+        return {std::numeric_limits<double>::quiet_NaN()};
     } else if (basis.empty()) {
-        return {std::numeric_limits<double>::quiet_NaN(), false};
+        return {};
     } else {
-        return {std::stod(basis), true};
+        return {std::stod(basis)};
     }
 }
 
 
-Deviation ParserOpenFlux::ParseDeviation(const std::string &deviation) {
+Deviation ParseDeviation(const std::string &deviation) {
     if (deviation.empty()) {
         return std::numeric_limits<double>::quiet_NaN();  // no deviation
     } else {
@@ -372,4 +353,5 @@ Deviation ParserOpenFlux::ParseDeviation(const std::string &deviation) {
     }
 }
 
-} //namespace khnum
+} // namespace open_flux_parser
+} // namespace khnum

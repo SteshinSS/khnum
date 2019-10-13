@@ -10,7 +10,7 @@
 #include "utilities/matrix.h"
 
 #include "modeller/modeller.h"
-#include "parser/open_flux_parser.h"
+#include "parser/open_flux_parser/open_flux_parser.h"
 #include "solver/solver.h"
 #include "clusterizer/clusterizer.h"
 
@@ -18,7 +18,8 @@
 namespace khnum {
 void RunCli() {
     try {
-        std::unique_ptr<IParser> parser(new ParserOpenFlux("../modelBig"));
+        // std::unique_ptr<IParser> parser(new ParserOpenFlux("../modelTca"));
+        ParserOpenFlux* parser = new ParserOpenFlux("../modelTca");
         parser->ParseExcludedMetabolites();
         parser->ParseMeasuredIsotopes();
         parser->ParseMeasurements();
