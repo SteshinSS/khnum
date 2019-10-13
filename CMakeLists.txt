@@ -7,7 +7,9 @@ if(" ${CMAKE_SOURCE_DIR}" STREQUAL " ${CMAKE_BINARY_DIR}")
     message(FATAL_ERROR "FATAL: In-source builds are not allowed. You should create a separate directory for build files.")
 endif()
 
+
 file(GLOB_RECURSE khnum_sources src/*.cpp src/*.h)
+
 add_executable(khnum ${khnum_sources})
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
@@ -17,15 +19,16 @@ ELSE()
 ENDIF()
 
 target_include_directories(khnum PUBLIC src)
-set_source_files_properties(${sources} PROPERTIES COMPILE_FLAGS "-Wall -Wpedantic -Wextra")
+set_source_files_properties(${khnum_sources} PROPERTIES COMPILE_FLAGS "-Wall -Wpedantic -Wextra")
 
 
 # Build libraries
 
 add_subdirectory(lib/alglib)
 add_subdirectory(lib/eigen)
+add_subdirectory(lib/catch)
 target_link_libraries(khnum eigen alglib)
 
-
-
-
+add_subdirectory(tests)
+enable_testing()
+add_test(FirstTest khnum_tests)

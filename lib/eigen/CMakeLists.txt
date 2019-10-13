@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 project(eigen)
 file(GLOB_RECURSE eigen_sources eigen/*.cpp eigen/*.h)
-add_library(eigen ${eigen_sources})
+add_library(eigen STATIC ${eigen_sources})
 set_target_properties(eigen PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories(eigen PUBLIC ${PROJECT_SOURCE_DIR})

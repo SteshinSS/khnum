@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 project(alglib)
 file(GLOB_RECURSE alglib_sources alglib/*.cpp alglib/*.h)
-add_library(alglib ${alglib_sources})
+add_library(alglib STATIC ${alglib_sources})
 target_include_directories(alglib PUBLIC ${PROJECT_SOURCE_DIR})
 set_target_properties(alglib PROPERTIES LINKER_LANGUAGE CXX)
