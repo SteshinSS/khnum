@@ -28,10 +28,12 @@ std::vector<Measurement> ParseMeasurements(const std::vector<std::string>& raw_m
                                            const std::vector<Emu>& measured_isotopes,
                                            const Delimiters& delimiters);
 
-inline std::string GetCell(std::stringstream &line, const Delimiters& delimiters);
+std::string GetCell(std::stringstream &line, const Delimiters& delimiters);
 
 std::vector<InputSubstrate> ParseInputSubstrates(const std::vector<std::string>& raw_input_substrates,
                                                  const Delimiters& delimiters);
+
+
 
 std::vector<Reaction> ParseReactions(const std::string& reactions_path,
                                      const Delimiters& delimiters);

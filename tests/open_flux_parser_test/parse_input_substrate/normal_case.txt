@@ -1,0 +1,4 @@
+Substrate,labeling pattern,ratio
+PYR_EX,0.99 0.0107 0.0107,0.5
+PYR_EX,0.99 0.99 0.99,0.5
+GLU_EX,0.99 0.0107 0.0107 0.0107 0.0107,1
