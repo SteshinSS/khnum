@@ -1,4 +1,4 @@
-#include "calculate_input_mid.h"
+#include "modeller/calculate_input_mid.h"
 
 #include <vector>
 #include <algorithm>

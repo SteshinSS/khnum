@@ -1,4 +1,4 @@
-#include "create_stoichiometry_matrix.h"
+#include "modeller/create_stoichiometry_matrix.h"
 
 #include <string>
 #include <vector>

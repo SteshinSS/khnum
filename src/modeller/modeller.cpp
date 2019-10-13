@@ -1,4 +1,4 @@
-#include "modeller.h"
+#include "modeller/modeller.h"
 
 #include <math.h>
 #include <iostream>

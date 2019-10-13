@@ -3,10 +3,23 @@ project(khnum)
 set(CMAKE_CXX_STANDARD 17)
 
 
+
+if (CMAKE_BUILD_TYPE MATCHES Debug)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Og -ggdb")
+ELSE()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+ENDIF()
+
 if(" ${CMAKE_SOURCE_DIR}" STREQUAL " ${CMAKE_BINARY_DIR}")
     message(FATAL_ERROR "FATAL: In-source builds are not allowed. You should create a separate directory for build files.")
 endif()
 
+# Build libraries
+
+add_subdirectory(lib/alglib)
+add_subdirectory(lib/eigen)
+
+# Create khnum library
 
 file(GLOB_RECURSE KHNUM_SOURCES
      src/clusterizer/*
@@ -17,32 +30,28 @@ file(GLOB_RECURSE KHNUM_SOURCES
      src/solver/*
      src/utilities/*)
 
-add_executable(khnum ${KHNUM_SOURCES} src/main.cpp)
-
-if (CMAKE_BUILD_TYPE MATCHES Debug)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Og -ggdb")
-ELSE()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
-ENDIF()
-
-target_include_directories(khnum PUBLIC src)
 set_source_files_properties(${KHNUM_SOURCES} PROPERTIES COMPILE_FLAGS "-Wall -Wpedantic -Wextra")
 
+add_library(khnum_lib ${KHNUM_SOURCES})
+target_link_libraries(khnum_lib eigen alglib)
+target_include_directories(khnum_lib PUBLIC include)
 
-# Build libraries
+# Create khnum binary
 
-add_subdirectory(lib/alglib)
-add_subdirectory(lib/eigen)
-target_link_libraries(khnum eigen alglib)
+add_executable(khnum src/main.cpp)
+target_link_libraries(khnum khnum_lib)
+target_include_directories(khnum PUBLIC include)
 
-option(BUILD_TESTS "Determines whether to build tests." ON)
+# Create tests
+
+option(BUILD_TESTS "Determines whether to build tests." OFF)
 if (BUILD_TESTS)
     enable_testing()
     file(GLOB_RECURSE TESTS_SOURCES tests/*.cpp tests/*.h)
 
-    add_executable(run_tests ${TESTS_SOURCES} ${KHNUM_SOURCES})
+    add_executable(run_tests ${TESTS_SOURCES})
+    target_include_directories(run_tests PUBLIC include)
     add_subdirectory(lib/catch)
-    target_link_libraries(run_tests eigen alglib catch)
-    target_include_directories(run_tests PUBLIC src)
+    target_link_libraries(run_tests khnum_lib eigen alglib catch)
     add_test(NAME run_tests.cpp COMMAND MainTests)
 endif()

@@ -1,4 +1,4 @@
-#include "clusterizer.h"
+#include "clusterizer/clusterizer.h"
 
 #include <unordered_map>
 #include <iostream>

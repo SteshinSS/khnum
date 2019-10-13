@@ -1,4 +1,4 @@
-#include "open_flux_parser.h"
+#include "parser/open_flux_parser.h"
 
 #include <algorithm>
 #include <fstream>
