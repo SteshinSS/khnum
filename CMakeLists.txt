@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.0)
 project(khnum)
 set(CMAKE_CXX_STANDARD 17)
 
+option(BUILD_TESTS "Determines whether to build tests." OFF)
+
 
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
@@ -44,7 +46,7 @@ target_include_directories(khnum PUBLIC include)
 
 # Create tests
 
-option(BUILD_TESTS "Determines whether to build tests." OFF)
+
 if (BUILD_TESTS)
     enable_testing()
     file(GLOB_RECURSE TESTS_SOURCES tests/*.cpp tests/*.h)
@@ -53,5 +55,5 @@ if (BUILD_TESTS)
     target_include_directories(run_tests PUBLIC include)
     add_subdirectory(lib/catch)
     target_link_libraries(run_tests khnum_lib eigen alglib catch)
-    add_test(NAME run_tests.cpp COMMAND MainTests)
+    add_test(NAME open_flux_parser_test.cpp COMMAND OpenFluxParserTest)
 endif()

@@ -14,9 +14,15 @@ std::vector<std::string> GetLines(const std::string &path) {
     std::vector<std::string> lines;
 
     std::ifstream input(path);
+    if (!input) {
+        throw(std::runtime_error("Can't open file: " + path));
+    }
+
     std::string next_line;
     while (getline(input, next_line)) {
-        lines.emplace_back(next_line);
+        if (!next_line.empty()) {
+            lines.emplace_back(next_line);
+        }
     }
 
     return lines;
