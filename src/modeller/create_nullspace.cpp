@@ -72,11 +72,21 @@ Matrix GetNullspace(const Matrix& original_matrix, std::vector<Reaction> &reacti
 
 
 bool ExchangeRowsToMakePivotNotNull(Matrix &matrix, const int column) {
+    double max_pivot = matrix(column, column);
+    int max_row = column;
+    bool found_non_zero = false;
     for (int row = column + 1; row < matrix.rows(); ++row) {
         if (abs(matrix(row, column)) > epsilon) {
-            matrix.row(column).swap(matrix.row(row));
-            return true;
+            found_non_zero = true;
+            if (max_pivot < matrix(row, column)) {
+                max_pivot = matrix(row, column);
+                max_row = row;
+            }
         }
+    }
+    if (found_non_zero) {
+        matrix.row(column).swap(matrix.row(max_row));
+        return true;
     }
     return false;
 }
