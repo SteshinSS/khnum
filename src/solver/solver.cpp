@@ -78,11 +78,12 @@ void Solver::FillBoundVectors() {
 
 void Solver::SetOptimizationParameters() {
     alglib::ae_int_t maxits = 0;
-    const double epsx = 0.00000000001;
+    const double epsx = 0.1e-12;
 
     alglib::minlmcreatev(nullity_, measurements_count_, free_fluxes_, 0.001, state_);
     alglib::minlmsetcond(state_, epsx, maxits);
-    // alglib::minlmsetbc(state_, lower_bounds_, upper_bounds_);
+    // alglib::minlmsetxrep(state_, true);
+    alglib::minlmsetbc(state_, lower_bounds_, upper_bounds_);
 }
 
 
@@ -107,7 +108,7 @@ void Solver::PrintStartMessage() {
 
 
 alglib::real_1d_array Solver::RunOptimization() {
-    alglib::minlmoptimize(state_, AlglibCallback, nullptr, this, alglib::xdefault);
+    alglib::minlmoptimize(state_, AlglibCallback, PrintResult, this, alglib::xdefault);
 
     alglib::real_1d_array final_free_fluxes;
     alglib::minlmresults(state_, final_free_fluxes, report_);
@@ -124,22 +125,31 @@ void AlglibCallback(const alglib::real_1d_array &free_fluxes,
     solver->CalculateResidual(free_fluxes, residuals);
 }
 
+void PrintResult(const alglib::real_1d_array &free_fluxes, double value, void *ptr) {
+    for (int i = 0; i < free_fluxes.length(); ++i) {
+        std::cout << free_fluxes(i) << " ";
+    }
+    std::cout << std::endl << "SSR: " << value << std::endl << std::endl;
+}
+
 
 void Solver::CalculateResidual(const alglib::real_1d_array &free_fluxes,
                                alglib::real_1d_array &residuals) {
     std::vector<Flux> calculated_fluxes = CalculateAllFluxesFromFree(free_fluxes);
-    // std::vector<EmuAndMid> simulated_mids = simulator_.CalculateMids(calculated_fluxes);
-    std::vector<EmuAndMid> simulated_mids = new_simulator_.CalculateMids(calculated_fluxes);
+    std::vector<EmuAndMid> simulated_mids = simulator_.CalculateMids(calculated_fluxes);
+    // std::vector<EmuAndMid> simulated_mids = new_simulator_.CalculateMids(calculated_fluxes);
 
+    /*
+    for (int i = 0; i < simulated_mids[0].mid.size(); ++i) {
+        std::cout << simulated_mids[0].mid[i] << " ";
+    }
+    std::cout << std::endl;
+     */
     Fillf0Array(residuals, simulated_mids);
 }
 
 
 std::vector<Flux> Solver::CalculateAllFluxesFromFree(const alglib::real_1d_array &free_fluxes_alglib) {
-    for (int i = 0; i < free_fluxes_alglib.length(); ++i) {
-        std::cout << free_fluxes_alglib(i) << " ";
-    }
-    std::cout << std::endl;
     Eigen::VectorXd free_fluxes = GetEigenVectorFromAlgLibVector(free_fluxes_alglib);
     Matrix depended_fluxes_matrix = -nullspace_ * free_fluxes;
     std::vector<Flux> all_fluxes(reactions_num_, -1);
@@ -147,6 +157,7 @@ std::vector<Flux> Solver::CalculateAllFluxesFromFree(const alglib::real_1d_array
     const int depended_reactions_total = depended_fluxes_matrix.rows();
     const int
         metabolite_balance_reactions_total = reactions_num_ - depended_reactions_total - free_fluxes_alglib.length();
+
 
     for (int i = 0; i < metabolite_balance_reactions_total; ++i) {
         all_fluxes[reactions_.at(i).id] = 1;
@@ -171,11 +182,10 @@ void Solver::Fillf0Array(alglib::real_1d_array &residuals, const std::vector<Emu
             residuals[total_residuals] = simulated_mids[isotope].mid[mass_shift];
             residuals[total_residuals] -= (measured_mids_[isotope].mid[mass_shift]);
             residuals[total_residuals] /= measured_mids_[isotope].errors[mass_shift];
-            std::cout << residuals[total_residuals] << " ";
+            // std::cout << residuals[total_residuals] << " ";
             ++total_residuals;
         }
     }
-    std::cout << std::endl;
 }
 
 
@@ -190,8 +200,8 @@ double Solver::GetSSR(const alglib::real_1d_array &residuals) {
 
 void Solver::PrintFinalMessage(const alglib::real_1d_array &free_fluxes) {
     std::vector<Flux> final_all_fluxes = CalculateAllFluxesFromFree(free_fluxes);
-    // std::vector<EmuAndMid> simulated_mids = simulator_.CalculateMids(final_all_fluxes);
-    std::vector<EmuAndMid> simulated_mids = new_simulator_.CalculateMids(final_all_fluxes);
+    std::vector<EmuAndMid> simulated_mids = simulator_.CalculateMids(final_all_fluxes);
+    // std::vector<EmuAndMid> simulated_mids = new_simulator_.CalculateMids(final_all_fluxes);
     alglib::real_1d_array residuals;
     residuals.setlength(measurements_count_);
     Fillf0Array(residuals, simulated_mids);

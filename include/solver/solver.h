@@ -46,7 +46,7 @@ private:
     friend void AlglibCallback(const alglib::real_1d_array &free_fluxes,
                                alglib::real_1d_array &residuals, void *ptr);
 
-private:
+public:
      int iteration_total_;
      int iteration_;
 
@@ -73,4 +73,6 @@ private:
 
 void AlglibCallback(const alglib::real_1d_array &free_fluxes,
                     alglib::real_1d_array &residuals, void *ptr);
+
+void PrintResult(const alglib::real_1d_array &free_fluxes, double value, void *ptr);
 } // namespace khnum
