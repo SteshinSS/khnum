@@ -185,9 +185,10 @@ Reaction FillReaction(const std::string& raw_line, int id, const Delimiters& del
     std::optional<Basis> basis = ParseBasis(GetCell(line, delimiters));
     if (basis) {
         reaction.basis = *basis;
-        reaction.is_set_free = std::isnan(*basis);
+        reaction.is_set_free = true;
     } else {
-        reaction.basis = false;
+        reaction.basis = std::numeric_limits<double>::quiet_NaN();
+        reaction.is_set_free = false;
     }
     reaction.deviation = ParseDeviation(GetCell(line, delimiters));
 
@@ -197,15 +198,15 @@ Reaction FillReaction(const std::string& raw_line, int id, const Delimiters& del
 
 ChemicalEquation ParseChemicalEquation(std::stringstream &line, const Delimiters& delimiters) {
     const std::string substrate_equation = GetCell(line, delimiters);
-    const size_t substrate_delimiter_position = substrate_equation.find(delimiters.reaction_side_delimiter);
+    const size_t reaction_delimiter_position = substrate_equation.find(delimiters.reaction_side_delimiter);
 
     const std::string atom_equation = GetCell(line, delimiters);
     size_t atom_delimiter_position = atom_equation.find(delimiters.reaction_side_delimiter);
 
     bool is_atom_equation_ok = (atom_delimiter_position != std::string::npos) || atom_equation.empty();
 
-    if (substrate_delimiter_position != std::string::npos && is_atom_equation_ok) {
-        const std::string left_side_substrate_equation = substrate_equation.substr(0, substrate_delimiter_position);
+    if (reaction_delimiter_position != std::string::npos && is_atom_equation_ok) {
+        const std::string left_side_substrate_equation = substrate_equation.substr(0, reaction_delimiter_position);
         const std::string left_side_atom_equation = atom_equation.empty() ? "" :
                                                     atom_equation.substr(0, atom_delimiter_position);
 
@@ -213,7 +214,7 @@ ChemicalEquation ParseChemicalEquation(std::stringstream &line, const Delimiters
             left_side_substrate_equation, left_side_atom_equation, delimiters);
 
         const std::string right_side_substrate_equation = substrate_equation.substr(
-            substrate_delimiter_position + 2);
+            reaction_delimiter_position + 2);
         const std::string right_side_atom_equation = atom_equation.empty() ? "" :
                                                      atom_equation.substr(atom_delimiter_position + 2);
 
@@ -231,7 +232,7 @@ ChemicalEquation ParseChemicalEquation(std::stringstream &line, const Delimiters
 ChemicalEquationSide FillEquationSide(const std::string &substrate_equation, const std::string &atom_equation,
                                       const Delimiters& delimiters) {
     ChemicalEquationSide equation_side = ParseSubstrateEquationSide(substrate_equation, delimiters);
-    ParseAtomEquationSide(atom_equation, &equation_side, delimiters);
+    ParseAtomEquationSide(atom_equation, delimiters, &equation_side);
     return equation_side;
 }
 
@@ -261,7 +262,7 @@ ChemicalEquationSide ParseSubstrateEquationSide(const std::string &raw_equation,
             } else {
                 throw std::runtime_error("There is reaction with two coefficient in a row!");
             }
-        } catch (std::invalid_argument) {
+        } catch (std::invalid_argument&) {
             if (token != delimiters.substrate_delimiter) {
                 if (!previous_token_is_coefficient) {
                     last_coefficient = 1.0;
@@ -291,8 +292,8 @@ ChemicalEquationSide ParseSubstrateEquationSide(const std::string &raw_equation,
 }
 
 
-void ParseAtomEquationSide(const std::string &atom_equation, ChemicalEquationSide *equation_side,
-                           const Delimiters& delimiters) {
+void ParseAtomEquationSide(const std::string &atom_equation, const Delimiters& delimiters,
+                           ChemicalEquationSide *equation_side) {
     // It's ok if atom_equation is empty
     if (!atom_equation.empty()) {
         std::stringstream equation{atom_equation};

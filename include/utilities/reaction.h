@@ -10,7 +10,7 @@ using AtomRepresentation = std::string;
 using SubstrateCoefficient = double;
 
 struct Substrate {
-    std::string name;                 // for example "PYR_EX"
+    std::string name;                 // for example, "PYR_EX"
     AtomRepresentation formula;       // "abc"
     SubstrateCoefficient coefficient; // 1.0
 };

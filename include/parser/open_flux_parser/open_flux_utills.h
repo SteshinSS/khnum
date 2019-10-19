@@ -47,8 +47,8 @@ ChemicalEquationSide FillEquationSide(const std::string &substrate_equation, con
 
 ChemicalEquationSide ParseSubstrateEquationSide(const std::string &raw_equation, const Delimiters& delimiters);
 
-void ParseAtomEquationSide(const std::string &atom_equation, ChemicalEquationSide *equation_side,
-                           const Delimiters& delimiters);
+void ParseAtomEquationSide(const std::string &atom_equation, const Delimiters& delimiters,
+                           ChemicalEquationSide *equation_side);
 
 ReactionType ParseReactionType(const std::string &type);
 
