@@ -11,7 +11,7 @@ using namespace khnum::open_flux_parser;
 
 const std::string folder = "../tests/open_flux_parser_test";
 
-TEST_CASE("GetLines()") {
+TEST_CASE("GetLines()", "[OpenFluxParser]") {
     const std::string subfolder = folder + "/get_lines";
     SECTION("with empty file") {
         std::vector<std::string> result = GetLines(subfolder + "/empty_file.txt");
@@ -43,7 +43,7 @@ TEST_CASE("GetLines()") {
     }
 }
 
-TEST_CASE("ParseMeasuredIsotopes()") {
+TEST_CASE("ParseMeasuredIsotopes()", "[OpenFluxParser]") {
     SECTION("with normal file") {
         std::vector<Emu> result = ParseMeasuredIsotopes({"Emu1:111", "OtherEmu2:1"});
         REQUIRE(result[0].name == "Emu1");
@@ -70,7 +70,7 @@ TEST_CASE("ParseMeasuredIsotopes()") {
     }
 }
 
-TEST_CASE("ParseOneMeasuredIsotope()") {
+TEST_CASE("ParseOneMeasuredIsotope()", "[OpenFluxParser]") {
     SECTION("with normal emu") {
         std::string line = "VALX:1111";
         Emu emu = ParseOneMeasuredIsotope(line);
@@ -108,7 +108,7 @@ TEST_CASE("ParseOneMeasuredIsotope()") {
     }
 }
 
-TEST_CASE("ParseMeasurements()") {
+TEST_CASE("ParseMeasurements()", "[OpenFluxParser]") {
     const std::string subfolder = folder + "/parse_measurements";
 
     Delimiters delimiters;
@@ -211,7 +211,7 @@ TEST_CASE("ParseMeasurements()") {
     }
 }
 
-TEST_CASE("GetCell()") {
+TEST_CASE("GetCell()", "[OpenFluxParser]") {
     Delimiters delimiter;
     delimiter.csv_delimiter = ',';
 
@@ -236,7 +236,7 @@ TEST_CASE("GetCell()") {
     }
 }
 
-TEST_CASE("ParseInputSubstrate()") {
+TEST_CASE("ParseInputSubstrate()", "[OpenFluxParser]") {
     Delimiters delimiters;
     delimiters.csv_delimiter = ',';
 

@@ -12,7 +12,7 @@ using namespace khnum::open_flux_parser;
 const std::string folder = "../tests/open_flux_parser_test";
 
 
-TEST_CASE("ParseReactionType()") {
+TEST_CASE("ParseReactionType()", "[OpenFluxParser]") {
     SECTION("F") {
         std::string type = "F";
         ReactionType result = ParseReactionType(type);
@@ -54,7 +54,7 @@ TEST_CASE("ParseReactionType()") {
     }
 }
 
-TEST_CASE("ParseBasis()") {
+TEST_CASE("ParseBasis()", "[OpenFluxParser]") {
     SECTION("Normal") {
         std::string basis = "1.337";
         auto result = ParseBasis(basis);
@@ -85,7 +85,7 @@ TEST_CASE("ParseBasis()") {
     }
 }
 
-TEST_CASE("ParseDeviation()") {
+TEST_CASE("ParseDeviation()", "[OpenFluxParser]") {
     SECTION("Normal") {
         std::string deviation = "2.228";
         auto result = ParseDeviation(deviation);
@@ -103,7 +103,7 @@ TEST_CASE("ParseDeviation()") {
     }
 }
 
-TEST_CASE("ParseSubstrateEquationSide()") {
+TEST_CASE("ParseSubstrateEquationSide()", "[OpenFluxParser]") {
     Delimiters delimiters;
     delimiters.csv_delimiter = ',';
     delimiters.reaction_side_delimiter = "=";
@@ -183,7 +183,7 @@ auto CompareChemicalEquations(const ChemicalEquation& lhs, const ChemicalEquatio
 }
 
 
-TEST_CASE("ParseChemicalEquation()") {
+TEST_CASE("ParseChemicalEquation()", "[OpenFluxParser]") {
     Delimiters delimiters;
     delimiters.csv_delimiter = ',';
     delimiters.reaction_side_delimiter = "=";
