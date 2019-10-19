@@ -75,12 +75,13 @@ TEST_CASE("ParseBasis()") {
 
     SECTION("Wrong") {
         std::string basis = "XXX";
-        REQUIRE_THROWS_WITH(ParseBasis(basis), "");
+        REQUIRE_THROWS(ParseBasis(basis));
     }
 
     SECTION("Empty") {
         std::string basis = "";
-        REQUIRE_THROWS_WITH(ParseBasis(basis), "");
+        std::optional<Basis> result = ParseBasis(basis);
+        REQUIRE(!result.has_value());
     }
 }
 
@@ -92,13 +93,13 @@ TEST_CASE("ParseDeviation()") {
     }
 
     SECTION("Wrong") {
-        std::string deviation = "2.aaa";
-        REQUIRE_THROWS_WITH(ParseDeviation(deviation), "");
+        std::string deviation = "2.0aaa";
+        REQUIRE_THROWS(ParseDeviation(deviation));
     }
 
     SECTION("Empty") {
         std::string deviation;
-        REQUIRE_THROWS_WITH(ParseDeviation(deviation), "");
+        REQUIRE_THROWS(ParseDeviation(deviation));
     }
 }
 
@@ -141,17 +142,12 @@ TEST_CASE("ParseSubstrateEquationSide()") {
 
     SECTION("Empty") {
         std::string raw_reaction;
-        REQUIRE_THROWS_WITH(ParseSubstrateEquationSide(raw_reaction, delimiters), "");
+        REQUIRE_THROWS(ParseSubstrateEquationSide(raw_reaction, delimiters));
     }
 
     SECTION("Two pluses") {
         std::string raw_reaction = "5.0 a + + b";
-        REQUIRE_THROWS_WITH(ParseSubstrateEquationSide(raw_reaction, delimiters), "");
-    }
-
-    SECTION("Same substrate") {
-        std::string raw_reaction = "5.0 a + 3.4 a";
-        REQUIRE_THROWS_WITH(ParseSubstrateEquationSide(raw_reaction, delimiters), "");
+        REQUIRE_THROWS(ParseSubstrateEquationSide(raw_reaction, delimiters));
     }
 }
 
@@ -196,7 +192,7 @@ TEST_CASE("ParseChemicalEquation()") {
 
 
     SECTION("Normal") {
-        std::string equation = "2 SUC = OAA + FADH2 + 0.5 NADH, 2 abcd = abcd + X + X";
+        std::string equation = "2 SUC = OAA + FADH2 + 0.5 NADH,2 abcd = abcd + X + 0.5 X";
         std::stringstream line(equation);
         auto result = ParseChemicalEquation(line, delimiters);
 
@@ -248,12 +244,6 @@ TEST_CASE("ParseChemicalEquation()") {
         std::string equation = "2 SUC = 0.5 0.5 OAA, 2ab = ab";
     std::stringstream line(equation);
         REQUIRE_THROWS_WITH(ParseChemicalEquation(line, delimiters), "There is reaction with two coefficient in a row!");
-    }
-
-    SECTION("Same substrate in one side") {
-        std::string equation = "2 SUC + SUC = 0.5 OAA, 2ab + cd = ab";
-    std::stringstream line(equation);
-        REQUIRE_THROWS_WITH(ParseChemicalEquation(line, delimiters), "");
     }
 
     SECTION("Atoms are not consistent") {
