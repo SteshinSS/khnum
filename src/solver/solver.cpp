@@ -5,6 +5,7 @@
 #include <ctime>
 #include "alglib/optimization.h"
 
+#include "simulator/new_simulator.h"
 #include "utilities/debug_utills/debug_prints.h"
 #include "utilities/get_eigen_vec_from_alglib_vec.h"
 
@@ -48,8 +49,10 @@ void Solver::Solve() {
         GenerateInitialPoints(random_source);
         if (iteration_ == 0) {
             SetOptimizationParameters();
+        } else {
+            alglib::minlmrestartfrom(state_, free_fluxes_);
         }
-        alglib::minlmrestartfrom(state_, free_fluxes_);
+
         alglib::real_1d_array new_solution = RunOptimization();
 
         all_solutions_.emplace_back(new_solution);
@@ -75,11 +78,11 @@ void Solver::FillBoundVectors() {
 
 void Solver::SetOptimizationParameters() {
     alglib::ae_int_t maxits = 0;
-    const double epsx = 0.00000000000001;
+    const double epsx = 0.00000000001;
 
-    alglib::minlmcreatev(nullity_, measurements_count_, free_fluxes_, 0.01, state_);
+    alglib::minlmcreatev(nullity_, measurements_count_, free_fluxes_, 0.001, state_);
     alglib::minlmsetcond(state_, epsx, maxits);
-    alglib::minlmsetbc(state_, lower_bounds_, upper_bounds_);
+    // alglib::minlmsetbc(state_, lower_bounds_, upper_bounds_);
 }
 
 
@@ -104,10 +107,11 @@ void Solver::PrintStartMessage() {
 
 
 alglib::real_1d_array Solver::RunOptimization() {
-    alglib::minlmoptimize(state_, AlglibCallback, nullptr, this);
+    alglib::minlmoptimize(state_, AlglibCallback, nullptr, this, alglib::xdefault);
 
     alglib::real_1d_array final_free_fluxes;
     alglib::minlmresults(state_, final_free_fluxes, report_);
+
     PrintFinalMessage(final_free_fluxes);
 
     return final_free_fluxes;
@@ -132,9 +136,13 @@ void Solver::CalculateResidual(const alglib::real_1d_array &free_fluxes,
 
 
 std::vector<Flux> Solver::CalculateAllFluxesFromFree(const alglib::real_1d_array &free_fluxes_alglib) {
+    for (int i = 0; i < free_fluxes_alglib.length(); ++i) {
+        std::cout << free_fluxes_alglib(i) << " ";
+    }
+    std::cout << std::endl;
     Eigen::VectorXd free_fluxes = GetEigenVectorFromAlgLibVector(free_fluxes_alglib);
     Matrix depended_fluxes_matrix = -nullspace_ * free_fluxes;
-    std::vector<Flux> all_fluxes(reactions_num_);
+    std::vector<Flux> all_fluxes(reactions_num_, -1);
     // non metabolite balance reactions
     const int depended_reactions_total = depended_fluxes_matrix.rows();
     const int
@@ -163,9 +171,11 @@ void Solver::Fillf0Array(alglib::real_1d_array &residuals, const std::vector<Emu
             residuals[total_residuals] = simulated_mids[isotope].mid[mass_shift];
             residuals[total_residuals] -= (measured_mids_[isotope].mid[mass_shift]);
             residuals[total_residuals] /= measured_mids_[isotope].errors[mass_shift];
+            std::cout << residuals[total_residuals] << " ";
             ++total_residuals;
         }
     }
+    std::cout << std::endl;
 }
 
 

@@ -63,7 +63,6 @@ void Modeller::CreateNullspaceMatrix() {
 
     Matrix stoichiometry_matrix = modelling_utills::CreateStoichiometryMatrix(reactions_, included_metabolites);
     nullspace_ = modelling_utills::GetNullspace(stoichiometry_matrix, reactions_);
-    std::cout << nullspace_ << std::endl;
 }
 
 
