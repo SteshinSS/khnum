@@ -33,8 +33,8 @@ EmuAndMid CalculateOneMid(const InputSubstrate &input_substrate,
     EmuAndMid new_emu_mid;
     new_emu_mid.emu = input_emu;
 
-    // Let input_emu be PYR:1010
-    // It means that Emu consists of two traced atoms of PYR: at 0 and 2 positions
+    // Let input_emu be ARG:1010
+    // It means that Emu consists of two atoms of ARG: at 0 and 2 positions
 
     // Find atom positions included in input_emu
     // For our example included_atoms = [0, 2]
@@ -47,7 +47,7 @@ EmuAndMid CalculateOneMid(const InputSubstrate &input_substrate,
 
     int emu_size = included_atoms.size();
     // Mid is a vector which i'th value equal fraction of such Emu with mass shift = i
-    // For our example there are 3 posibilities of mass shifts: M + 0, M + 1, or M + 2
+    // For our example there are 3 possibilites of mass shifts: M + 0, M + 1, or M + 2
     Mid new_mid(emu_size + 1, 0.0);
     for (int mass_shift = 0; mass_shift < emu_size + 1; ++mass_shift) {
         double fraction = 0.0;
@@ -56,7 +56,7 @@ EmuAndMid CalculateOneMid(const InputSubstrate &input_substrate,
             double mixture_fraction = 0.0;
 
             // create bitmask with possible isotope atoms
-            // for our example, when mass_shift = 1, we could choose either first or second atoms of PYR:1010
+            // for our example, when mass_shift = 1, we could choose either first or second atoms of ARG:1010
             // so chosen_positions is either [0,1] or [1,0] as well
             std::vector<bool> chosen_positions(emu_size, false);
             for (int position = 0; position < mass_shift; ++position) {
@@ -65,7 +65,7 @@ EmuAndMid CalculateOneMid(const InputSubstrate &input_substrate,
 
             // permutate through the all possible masks
             do {
-                double current_position_fraction = 1;
+                double current_position_fraction = 1.0;
                 for (int atom_position = 0; atom_position < emu_size; ++atom_position) {
                     if (chosen_positions[atom_position]) {
                         current_position_fraction *= mixture.fractions[included_atoms[atom_position]];

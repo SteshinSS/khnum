@@ -79,7 +79,7 @@ int FindLargestEmuSize(const std::vector<EmuReaction> &reactions) {
 
 int GetEmuSize(const Emu &emu) {
     int size = 0;
-    for (const bool &state : emu.atom_states) {
+    for (bool state : emu.atom_states) {
         if (state) {
             ++size;
         }
