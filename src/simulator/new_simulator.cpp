@@ -39,18 +39,6 @@ NewSimulator::NewSimulator(const std::vector<EmuNetwork> &networks, const std::v
         std::vector<Emu> known_emus;
         std::vector<Convolution> convolutions;
         FillEmuLists(unknown_emus, known_emus, convolutions, all_known_emus);
-        /*
-        for (const Emu emu : unknown_emus) {
-            PrintEmu(emu);
-            std::cout << std::endl;
-        }
-        std::cout << std::endl;
-        for (const Emu emu : known_emus) {
-            PrintEmu(emu);
-            std::cout << std::endl;
-        }
-        std::cout << std::endl;
-         */
         CreateSymbolicMatrices(unknown_emus, known_emus, convolutions);
         FillFinalEmu(unknown_emus);
         InsertIntoAllKnownEmus(unknown_emus, all_known_emus);
@@ -249,13 +237,6 @@ void NewSimulator::ConvertToSparseMatrix(const std::vector<std::vector<FluxCombi
                 matrix_element.i = i;
                 matrix_element.j = j;
                 sparse_matrix.emplace_back(matrix_element);
-                /*
-                std::cout << "(" << i << ", " << j << ") : ";
-                for (FluxAndCoefficient flux : matrix_element.fluxes) {
-                    std::cout << flux.coefficient << " * " << flux.id << "  ";
-                }
-                std::cout << std::endl;
-                 */
             }
         }
     }

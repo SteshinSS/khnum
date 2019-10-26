@@ -97,6 +97,9 @@ void Solver::SetOptimizationParameters() {
     SetConstraints();
 }
 
+
+// Set constraints that Vdep = -nullspace * Vfree > 0
+// This is the same as nullspace * VFree < 0
 void Solver::SetConstraints() {
     alglib::real_2d_array constraint;
     constraint.setlength(nullspace_.rows(), nullspace_.cols() + 1);
