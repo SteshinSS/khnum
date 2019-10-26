@@ -33,6 +33,7 @@ private:
     std::vector<EmuReaction> all_emu_reactions_;
 
     Matrix nullspace_;
+    Matrix stoichiometry_matrix_;
     std::vector<EmuAndMid> input_substrate_mids_;
     std::vector<EmuNetwork> emu_networks_;
 

@@ -10,6 +10,7 @@
 
 #include "utilities/emu.h"
 #include "utilities/reaction.h"
+#include "utilities/debug_utills/debug_prints.h"
 
 
 namespace khnum {
@@ -150,7 +151,6 @@ EmuReaction CreateOneEmuReaction(const Reaction &reaction,
             }
         }
     }
-
     result_reaction.left = left_side;
     return result_reaction;
 }

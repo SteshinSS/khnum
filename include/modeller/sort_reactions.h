@@ -9,7 +9,7 @@
 
 namespace khnum {
 namespace modelling_utills {
-std::vector<Reaction> SortReactionsByType(std::vector<Reaction> reactions);
+std::vector<Reaction> SortReactionsByType(const std::vector<Reaction>& reactions);
 
 std::vector<Reaction> SortReactionByID(std::vector<Reaction> reactions);
 

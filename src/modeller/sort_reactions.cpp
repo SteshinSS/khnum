@@ -11,8 +11,9 @@
 
 namespace khnum {
 namespace modelling_utills {
-std::vector<Reaction> SortReactionsByType(std::vector<Reaction> reactions) {
-    std::sort(reactions.begin(), reactions.end(), [](const Reaction &lhs, const Reaction &rhs) {
+std::vector<Reaction> SortReactionsByType(const std::vector<Reaction>& reactions) {
+    std::vector<Reaction> sorted_reactions = reactions;
+    std::sort(sorted_reactions.begin(), sorted_reactions.end(), [](const Reaction &lhs, const Reaction &rhs) {
         int lhs_priority = GetPriority(lhs);
         int rhs_priority = GetPriority(rhs);
         if (lhs_priority == rhs_priority) {
@@ -22,7 +23,7 @@ std::vector<Reaction> SortReactionsByType(std::vector<Reaction> reactions) {
         }
     });
 
-    return reactions;
+    return sorted_reactions;
 }
 
 
@@ -40,7 +41,7 @@ int GetPriority(const Reaction &reaction) {
         } else if (reaction.type == ReactionType::IsotopomerBalance) {
             priority = 0;
         }
-    } else if (reaction.is_set_free) {
+    } else if (std::isnan(reaction.basis)) {
         priority = 5;
     } else {
         priority = 6;

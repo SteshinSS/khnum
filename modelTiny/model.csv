@@ -1,0 +1,8 @@
+RxnID,rxnEq,rxnCTrans,rates,rxnType,basis,deviation
+R1,A = B,abc = abc,,F,1,
+R2,B = D,abc = abc,,FR,,
+R3,D = B,abc = abc,,R,X,
+R4,B = C + E,abc = bc + a,,F,,
+R5,B + C = D + G,abc + de = bcd + ae,,F,,
+R6,G = E + E,ab = a + b,,F,,
+R7,D = F,abc = abc,,F,,

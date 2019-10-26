@@ -39,6 +39,18 @@ NewSimulator::NewSimulator(const std::vector<EmuNetwork> &networks, const std::v
         std::vector<Emu> known_emus;
         std::vector<Convolution> convolutions;
         FillEmuLists(unknown_emus, known_emus, convolutions, all_known_emus);
+        /*
+        for (const Emu emu : unknown_emus) {
+            PrintEmu(emu);
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
+        for (const Emu emu : known_emus) {
+            PrintEmu(emu);
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
+         */
         CreateSymbolicMatrices(unknown_emus, known_emus, convolutions);
         FillFinalEmu(unknown_emus);
         InsertIntoAllKnownEmus(unknown_emus, all_known_emus);
@@ -96,7 +108,7 @@ void NewSimulator::CheckAndInsertEmu(const Emu &emu, std::vector<NetworkEmu> &al
 void NewSimulator::ConvolveReaction(const EmuReaction& reaction, std::vector<NetworkEmu> &all_known_emus,
                                            std::set<Emu>& seen_emus, std::vector<Convolution>& convolutions) {
     int reaction_id = reaction.id;
-
+/*
     auto it = std::find_if(convolutions.begin(), convolutions.end(),
                             [reaction_id](const Convolution& convolution) {
                                 return convolution.flux_id == reaction_id;
@@ -104,12 +116,13 @@ void NewSimulator::ConvolveReaction(const EmuReaction& reaction, std::vector<Net
     if (it != convolutions.end()) {
         return;
     }
+    */
 
     Convolution convolution;
     convolution.flux_id = reaction.id;
     for (const EmuSubstrate& emu : reaction.left) {
         if (seen_emus.find(emu.emu) != seen_emus.end()) {
-            continue;
+            // continue;
         }
         seen_emus.insert(emu.emu);
 
@@ -176,7 +189,7 @@ void NewSimulator::CreateSymbolicMatrices(const std::vector<Emu>& unknown_emus,
                 A[position_of_product][position_of_substrate].fluxes.emplace_back(substrate_element);
             } else {
                 FluxAndCoefficient substrate_element;
-                substrate_element.coefficient = -substrate.coefficient;
+                substrate_element.coefficient = -reaction.right.coefficient;
                 substrate_element.id = reaction.id;
                 B[position_of_product][position_of_substrate].fluxes.emplace_back(substrate_element);
             }
@@ -236,6 +249,13 @@ void NewSimulator::ConvertToSparseMatrix(const std::vector<std::vector<FluxCombi
                 matrix_element.i = i;
                 matrix_element.j = j;
                 sparse_matrix.emplace_back(matrix_element);
+                /*
+                std::cout << "(" << i << ", " << j << ") : ";
+                for (FluxAndCoefficient flux : matrix_element.fluxes) {
+                    std::cout << flux.coefficient << " * " << flux.id << "  ";
+                }
+                std::cout << std::endl;
+                 */
             }
         }
     }
@@ -354,7 +374,6 @@ Matrix NewSimulator::GenerateYMatrix(const std::vector<std::vector<Mid>>& known_
 void NewSimulator::SaveNewEmus(const Matrix& X,
                                std::vector<std::vector<Mid>>& known_mids,
                                std::vector<EmuAndMid>& result) {
-
     for (int position : usefull_emus_[network_]) {
         Mid new_mid;
         for (int mass_shift = 0; mass_shift < network_size_[network_] + 1; ++mass_shift) {

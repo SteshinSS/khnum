@@ -36,8 +36,10 @@ Matrix CreateStoichiometryMatrix(const std::vector<Reaction> &reactions,
                     reaction.id);
             }
             ++stoichiometry_reaction_number;
+
         }
     }
+
 
     return stoichiometry_matrix;
 }

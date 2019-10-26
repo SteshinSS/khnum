@@ -2,6 +2,7 @@
 
 #include <math.h>
 #include <iostream>
+#include <modeller/calculate_flux_bounds.h>
 
 #include "utilities/matrix.h"
 #include "modeller/create_emu_networks.h"
@@ -37,22 +38,7 @@ void Modeller::CreateEmuNetworks() {
 
 
 void Modeller::CalculateFluxBounds() {
-    for (Reaction &reaction : reactions_) {
-        if (std::isnan(reaction.basis)) {
-            reaction.computed_upper_bound = reaction.setted_upper_bound ?
-                                            *reaction.setted_upper_bound : 10;
-            reaction.computed_lower_bound = reaction.setted_lower_bound ?
-                                            *reaction.setted_lower_bound : 0;
-        } else {
-            if (std::isnan(reaction.deviation)) {
-                reaction.computed_upper_bound = reaction.basis;
-                reaction.computed_lower_bound = reaction.basis;
-            } else {
-                reaction.computed_upper_bound = reaction.basis + reaction.deviation;
-                reaction.computed_lower_bound = reaction.basis - reaction.deviation;
-            }
-        }
-    }
+    modelling_utills::CalculateFluxBounds(reactions_, stoichiometry_matrix_);
 }
 
 
@@ -61,8 +47,8 @@ void Modeller::CreateNullspaceMatrix() {
     std::vector<std::string> included_metabolites = modelling_utills::CreateIncludedMetaboliteList(full_metabolite_list,
                                                                                  excluded_metabolites_);
 
-    Matrix stoichiometry_matrix = modelling_utills::CreateStoichiometryMatrix(reactions_, included_metabolites);
-    nullspace_ = modelling_utills::GetNullspace(stoichiometry_matrix, reactions_);
+    stoichiometry_matrix_ = modelling_utills::CreateStoichiometryMatrix(reactions_, included_metabolites);
+    nullspace_ = modelling_utills::GetNullspace(stoichiometry_matrix_, reactions_);
 }
 
 

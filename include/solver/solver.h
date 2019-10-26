@@ -26,6 +26,9 @@ private:
 
     void SetOptimizationParameters();
 
+    // Set constraints so the fluxes always > 0
+    void SetConstraints();
+
     void GenerateInitialPoints(std::mt19937 &random_source);
 
     void PrintStartMessage();
@@ -73,6 +76,4 @@ public:
 
 void AlglibCallback(const alglib::real_1d_array &free_fluxes,
                     alglib::real_1d_array &residuals, void *ptr);
-
-void PrintResult(const alglib::real_1d_array &free_fluxes, double value, void *ptr);
 } // namespace khnum
