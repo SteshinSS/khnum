@@ -10,5 +10,7 @@ namespace khnum {
 namespace modelling_utills {
 
 void CalculateFluxBounds(std::vector<Reaction>& reactions, const Matrix& stoichiometry_matrix);
+void PrepareLinearProblem(std::vector<Reaction>& reactions, const Matrix& stoichiometry_matrix, glp_prob* linear_problem);
+
 }
 }
