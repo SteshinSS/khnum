@@ -54,3 +54,59 @@ TEST_CASE("CalculateOneMid()", "[Modelling Utils]") {
         }
     }
 }
+
+TEST_CASE("CreateOneEmuReaction", "[Modelling Utils]") {
+    SECTION("Normal use") {
+        Reaction reaction;
+        reaction.id = 5;
+        ChemicalEquation equation; // "A + 2.0 B = 1.5 C + D, ab + cd = bda + c"
+        Substrate A;
+        A.name = "A";
+        A.formula = "ab";
+        A.coefficient = 1.0;
+
+        Substrate B;
+        B.name = "B";
+        B.formula = "cd";
+        B.coefficient = 2.0;
+
+        Substrate C;
+        C.name = "C";
+        C.formula = "bda";
+        C.coefficient = 1.5;
+
+        Substrate D;
+        D.name = "D";
+        D.formula = "c";
+
+        equation.left.push_back(A);
+        equation.left.push_back(B);
+        equation.right.push_back(C);
+        equation.right.push_back(D);
+
+        reaction.chemical_equation = equation;
+
+        Emu C110;
+        C110.name = "C";
+        C110.atom_states = {1, 0, 1};
+
+        EmuReaction result = CreateOneEmuReaction(reaction, C, C110);
+        EmuReaction should_be;
+        should_be.id = reaction.id;
+        should_be.right.emu = C110;
+
+        EmuSubstrate A01;
+        A01.coefficient = 1.0;
+        A01.emu.name = "A";
+        A01.emu.atom_states = {0, 1};
+        should_be.left.push_back(A01);
+
+        EmuSubstrate B01;
+        B01.coefficient = 1.5;
+        B01.emu.name = "B";
+        B01.emu.atom_states = {0, 1};
+        should_be.left.push_back(B01);
+
+        REQUIRE(result == should_be);
+    }
+}

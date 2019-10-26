@@ -21,8 +21,11 @@ bool operator==(const Emu &lhs, const Emu &rhs) {
 
 
 bool operator==(EmuSubstrate const &lhs, EmuSubstrate const &rhs) {
+    const double epsilon = 0.0001;
     if (lhs.emu == rhs.emu) {
-        return lhs.coefficient == rhs.coefficient;
+        bool is_same = ((lhs.coefficient - epsilon) < rhs.coefficient) &&
+                       ((rhs.coefficient - epsilon) < lhs.coefficient);
+        return is_same;
     } else {
         return false;
     }

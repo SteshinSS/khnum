@@ -2,7 +2,6 @@
 
 #include <math.h>
 #include <iostream>
-#include <modeller/calculate_flux_bounds.h>
 
 #include "utilities/matrix.h"
 #include "modeller/create_emu_networks.h"
@@ -12,6 +11,8 @@
 #include "modeller/create_metabolite_list.h"
 #include "modeller/create_stoichiometry_matrix.h"
 #include "modeller/create_nullspace.h"
+#include "modeller/calculate_flux_bounds.h"
+#include "modeller/check_model.h"
 
 #include "utilities/debug_utills/debug_prints.h"
 
@@ -60,6 +61,10 @@ void Modeller::CalculateMeasurementsCount() {
     }
 }
 
+
+void Modeller::CheckModelForErrors() {
+    modelling_utills::CheckMeasurementsMID(measurements_);
+}
 
 Problem Modeller::GetProblem() {
     Problem problem;

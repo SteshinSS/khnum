@@ -32,6 +32,7 @@ void RunCli() {
         modeller.CreateNullspaceMatrix();
         modeller.CalculateFluxBounds();
         modeller.CalculateMeasurementsCount();
+        modeller.CheckModelForErrors();
 
         Problem problem = modeller.GetProblem();
 
