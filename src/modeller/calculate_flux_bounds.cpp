@@ -57,7 +57,7 @@ void PrepareLinearProblem(std::vector<Reaction>& reactions, const Matrix& stoich
         const Reaction& reaction = reactions.at(reaction_num + metabolite_balance_reactions_total);
         if (std::isnan(reaction.basis)) {
             double upper_bound = reaction.setted_upper_bound ?
-                                 *reaction.setted_upper_bound : 10;
+                                 *reaction.setted_upper_bound : 200;
             double lower_bound = reaction.setted_lower_bound ?
                                  *reaction.setted_lower_bound : 0;
             glp_set_col_bnds(linear_problem, reaction_num + 1, GLP_DB, lower_bound, upper_bound);
