@@ -30,6 +30,7 @@ private:
     std::vector<Measurement> measurements_;
     std::vector<InputSubstrate> input_substrate_;
     std::vector<std::string> excluded_metabolites_;
+    std::vector<int> free_fluxes_id_;
 
     std::vector<Emu> input_emu_list_;
     std::vector<EmuReaction> all_emu_reactions_;
@@ -38,6 +39,7 @@ private:
     Matrix stoichiometry_matrix_;
     std::vector<EmuAndMid> input_substrate_mids_;
     std::vector<EmuNetwork> emu_networks_;
+    std::vector<int> id_to_pos_;
 
     int measurements_count_ = 0;
 };

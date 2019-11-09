@@ -14,12 +14,12 @@ namespace khnum {
 
 
 Solver::Solver(const Problem &problem) :
-            simulator_(problem.networks, problem.input_substrate_mids, problem.measured_isotopes),
-            new_simulator_(problem.networks, problem.input_substrate_mids, problem.measured_isotopes) {
+            new_simulator_(problem.simulator_parameters_) {
     reactions_ = problem.reactions;
     nullspace_ = problem.nullspace;
     measured_mids_ = problem.measurements;
     measurements_count_ = problem.measurements_count;
+    use_analytic_gradient_ = problem.simulator_parameters_.use_analytic_jacobian;
 
     nullity_ = nullspace_.cols();
     free_fluxes_.setlength(nullity_);
@@ -29,6 +29,8 @@ Solver::Solver(const Problem &problem) :
     iteration_ = 0;
     iteration_total_ = 100;
     reactions_num_ = reactions_.size();
+
+
 }
 
 
@@ -90,7 +92,13 @@ void Solver::SetOptimizationParameters() {
     alglib::ae_int_t maxits = 0;
     const double epsx = 0.1e-12;
 
-    alglib::minlmcreatev(nullity_, measurements_count_, free_fluxes_, 0.001, state_);
+    if (use_analytic_gradient_) {
+        alglib::minlmcreatevj(nullity_, measurements_count_, free_fluxes_, state_);
+        alglib::minlmoptguardgradient(state_, 0.001);
+    } else {
+        alglib::minlmcreatev(nullity_, measurements_count_, free_fluxes_, 0.001, state_);
+    }
+
     alglib::minlmsetcond(state_, epsx, maxits);
     alglib::minlmsetbc(state_, lower_bounds_, upper_bounds_);
 
@@ -130,7 +138,32 @@ void Solver::PrintStartMessage() {
 
 
 alglib::real_1d_array Solver::RunOptimization() {
-    alglib::minlmoptimize(state_, AlglibCallback, nullptr, this, alglib::xdefault);
+    if (use_analytic_gradient_) {
+        alglib::minlmoptimize(state_, AlglibCallback, JacobianCallback, nullptr, this, alglib::xdefault);
+
+        alglib::optguardreport ogrep;
+        alglib::minlmoptguardresults(state_, ogrep);
+        if (ogrep.badgradsuspected) {
+            std::cout << "Bad jacobian. Should be: " << std::endl;
+            for (int i = 0; i < ogrep.badgradnum.rows(); ++i) {
+                for (int j = 0; j < ogrep.badgradnum.cols(); ++j) {
+                    std::cout << ogrep.badgradnum(i, j) << " ";
+                }
+                std::cout << std::endl;
+            }
+
+            std::cout << std::endl << "But actually: " << std::endl;
+            for (int i = 0; i < ogrep.badgraduser.rows(); ++i) {
+                for (int j = 0; j < ogrep.badgraduser.cols(); ++j) {
+                    std::cout << ogrep.badgraduser(i, j) << " ";
+                }
+                std::cout << std::endl;
+            }
+        }
+    } else {
+        alglib::minlmoptimize(state_, AlglibCallback, nullptr, this, alglib::xdefault);
+    }
+
 
     alglib::real_1d_array final_free_fluxes;
     alglib::minlmresults(state_, final_free_fluxes, report_);
@@ -138,6 +171,14 @@ alglib::real_1d_array Solver::RunOptimization() {
     PrintFinalMessage(final_free_fluxes);
 
     return final_free_fluxes;
+}
+
+void JacobianCallback(const alglib::real_1d_array &free_fluxes,
+                      alglib::real_1d_array &fi,
+                      alglib::real_2d_array &jac, void *ptr) {
+    AlglibCallback(free_fluxes, fi, ptr);
+    Solver* solver = static_cast<Solver*>(ptr);
+    solver->FillJacobian(jac);
 }
 
 
@@ -148,13 +189,33 @@ void AlglibCallback(const alglib::real_1d_array &free_fluxes,
 }
 
 
+
+void Solver::FillJacobian(alglib::real_2d_array &jac) {
+    for (int i = 0; i < last_jacobian_.rows(); ++i) {
+        for (int j = 0; j < last_jacobian_.cols(); ++j) {
+            jac(j, i) = last_jacobian_(i, j);
+        }
+    }
+/*
+    for (int i = 0; i < last_jacobian_.rows(); ++i) {
+        for (int j = 0; j < last_jacobian_.cols(); ++j) {
+            std::cout <<last_jacobian_(i, j) << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;
+    */
+}
+
+
 void Solver::CalculateResidual(const alglib::real_1d_array &free_fluxes,
                                alglib::real_1d_array &residuals) {
     std::vector<Flux> calculated_fluxes = CalculateAllFluxesFromFree(free_fluxes);
-    // std::vector<EmuAndMid> simulated_mids = simulator_.CalculateMids(calculated_fluxes);
-     std::vector<EmuAndMid> simulated_mids = new_simulator_.CalculateMids(calculated_fluxes);
+    SimulatorResult result = new_simulator_.CalculateMids(calculated_fluxes);
 
-    Fillf0Array(residuals, simulated_mids);
+    last_jacobian_ = result.jacobian;
+
+    Fillf0Array(residuals, result.simulated_mids);
 }
 
 
@@ -207,11 +268,10 @@ double Solver::GetSSR(const alglib::real_1d_array &residuals) {
 
 void Solver::PrintFinalMessage(const alglib::real_1d_array &free_fluxes) {
     std::vector<Flux> final_all_fluxes = CalculateAllFluxesFromFree(free_fluxes);
-    // std::vector<EmuAndMid> simulated_mids = simulator_.CalculateMids(final_all_fluxes);
-    std::vector<EmuAndMid> simulated_mids = new_simulator_.CalculateMids(final_all_fluxes);
+    SimulatorResult result = new_simulator_.CalculateMids(final_all_fluxes);
     alglib::real_1d_array residuals;
     residuals.setlength(measurements_count_);
-    Fillf0Array(residuals, simulated_mids);
+    Fillf0Array(residuals, result.simulated_mids);
 
     double ssr = GetSSR(residuals);
 

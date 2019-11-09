@@ -8,11 +8,13 @@
 namespace khnum {
 using AtomRepresentation = std::string;
 using SubstrateCoefficient = double;
+using AtomCoefficient = double;
 
 struct Substrate {
     std::string name;                 // for example, "PYR_EX"
     AtomRepresentation formula;       // "abc"
-    SubstrateCoefficient coefficient; // 1.0
+    SubstrateCoefficient substrate_coefficient_ = 0.0; // 1.0
+    AtomCoefficient atom_coefficient_ = 0.0;
 };
 
 // need for stl containers
@@ -26,7 +28,7 @@ struct ChemicalEquation {
 };
 
 
-using Rate = double;
+
 
 /// see OpenFlux paper
 enum class ReactionType {

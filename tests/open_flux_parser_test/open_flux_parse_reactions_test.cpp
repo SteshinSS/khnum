@@ -114,11 +114,11 @@ TEST_CASE("ParseSubstrateEquationSide()", "[OpenFluxParser]") {
         ChemicalEquationSide result = ParseSubstrateEquationSide(raw_reaction, delimiters);
         REQUIRE(result.size() == 35);
         REQUIRE(result[0].name == "trp_L_c");
-        REQUIRE(result[0].coefficient == Approx(0.054));
+        REQUIRE(result[0].substrate_coefficient_ == Approx(0.054));
         REQUIRE(result[5].name == "thr_L_c");
-        REQUIRE(result[5].coefficient == Approx(0.241));
+        REQUIRE(result[5].substrate_coefficient_ == Approx(0.241));
         REQUIRE(result.back().name == "ttp_c");
-        REQUIRE(result.back().coefficient == Approx(0.007));
+        REQUIRE(result.back().substrate_coefficient_ == Approx(0.007));
     }
 
     SECTION("Without coefficients") {
@@ -126,13 +126,13 @@ TEST_CASE("ParseSubstrateEquationSide()", "[OpenFluxParser]") {
         ChemicalEquationSide  result = ParseSubstrateEquationSide(raw_reaction, delimiters);
         REQUIRE(result.size() == 4);
         REQUIRE(result[0].name == "a");
-        REQUIRE(result[0].coefficient == Approx(1.0));
+        REQUIRE(result[0].substrate_coefficient_ == Approx(1.0));
         REQUIRE(result[1].name == "b");
-        REQUIRE(result[1].coefficient == Approx(1.0));
+        REQUIRE(result[1].substrate_coefficient_ == Approx(1.0));
         REQUIRE(result[2].name == "c");
-        REQUIRE(result[2].coefficient == Approx(3.0));
+        REQUIRE(result[2].substrate_coefficient_ == Approx(3.0));
         REQUIRE(result[3].name == "d");
-        REQUIRE(result[3].coefficient == Approx(4.0));
+        REQUIRE(result[3].substrate_coefficient_ == Approx(4.0));
     }
 
     SECTION("Two coefficients") {
@@ -159,7 +159,7 @@ auto CompareChemicalEquationSide(const ChemicalEquationSide& lhs, const Chemical
         if (lhs[i].name != rhs[i].name) {
             return false;
         }
-        bool is_equal = (lhs[i].coefficient - 0.01 < rhs[i].coefficient && lhs[i].coefficient + 0.01 > rhs[i].coefficient);
+        bool is_equal = (lhs[i].substrate_coefficient_ - 0.01 < rhs[i].substrate_coefficient_ && lhs[i].substrate_coefficient_ + 0.01 > rhs[i].substrate_coefficient_);
         if (!is_equal) {
             return false;
         }

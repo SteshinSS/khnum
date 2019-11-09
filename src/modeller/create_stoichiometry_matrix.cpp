@@ -47,21 +47,14 @@ Matrix CreateStoichiometryMatrix(const std::vector<Reaction> &reactions,
 
 double GetTotalCoefficient(const ChemicalEquation &chemical_equation, const std::string &metabolite, const int id) {
     double result{0.0};
-    bool is_found_at_left{false};
     for (const Substrate &substrate : chemical_equation.left) {
         if (substrate.name == metabolite) {
-            result -= substrate.coefficient;
-            is_found_at_left = true;
+            result -= substrate.substrate_coefficient_;
         }
     }
     for (const Substrate &substrate : chemical_equation.right) {
         if (substrate.name == metabolite) {
-            if (!is_found_at_left) {
-                result += substrate.coefficient;
-            } else {
-                throw std::runtime_error("There is reaction with the same substrate in both sides! " +
-                    std::to_string(id));
-            }
+            result += substrate.substrate_coefficient_;
         }
     }
     return result;

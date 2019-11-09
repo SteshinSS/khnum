@@ -1,0 +1,8 @@
+mal_L_b
+lac_L_c
+ac_ex
+glc_DS_b
+glc_DU_b
+co2_nat
+co2_ex
+Biomass

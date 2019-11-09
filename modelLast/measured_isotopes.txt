@@ -1,0 +1,14 @@
+ala_L_c:111
+arg_L_c:111111
+asp_L_c:1111
+gly_c:11
+his_L_c:111111
+ile_L_c:111111
+lys_L_c:111111
+met_L_c:11111
+phe_L_c:111111111
+pro_L_c:11111
+ser_L_c:111
+thr_L_c:1111
+tyr_L_c:111111111
+val_L_c:11111

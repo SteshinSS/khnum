@@ -7,53 +7,6 @@
 using namespace khnum;
 using namespace khnum::modelling_utills;
 
-TEST_CASE("CalculateOneMid()", "[Modelling Utils]") {
-    SECTION("One Mix, Two Masses") {
-        Mixture mix;
-        mix.ratio = 1.0;
-        mix.fractions = {0.1, 0.3};
-        InputSubstrate input_substrate;
-        input_substrate.name = "my_emu";
-        input_substrate.mixtures.push_back(mix);
-
-        Emu emu;
-        emu.name = "my_emu";
-        emu.atom_states = {1, 1};
-
-        auto result = CalculateOneMid(input_substrate, emu);
-        Mid should_be = {0.63, 0.34, 0.03};
-        REQUIRE(result.mid.size() == should_be.size());
-        for (int i = 0; i < should_be.size(); ++i) {
-            REQUIRE(result.mid[i] == Approx(should_be[i]));
-        }
-    }
-
-    SECTION("Two Mixes, Two Masses") {
-        Mixture mix;
-        mix.ratio = 0.3333;
-        mix.fractions = {0.1, 0.3};
-
-        Mixture second_mix;
-        second_mix.ratio = 0.6666;
-        second_mix.fractions = {0.6, 0.1};
-
-        InputSubstrate input_substrate;
-        input_substrate.name = "my_emu";
-        input_substrate.mixtures.push_back(mix);
-        input_substrate.mixtures.push_back(second_mix);
-
-        Emu emu;
-        emu.name = "my_emu";
-        emu.atom_states = {0, 1};
-
-        auto result = CalculateOneMid(input_substrate, emu);
-        Mid should_be = {0.83, 0.16};
-        REQUIRE(result.mid.size() == should_be.size());
-        for (int i = 0; i < should_be.size(); ++i) {
-            REQUIRE(result.mid[i] == Approx(should_be[i]).epsilon(0.1));
-        }
-    }
-}
 
 TEST_CASE("CreateOneEmuReaction", "[Modelling Utils]") {
     SECTION("Complicated use") {
@@ -63,22 +16,22 @@ TEST_CASE("CreateOneEmuReaction", "[Modelling Utils]") {
         Substrate A;
         A.name = "A";
         A.formula = "ab";
-        A.coefficient = 1.0;
+        A.substrate_coefficient_ = 1.0;
 
         Substrate B;
         B.name = "B";
         B.formula = "cd";
-        B.coefficient = 2.0;
+        B.substrate_coefficient_ = 2.0;
 
         Substrate C;
         C.name = "C";
         C.formula = "bda";
-        C.coefficient = 1.5;
+        C.substrate_coefficient_ = 1.5;
 
         Substrate D;
         D.name = "D";
         D.formula = "c";
-        D.coefficient = 1.0;
+        D.substrate_coefficient_ = 1.0;
 
         equation.left.push_back(A);
         equation.left.push_back(B);
@@ -119,37 +72,37 @@ TEST_CASE("CreateOneEmuReaction", "[Modelling Utils]") {
         Substrate A;
         A.name = "A";
         A.formula = "ab";
-        A.coefficient = 1.0;
+        A.substrate_coefficient_ = 1.0;
         equation.left.push_back(A);
 
         Substrate B;
         B.name = "B";
         B.formula = "cd";
-        B.coefficient = 1.0;
+        B.substrate_coefficient_ = 1.0;
         equation.left.push_back(B);
 
         Substrate C;
         C.name = "C";
         C.formula = "ef";
-        C.coefficient = 1.0;
+        C.substrate_coefficient_ = 1.0;
         equation.left.push_back(C);
 
         Substrate D;
         D.name = "D";
         D.formula = "g";
-        D.coefficient = 1.0;
+        D.substrate_coefficient_ = 1.0;
         equation.left.push_back(D);
 
         Substrate E;
         E.name = "E";
         E.formula = "abcdef";
-        E.coefficient = 1.0;
+        E.substrate_coefficient_ = 1.0;
         equation.right.push_back(E);
 
         Substrate F;
         F.name = "F";
         F.formula = "g";
-        F.coefficient = 1.0;
+        F.substrate_coefficient_ = 1.0;
         equation.right.push_back(F);
 
         reaction.chemical_equation = equation;
@@ -193,19 +146,19 @@ TEST_CASE("CreateNewEmuReactions()", "[Modelling Utils]") {
         reaction.id = 1337;
         ChemicalEquation equation; // Fum + Fum = OAC, 0.5 abcd + 0.5 dcba = abcd
         Substrate Fum_first;
-        Fum_first.coefficient = 0.5;
+        Fum_first.substrate_coefficient_ = 0.5;
         Fum_first.name = "Fum";
         Fum_first.formula = "abcd";
         equation.left.push_back(Fum_first);
 
         Substrate Fum_second;
-        Fum_second.coefficient = 0.5;
+        Fum_second.substrate_coefficient_ = 0.5;
         Fum_second.name = "Fum";
         Fum_second.formula = "dcba";
         equation.left.push_back(Fum_second);
 
         Substrate OAC;
-        OAC.coefficient = 1.0;
+        OAC.substrate_coefficient_ = 1.0;
         OAC.name = "OAC";
         OAC.formula = "abcd";
         equation.right.push_back(OAC);
@@ -253,19 +206,19 @@ TEST_CASE("CreateNewEmuReactions()", "[Modelling Utils]") {
         reaction.id = 1337;
         ChemicalEquation equation; // Fum + Fum = OAC, 0.5 abcd + 0.5 dcba = abcd
         Substrate Fum_first;
-        Fum_first.coefficient = 0.5;
+        Fum_first.substrate_coefficient_ = 0.5;
         Fum_first.name = "Fum";
         Fum_first.formula = "abcd";
         equation.left.push_back(Fum_first);
 
         Substrate Fum_second;
-        Fum_second.coefficient = 0.5;
+        Fum_second.substrate_coefficient_ = 0.5;
         Fum_second.name = "Fum";
         Fum_second.formula = "dcba";
         equation.left.push_back(Fum_second);
 
         Substrate OAC;
-        OAC.coefficient = 1.0;
+        OAC.substrate_coefficient_ = 1.0;
         OAC.name = "OAC";
         OAC.formula = "abcd";
         equation.right.push_back(OAC);
@@ -300,19 +253,19 @@ TEST_CASE("CreateNewEmuReactions()", "[Modelling Utils]") {
         ChemicalEquation equation; // OAC = Fum + Fum, abcd = 0.5 abcd + 0.5 dcba
 
         Substrate OAC;
-        OAC.coefficient = 1.0;
+        OAC.substrate_coefficient_ = 1.0;
         OAC.name = "OAC";
         OAC.formula = "abcd";
         equation.left.push_back(OAC);
 
         Substrate Fum_first;
-        Fum_first.coefficient = 0.5;
+        Fum_first.substrate_coefficient_ = 0.5;
         Fum_first.name = "Fum";
         Fum_first.formula = "abcd";
         equation.right.push_back(Fum_first);
 
         Substrate Fum_second;
-        Fum_second.coefficient = 0.5;
+        Fum_second.substrate_coefficient_ = 0.5;
         Fum_second.name = "Fum";
         Fum_second.formula = "dcba";
         equation.right.push_back(Fum_second);
@@ -364,19 +317,19 @@ TEST_CASE("CreateNewEmuReactions()", "[Modelling Utils]") {
         ChemicalEquation equation; // OAC = Fum + Fum, abcd = 0.5 abcd + 0.5 dcba
 
         Substrate OAC;
-        OAC.coefficient = 1.0;
+        OAC.substrate_coefficient_ = 1.0;
         OAC.name = "OAC";
         OAC.formula = "abcd";
         equation.left.push_back(OAC);
 
         Substrate Fum_first;
-        Fum_first.coefficient = 0.5;
+        Fum_first.substrate_coefficient_ = 0.5;
         Fum_first.name = "Fum";
         Fum_first.formula = "abcd";
         equation.right.push_back(Fum_first);
 
         Substrate Fum_second;
-        Fum_second.coefficient = 0.5;
+        Fum_second.substrate_coefficient_ = 0.5;
         Fum_second.name = "Fum";
         Fum_second.formula = "dcba";
         equation.right.push_back(Fum_second);
@@ -411,25 +364,25 @@ TEST_CASE("CreateNewEmuReactions()", "[Modelling Utils]") {
         ChemicalEquation equation; // Suc + Suc = Fum + Fum, 0.5 abcd + 0.5 dcba = 0.5 abcd + 0.5 dcba
 
         Substrate Suc_first;
-        Suc_first.coefficient = 0.5;
+        Suc_first.substrate_coefficient_ = 0.5;
         Suc_first.name = "Suc";
         Suc_first.formula = "abcd";
         equation.left.push_back(Suc_first);
 
         Substrate Suc_second;
-        Suc_second.coefficient = 0.5;
+        Suc_second.substrate_coefficient_ = 0.5;
         Suc_second.name = "Suc";
         Suc_second.formula = "dcba";
         equation.left.push_back(Suc_second);
 
         Substrate Fum_first;
-        Fum_first.coefficient = 0.5;
+        Fum_first.substrate_coefficient_ = 0.5;
         Fum_first.name = "Fum";
         Fum_first.formula = "abcd";
         equation.right.push_back(Fum_first);
 
         Substrate Fum_second;
-        Fum_second.coefficient = 0.5;
+        Fum_second.substrate_coefficient_ = 0.5;
         Fum_second.name = "Fum";
         Fum_second.formula = "dcba";
         equation.right.push_back(Fum_second);
@@ -481,25 +434,25 @@ TEST_CASE("CreateNewEmuReactions()", "[Modelling Utils]") {
         ChemicalEquation equation; // Suc + Suc = Fum + Fum, 0.5 abcd + 0.5 dcba = 0.5 abcd + 0.5 dcba
 
         Substrate Suc_first;
-        Suc_first.coefficient = 0.5;
+        Suc_first.substrate_coefficient_ = 0.5;
         Suc_first.name = "Suc";
         Suc_first.formula = "abcd";
         equation.left.push_back(Suc_first);
 
         Substrate Suc_second;
-        Suc_second.coefficient = 0.5;
+        Suc_second.substrate_coefficient_ = 0.5;
         Suc_second.name = "Suc";
         Suc_second.formula = "dcba";
         equation.left.push_back(Suc_second);
 
         Substrate Fum_first;
-        Fum_first.coefficient = 0.5;
+        Fum_first.substrate_coefficient_ = 0.5;
         Fum_first.name = "Fum";
         Fum_first.formula = "abcd";
         equation.right.push_back(Fum_first);
 
         Substrate Fum_second;
-        Fum_second.coefficient = 0.5;
+        Fum_second.substrate_coefficient_ = 0.5;
         Fum_second.name = "Fum";
         Fum_second.formula = "dcba";
         equation.right.push_back(Fum_second);

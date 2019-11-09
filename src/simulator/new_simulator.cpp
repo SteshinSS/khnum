@@ -1,6 +1,7 @@
 #include "simulator/new_simulator.h"
 
 #include "utilities/debug_utills/debug_prints.h"
+#include "utilities/problem.h"
 
 #include <iostream>
 #include <tuple>
@@ -9,11 +10,14 @@
 
 namespace khnum {
 
-NewSimulator::NewSimulator(const std::vector<EmuNetwork> &networks, const std::vector<EmuAndMid> &input_mids,
-                           const std::vector<Emu> &measured_isotopes) :
-                    networks_{networks},
-                    input_mids_{input_mids},
-                    measured_isotopes_{measured_isotopes} {
+NewSimulator::NewSimulator(const SimulatorParameters& parameters) :
+                    networks_{parameters.networks},
+                    input_mids_{parameters.input_mids},
+                    measured_isotopes_{parameters.measured_isotopes},
+                    nullspace_{parameters.nullspace},
+                    id_to_pos_{parameters.id_to_pos},
+                    free_fluxes_id_{parameters.free_fluxes_id},
+                    use_analytic_jacobian_{parameters.use_analytic_jacobian} {
     usefull_emus_.resize(networks_.size());
     unknown_size_.resize(networks_.size());
     known_size_.resize(networks_.size());
@@ -34,7 +38,7 @@ NewSimulator::NewSimulator(const std::vector<EmuNetwork> &networks, const std::v
         all_known_emus.push_back(input_emu);
     }
 
-    for (network_ = 0; network_ < networks.size(); ++network_) {
+    for (network_ = 0; network_ < networks_.size(); ++network_) {
         std::vector<Emu> unknown_emus;
         std::vector<Emu> known_emus;
         std::vector<Convolution> convolutions;
@@ -153,7 +157,7 @@ void NewSimulator::CreateSymbolicMatrices(const std::vector<Emu>& unknown_emus,
 
         {
             FluxAndCoefficient product;
-            product.coefficient = -reaction.right.coefficient;
+            product.coefficient = -reaction.rate;
             product.id = reaction.id;
             A[position_of_product][position_of_product].fluxes.emplace_back(product);
         }
@@ -161,7 +165,7 @@ void NewSimulator::CreateSymbolicMatrices(const std::vector<Emu>& unknown_emus,
         if (reaction.left.size() > 1) {
             int position_of_convolution = FindConvolutionPosition(reaction.id, convolutions);
             FluxAndCoefficient convolution_element;
-            convolution_element.coefficient = -reaction.right.coefficient;
+            convolution_element.coefficient = -reaction.rate;
             convolution_element.id = reaction.id;
             B[position_of_product][known_emus.size() + position_of_convolution].fluxes.emplace_back(convolution_element);
         } else {
@@ -171,13 +175,13 @@ void NewSimulator::CreateSymbolicMatrices(const std::vector<Emu>& unknown_emus,
             int position_of_substrate = FindKnownEmuPosition(substrate.emu, known_emus);
             if (position_of_substrate == -1) {
                 FluxAndCoefficient substrate_element;
-                substrate_element.coefficient = reaction.right.coefficient;
+                substrate_element.coefficient = reaction.rate;
                 substrate_element.id = reaction.id;
                 position_of_substrate = FindUnknownEmuPosition(substrate.emu, unknown_emus);
                 A[position_of_product][position_of_substrate].fluxes.emplace_back(substrate_element);
             } else {
                 FluxAndCoefficient substrate_element;
-                substrate_element.coefficient = -reaction.right.coefficient;
+                substrate_element.coefficient = -reaction.rate;
                 substrate_element.id = reaction.id;
                 B[position_of_product][position_of_substrate].fluxes.emplace_back(substrate_element);
             }
@@ -286,9 +290,28 @@ int NewSimulator::FindNetworkSize() {
 }
 
 
-std::vector<EmuAndMid> NewSimulator::CalculateMids(const std::vector<Flux>& fluxes) {
-    std::vector<EmuAndMid> result(measured_isotopes_.size());
+SimulatorResult NewSimulator::CalculateMids(const std::vector<Flux> &fluxes) {
+    SimulatorResult result;
+    result.simulated_mids = std::vector<EmuAndMid>(measured_isotopes_.size());
+
+    int total_measurements = 0;
+    for (const auto& measurement : measured_isotopes_) {
+        total_measurements += measurement.atom_states.size() + 1;
+    }
+
+    result.jacobian = Matrix::Zero(free_fluxes_id_.size(), total_measurements);
     std::vector<std::vector<Mid>> known_mids(networks_.size());
+
+    std::vector<std::vector<std::vector<Mid>>> known_d_mids(free_fluxes_id_.size()); // [v][network][i]
+    for (auto& vec : known_d_mids) {
+        vec.resize(networks_.size());
+    }
+
+    std::vector<std::vector<EmuAndMid>> diff_results(free_fluxes_id_.size());
+    for (auto& vec : diff_results) {
+        vec.resize(measured_isotopes_.size());
+    }
+
     for (network_ = 0; network_ < networks_.size(); ++network_) {
         Matrix A = GenerateFluxMatrix(symbolic_Ai_[network_], fluxes, unknown_size_[network_]);
         Matrix B = GenerateFluxMatrix(symbolic_Bi_[network_], fluxes, known_size_[network_] + convolutions_[network_].size());
@@ -297,8 +320,41 @@ std::vector<EmuAndMid> NewSimulator::CalculateMids(const std::vector<Flux>& flux
         // Matrix X = A.lu().solve(BY); // need to add -fopenmp to flags
         Matrix X = A.householderQr().solve(BY);
         // Matrix X = A.colPivHouseholderQr().solve(BY);
-        SaveNewEmus(X, known_mids, result);
+        SaveNewEmus(X, known_mids, result.simulated_mids);
+
+        if (use_analytic_jacobian_) {
+            size_t position = 0;
+            for (int id : free_fluxes_id_) {
+                Matrix dBdv = GenerateDiffFluxMatrix(symbolic_Bi_[network_], known_size_[network_] + convolutions_[network_].size(), id, position);
+                // std::cout << dBdv << std::endl;
+                dBdv *= Y;
+                Matrix dAdv = GenerateDiffFluxMatrix(symbolic_Ai_[network_], unknown_size_[network_], id, position);
+                // std::cout << dAdv << std::endl;
+                dAdv *= X;
+                Matrix dYdv = B;
+                dYdv *= GenerateDiffYMatrix(known_d_mids[position], known_mids);
+                dBdv += dYdv - dAdv;
+                Matrix dXdv = A.householderQr().solve(dBdv);
+                // std::cout << dXdv << std::endl;
+                SaveNewEmus(dXdv, known_d_mids[position], diff_results[position]);
+                ++position;
+            }
+        }
     }
+
+    if (use_analytic_jacobian_) {
+        for (int i = 0; i < free_fluxes_id_.size(); ++i) {
+            int measurement = 0;
+            for (const EmuAndMid& mid : diff_results[i]) {
+                for (int part_measurement = 0; part_measurement < mid.mid.size(); ++part_measurement) {
+                    result.jacobian(i, measurement + part_measurement) = mid.mid[part_measurement];
+                }
+                measurement += mid.mid.size();
+            }
+        }
+    }
+
+
     return result;
 }
 
@@ -375,5 +431,80 @@ void NewSimulator::SaveNewEmus(const Matrix& X,
     }
 }
 
+
+Matrix NewSimulator::GenerateDiffFluxMatrix(const std::vector<FluxCombination>& symbolic_matrix,
+                                            int cols,
+                                            int id, int position) {
+    Matrix matrix =  Matrix::Zero(unknown_size_[network_], cols);
+    for (const FluxCombination& combination : symbolic_matrix) {
+        double value = 0.0;
+        for (const FluxAndCoefficient& flux : combination.fluxes) {
+            if (id_to_pos_[flux.id] == -1) {
+                if (flux.id == id) {
+                    value += flux.coefficient;
+                }
+            } else {
+                value += -nullspace_(id_to_pos_[flux.id], position);
+            }
+
+        }
+        matrix(combination.i, combination.j) = value;
+    }
+
+    return matrix;
+}
+
+Matrix NewSimulator::GenerateDiffYMatrix(const std::vector<std::vector<Mid>>& known_d_mids,
+                                         std::vector<std::vector<Mid>>& known_mids) {
+    Matrix Y(known_size_[network_] + convolutions_[network_].size(), network_size_[network_] + 1);
+    for (size_t i = 0; i < mids_Yi_[network_].size(); ++i) {
+        PositionOfKnownEmu known_emu = mids_Yi_[network_][i];
+        Mid mid;
+        if (known_emu.network == -1) {
+            mid = std::vector<double> (network_size_[network_] + 1, 0.0);
+        } else {
+            mid = known_d_mids[known_emu.network][known_emu.position];
+        }
+        for (size_t mass_shift = 0; mass_shift < mid.size(); ++mass_shift) {
+            Y(i, mass_shift) = mid[mass_shift];
+        }
+    }
+
+    size_t position = known_size_[network_];
+    for (const Convolution& convolution : convolutions_[network_]) {
+        std::optional<Mid> mid;
+        for (int i = 0; i < convolution.elements.size(); ++i) {
+            Mid mid_part(1, 1.0);
+            for (int j = 0; j < convolution.elements.size(); ++j) {
+                const PositionOfKnownEmu& emu = convolution.elements[j];
+                if (emu.network == -1) {
+                    mid_part = std::vector<double> (network_size_[network_] + 1, 0.0);
+                } else {
+                    if (i == j) {
+                        mid_part = mid_part * known_d_mids[emu.network][emu.position];
+                    } else {
+                        mid_part = mid_part * known_mids[emu.network][emu.position];
+                    }
+                }
+
+            }
+
+            if (mid) {
+                for (int j = 0; j < mid->size(); ++j) {
+                    (*mid)[j] += mid_part[j];
+                }
+            } else {
+                *mid = mid_part;
+            }
+        }
+
+        for (size_t mass_shift = 0; mass_shift < mid->size(); ++mass_shift) {
+            Y(position, mass_shift) = (*mid)[mass_shift];
+        }
+        ++position;
+    }
+
+    return Y;
+}
 
 } // namespace khnum

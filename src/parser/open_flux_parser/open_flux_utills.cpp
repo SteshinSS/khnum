@@ -270,7 +270,7 @@ ChemicalEquationSide ParseSubstrateEquationSide(const std::string &raw_equation,
                 previous_token_is_coefficient = false;
                 Substrate new_substrate;
                 new_substrate.name = token;
-                new_substrate.coefficient = last_coefficient;
+                new_substrate.substrate_coefficient_ = last_coefficient;
                 result.push_back(new_substrate);
             }
         }
@@ -298,14 +298,39 @@ void ParseAtomEquationSide(const std::string &atom_equation, const Delimiters& d
     if (!atom_equation.empty()) {
         std::stringstream equation{atom_equation};
         std::string token;
-        getline(equation, token, ' ');
-        auto current_substance = equation_side->begin();
-        while (!token.empty()) {
+        bool previous_token_is_coefficient{false}; // true, if previous iteration have found a coefficient
+        SubstrateCoefficient last_coefficient{}; // contains previous coefficient, if previous token is a coefficient
 
-            // We don't check coefficients
-            if (token != delimiters.substrate_delimiter && !std::isdigit(token[0])) {
-                current_substance->formula = token;
-                ++current_substance;
+        auto current_substance = equation_side->begin();
+        getline(equation, token, ' ');
+        while (!token.empty()) {
+            try {
+
+                // We are trying to convert token into a double
+                // std::stod throws an exception when token is a substrate name
+                std::size_t position_of_not_number; // see second argument of std::stod
+                last_coefficient = std::stod(token, &position_of_not_number);
+
+                if (position_of_not_number != token.size()) { // because std::stod won't throw when substrate name
+                    throw std::invalid_argument("");          // starts with digits
+                }
+
+                // We found a coefficient
+                if (!previous_token_is_coefficient) {
+                    previous_token_is_coefficient = true;
+                } else {
+                    throw std::runtime_error("There is reaction with two coefficient in a row!");
+                }
+            } catch (std::invalid_argument&) {
+                if (token != delimiters.substrate_delimiter) {
+                    if (!previous_token_is_coefficient) {
+                        last_coefficient = 1.0;
+                    }
+                    previous_token_is_coefficient = false;
+                    current_substance->formula = token;
+                    current_substance->atom_coefficient_ = last_coefficient;
+                    ++current_substance;
+                }
             }
             if (equation.eof()) {
                 break;

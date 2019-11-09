@@ -50,6 +50,18 @@ void Modeller::CreateNullspaceMatrix() {
 
     stoichiometry_matrix_ = modelling_utills::CreateStoichiometryMatrix(reactions_, included_metabolites);
     nullspace_ = modelling_utills::GetNullspace(stoichiometry_matrix_, reactions_);
+    id_to_pos_.resize(reactions_.size());
+    for (int i = 0; i < reactions_.size(); ++i) {
+        if (i < nullspace_.rows()) {
+            id_to_pos_[reactions_[i].id] = i;
+        } else {
+            id_to_pos_[reactions_[i].id] = -1;
+        }
+    }
+
+    for (int i = reactions_.size() - nullspace_.cols(); i < reactions_.size(); ++i) {
+        free_fluxes_id_.push_back(reactions_[i].id);
+    }
 }
 
 
@@ -71,10 +83,16 @@ Problem Modeller::GetProblem() {
     problem.reactions = reactions_;
     problem.measured_isotopes = measured_isotopes_;
     problem.nullspace = nullspace_;
-    problem.networks = emu_networks_;
-    problem.input_substrate_mids = input_substrate_mids_;
     problem.measurements = measurements_;
     problem.measurements_count = measurements_count_;
+
+    SimulatorParameters& simulator_parameters = problem.simulator_parameters_;
+    simulator_parameters.networks = emu_networks_;
+    simulator_parameters.input_mids = input_substrate_mids_;
+    simulator_parameters.measured_isotopes = measured_isotopes_;
+    simulator_parameters.nullspace = nullspace_;
+    simulator_parameters.id_to_pos = id_to_pos_;
+    simulator_parameters.free_fluxes_id = free_fluxes_id_;
 
     return problem;
 }

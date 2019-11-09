@@ -65,11 +65,11 @@ void PrintReactions(const std::vector<Reaction>& reactions) {
 void PrintReaction(const Reaction& reaction) {
     std::cout << reaction.id << " " << reaction.name << " ";
     for (Substrate sub : reaction.chemical_equation.left) {
-        std::cout << sub.coefficient << sub.name << " + ";
+        std::cout << sub.substrate_coefficient_ << sub.name << " + ";
     }
     std::cout << " = ";
     for (Substrate sub : reaction.chemical_equation.right) {
-        std::cout << sub.coefficient << sub.name << " + ";
+        std::cout << sub.substrate_coefficient_ << sub.name << " + ";
     }
     std::cout << ", ";
     for (Substrate sub : reaction.chemical_equation.left) {

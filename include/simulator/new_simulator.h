@@ -8,16 +8,22 @@
 #include "utilities/emu_and_mid.h"
 #include "utilities/reaction.h"
 #include "utilities/matrix.h"
+#include "utilities/problem.h"
 
 
 
 namespace khnum {
+
+struct SimulatorResult {
+    std::vector<EmuAndMid> simulated_mids;
+    Matrix jacobian;
+};
+
 class NewSimulator {
 public:
-    NewSimulator(const std::vector<EmuNetwork> &networks, const std::vector<EmuAndMid> &all_known_emus,
-                 const std::vector<Emu> &measured_isotopes);
+    NewSimulator(const SimulatorParameters& parameters);
 
-    std::vector<EmuAndMid> CalculateMids(const std::vector<Flux> &fluxes);
+    SimulatorResult CalculateMids(const std::vector<Flux> &fluxes);
 
 private:
     // Preprocessing functions
@@ -62,9 +68,20 @@ private:
 
     void SaveNewEmus(const Matrix &X, std::vector<std::vector<Mid>> &known_mids, std::vector<EmuAndMid>& result);
 
+
+    Matrix GenerateDiffFluxMatrix(const std::vector<FluxCombination>& symbolic_matrix,
+                                                int cols,
+                                                int id, int position);
+
+    Matrix GenerateDiffYMatrix(const std::vector<std::vector<Mid>>& known_d_mids,
+                                             std::vector<std::vector<Mid>>& known_mids);
+
 private:
     size_t network_;
-
+    Matrix nullspace_;
+    const std::vector<int> id_to_pos_;
+    const std::vector<int>& free_fluxes_id_;
+    bool use_analytic_jacobian_;
 
 
 private:
@@ -76,6 +93,8 @@ private:
     std::vector<int> unknown_size_; //
     std::vector<int> known_size_; //
     std::vector<int> network_size_;
+
+    std::vector<int> depended_flux_positions_;
 
     std::vector<std::vector<FluxCombination>> symbolic_Ai_; //
     std::vector<std::vector<FluxCombination>> symbolic_Bi_; //

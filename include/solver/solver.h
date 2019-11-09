@@ -49,9 +49,16 @@ private:
     friend void AlglibCallback(const alglib::real_1d_array &free_fluxes,
                                alglib::real_1d_array &residuals, void *ptr);
 
+    friend void JacobianCallback(const alglib::real_1d_array &free_fluxes,
+                                      alglib::real_1d_array &fi,
+                                      alglib::real_2d_array &jac, void *ptr);
+
+    void FillJacobian(alglib::real_2d_array &jac);
+
 public:
      int iteration_total_;
      int iteration_;
+     bool use_analytic_gradient_ = false;
 
      int nullity_;
      int reactions_num_;
@@ -64,16 +71,22 @@ public:
      alglib::real_1d_array free_fluxes_;
      alglib::real_1d_array lower_bounds_;
      alglib::real_1d_array upper_bounds_;
+     std::vector<int> free_flux_id_;
 
      alglib::minlmstate state_;
      alglib::minlmreport report_;
 
      std::vector<alglib::real_1d_array> all_solutions_;
 
-     Simulator simulator_;
      NewSimulator new_simulator_;
+
+     Matrix last_jacobian_;
 };
 
 void AlglibCallback(const alglib::real_1d_array &free_fluxes,
                     alglib::real_1d_array &residuals, void *ptr);
+
+void JacobianCallback(const alglib::real_1d_array &free_fluxes,
+                      alglib::real_1d_array &fi,
+                      alglib::real_2d_array &jac, void *ptr);
 } // namespace khnum

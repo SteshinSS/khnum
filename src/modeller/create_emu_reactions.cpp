@@ -94,12 +94,14 @@ EmuReaction CreateOneEmuReaction(const Reaction &reaction,
                                  const Emu &emu) {
     EmuReaction result_reaction;
     result_reaction.id = reaction.id;
+    Rate rate = 1.0;
 
     // form right side
     EmuSubstrate product;
     product.emu = emu;
-    product.coefficient = substrate.coefficient;
+    product.coefficient = substrate.substrate_coefficient_;
     result_reaction.right = product;
+    rate *= product.coefficient;
 
     EmuReactionSide left_side;
 
@@ -135,7 +137,7 @@ EmuReaction CreateOneEmuReaction(const Reaction &reaction,
                         new_precursor.emu.name = precursor.name;
                         new_precursor.emu.atom_states = AtomStates(precursor.formula.size(), false);
                         new_precursor.emu.atom_states[substrate_atom_position] = true;
-                        new_precursor.coefficient = precursor.coefficient;
+                        new_precursor.coefficient = precursor.substrate_coefficient_;
                         left_side.push_back(new_precursor);
                         included_substrates.push_back({precursor, left_side.size() - 1});
                     }
@@ -151,7 +153,12 @@ EmuReaction CreateOneEmuReaction(const Reaction &reaction,
             }
         }
     }
+    for (const EmuSubstrate& precursor : result_reaction.left) {
+        rate *= precursor.coefficient;
+    }
+
     result_reaction.left = left_side;
+    result_reaction.rate = rate;
     return result_reaction;
 }
 
@@ -164,7 +171,7 @@ std::vector<EmuReaction> SelectUniqueEmuReactions(const std::vector<EmuReaction>
         if (reaction_position == unique_emu_reactions.end()) {
             unique_emu_reactions.push_back(reaction);
         } else {
-            (reaction_position->right).coefficient += reaction.right.coefficient;
+            reaction_position->rate += reaction.rate;
         }
     }
 

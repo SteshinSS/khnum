@@ -4,6 +4,7 @@
 #include <string>
 
 
+
 namespace khnum {
 using AtomStates = std::vector<char>; // like a vector<bool> but iterable
 
@@ -23,10 +24,13 @@ struct EmuSubstrate {
 
 using EmuReactionSide = std::vector<EmuSubstrate>;
 
+using Rate = double;
+
 struct EmuReaction {
     int id;
     EmuReactionSide left;
     EmuSubstrate right;
+    Rate rate;
 };
 
 using EmuNetwork = std::vector<EmuReaction>;
