@@ -45,7 +45,7 @@ Matrix GetNullspace(const Matrix& original_matrix, std::vector<Reaction> &reacti
                           reactions[metabolite_balance_reactions_total + column_to_swap]);
                 std::cout << "Reaction num " << metabolite_balance_reactions_total + column << " and num "
                           << metabolite_balance_reactions_total + column_to_swap << " has swapped" << std::endl;
-                if (matrix(column, column) == 0) {
+                if (abs(matrix(column, column)) < epsilon) {
                     ExchangeRowsToMakePivotNotNull(matrix, column);
                 }
             }
@@ -72,14 +72,14 @@ Matrix GetNullspace(const Matrix& original_matrix, std::vector<Reaction> &reacti
 
 
 bool ExchangeRowsToMakePivotNotNull(Matrix &matrix, const int column) {
-    double max_pivot = matrix(column, column);
+    double max_pivot = abs(matrix(column, column));
     int max_row = column;
     bool found_non_zero = false;
     for (int row = column + 1; row < matrix.rows(); ++row) {
         if (abs(matrix(row, column)) > epsilon) {
             found_non_zero = true;
-            if (max_pivot < matrix(row, column)) {
-                max_pivot = matrix(row, column);
+            if (max_pivot < abs(matrix(row, column))) {
+                max_pivot = abs(matrix(row, column));
                 max_row = row;
             }
         }
@@ -93,7 +93,7 @@ bool ExchangeRowsToMakePivotNotNull(Matrix &matrix, const int column) {
 
 
 int FindNotNullColumn(const Matrix &matrix, const int currentRow) {
-    for (int column = matrix.rows() - 1; column < matrix.cols(); ++column) {
+    for (int column = matrix.rows(); column < matrix.cols(); ++column) {
         for (int row = currentRow; row < matrix.rows(); ++row) {
             if (abs(matrix(row, column)) > epsilon) {
                 return column;

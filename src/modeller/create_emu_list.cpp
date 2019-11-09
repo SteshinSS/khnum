@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <string>
+#include <algorithm>
 
 #include "utilities/emu.h"
 #include "utilities/input_substrate.h"
@@ -32,6 +33,9 @@ std::vector<Emu> CreateInputEmuList(const std::vector<EmuReaction> &reactions,
             }
         }
     }
+
+    std::sort(input_emu_list.begin(), input_emu_list.end());
+    input_emu_list.erase(std::unique(input_emu_list.begin(), input_emu_list.end()), input_emu_list.end());
     return input_emu_list;
 }
 } // namespace modelling_utills

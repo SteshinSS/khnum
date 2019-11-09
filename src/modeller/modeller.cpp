@@ -50,6 +50,7 @@ void Modeller::CreateNullspaceMatrix() {
 
     stoichiometry_matrix_ = modelling_utills::CreateStoichiometryMatrix(reactions_, included_metabolites);
     nullspace_ = modelling_utills::GetNullspace(stoichiometry_matrix_, reactions_);
+    std::cout << nullspace_ << std::endl;
     id_to_pos_.resize(reactions_.size());
     for (int i = 0; i < reactions_.size(); ++i) {
         if (i < nullspace_.rows()) {

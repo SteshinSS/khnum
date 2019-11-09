@@ -20,6 +20,7 @@ void PrintEmuReaction(const EmuReaction &reaction) {
     }
     std::cout << "= ";
     PrintEmuSubstrate(reaction.right);
+    std::cout << "    rate: " << reaction.rate;
     std::cout << std::endl;
 }
 
@@ -73,11 +74,11 @@ void PrintReaction(const Reaction& reaction) {
     }
     std::cout << ", ";
     for (Substrate sub : reaction.chemical_equation.left) {
-        std::cout << sub.formula << " + ";
+        std::cout << sub.atom_coefficient_ << sub.formula << " + ";
     }
     std::cout << " = ";
     for (Substrate sub : reaction.chemical_equation.right) {
-        std::cout << sub.formula << " + ";
+        std::cout << sub.atom_coefficient_ << sub.formula << " + ";
     }
     std::cout << ", ";
     if (reaction.type == ReactionType::Irreversible) {

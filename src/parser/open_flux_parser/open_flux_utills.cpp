@@ -170,7 +170,6 @@ std::vector<Reaction> ParseReactions(const std::string& reactions_path,
             getline(reaction_file, raw_line);
         }
     }
-
     return reactions;
 }
 
@@ -250,11 +249,13 @@ ChemicalEquationSide ParseSubstrateEquationSide(const std::string &raw_equation,
             // We are trying to convert token into a double
             // std::stod throws an exception when token is a substrate name
             std::size_t position_of_not_number; // see second argument of std::stod
-            last_coefficient = std::stod(token, &position_of_not_number);
+            double coefficient = std::stod(token, &position_of_not_number);
 
             if (position_of_not_number != token.size()) { // because std::stod won't throw when substrate name
                 throw std::invalid_argument("");          // starts with digits
             }
+
+            last_coefficient = coefficient;
 
             // We found a coefficient
             if (!previous_token_is_coefficient) {
