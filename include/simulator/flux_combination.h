@@ -32,6 +32,8 @@ struct Convolution {
     int flux_id;
 };
 
+bool operator==(const Convolution& lhs, const Convolution& rhs);
+
 
 struct NetworkEmu {
     Emu emu;

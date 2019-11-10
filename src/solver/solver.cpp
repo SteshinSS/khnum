@@ -196,15 +196,16 @@ void Solver::FillJacobian(alglib::real_2d_array &jac) {
             jac(j, i) = last_jacobian_(i, j);
         }
     }
-/*
-    for (int i = 0; i < last_jacobian_.rows(); ++i) {
-        for (int j = 0; j < last_jacobian_.cols(); ++j) {
-            std::cout <<last_jacobian_(i, j) << " ";
+
+    int total_residuals = 0;
+    for (size_t isotope = 0; isotope < measured_mids_.size(); ++isotope) {
+        for (size_t mass_shift = 0; mass_shift < measured_mids_[isotope].errors.size(); ++mass_shift) {
+            for (int flux = 0; flux < last_jacobian_.cols(); ++flux) {
+                jac(total_residuals, flux) /= measured_mids_[isotope].errors[mass_shift];
+            }
+            ++total_residuals;
         }
-        std::cout << std::endl;
     }
-    std::cout << std::endl;
-    */
 }
 
 

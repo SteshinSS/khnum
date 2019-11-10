@@ -50,13 +50,17 @@ void Modeller::CreateNullspaceMatrix() {
 
     stoichiometry_matrix_ = modelling_utills::CreateStoichiometryMatrix(reactions_, included_metabolites);
     nullspace_ = modelling_utills::GetNullspace(stoichiometry_matrix_, reactions_);
-    std::cout << nullspace_ << std::endl;
-    id_to_pos_.resize(reactions_.size());
+    id_to_pos_.resize(reactions_.size(), -1);
+    const int isotopomer_balance_reactions_total = reactions_.size() - nullspace_.rows() - nullspace_.cols();
     for (int i = 0; i < reactions_.size(); ++i) {
-        if (i < nullspace_.rows()) {
-            id_to_pos_[reactions_[i].id] = i;
-        } else {
+        if (i < isotopomer_balance_reactions_total) {
             id_to_pos_[reactions_[i].id] = -1;
+        } else {
+            if (i < isotopomer_balance_reactions_total + nullspace_.rows()) {
+                id_to_pos_[reactions_[i].id] = i - isotopomer_balance_reactions_total;
+            } else {
+                id_to_pos_[reactions_[i].id] = -1;
+            }
         }
     }
 

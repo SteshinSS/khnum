@@ -27,7 +27,7 @@ NewSimulator::NewSimulator(const SimulatorParameters& parameters) :
     symbolic_Bi_.resize(networks_.size());
     final_emus_.resize(networks_.size());
 
-    std::vector<NetworkEmu> all_known_emus;
+
     for (size_t i = 0; i < input_mids_.size(); ++i) {
         NetworkEmu input_emu;
         input_emu.emu = input_mids_[i].emu;
@@ -35,17 +35,17 @@ NewSimulator::NewSimulator(const SimulatorParameters& parameters) :
         input_emu.order_in_usefull_emus = i;
         input_emu.order_in_X = i;
         input_emu.is_usefull = true;
-        all_known_emus.push_back(input_emu);
+        all_known_emus_.push_back(input_emu);
     }
 
     for (network_ = 0; network_ < networks_.size(); ++network_) {
         std::vector<Emu> unknown_emus;
         std::vector<Emu> known_emus;
         std::vector<Convolution> convolutions;
-        FillEmuLists(unknown_emus, known_emus, convolutions, all_known_emus);
+        FillEmuLists(unknown_emus, known_emus, convolutions);
         CreateSymbolicMatrices(unknown_emus, known_emus, convolutions);
         FillFinalEmu(unknown_emus);
-        InsertIntoAllKnownEmus(unknown_emus, all_known_emus);
+        InsertIntoAllKnownEmus(unknown_emus);
         unknown_size_[network_] = unknown_emus.size();
         known_size_[network_] = known_emus.size();
         convolutions_.emplace_back(convolutions);
@@ -55,16 +55,21 @@ NewSimulator::NewSimulator(const SimulatorParameters& parameters) :
 
 
 void NewSimulator::FillEmuLists(std::vector<Emu> &unknown_emus, std::vector<Emu> &known_emus,
-                                std::vector<Convolution> &convolutions, std::vector<NetworkEmu> &all_known_emus) {
+                                std::vector<Convolution> &convolutions) {
     std::set<Emu> seen_emus;
     for (const EmuReaction &reaction : networks_[network_]) {
         if (reaction.left.size() == 1) {
             if (seen_emus.find(reaction.left[0].emu) == seen_emus.end()) {
-                CheckAndInsertEmu(reaction.left[0].emu, all_known_emus, known_emus, unknown_emus);
+                CheckAndInsertEmu(reaction.left[0].emu, known_emus, unknown_emus);
                 seen_emus.insert(reaction.left[0].emu);
             }
         } else {
-            ConvolveReaction(reaction, all_known_emus, seen_emus, convolutions);
+            Convolution convolution = ConvolveReaction(reaction);
+
+            auto already_has = std::find(convolutions.begin(), convolutions.end(), convolution);
+            if (already_has == convolutions.end()) {
+                convolutions.push_back(convolution);
+            }
         }
 
         if (seen_emus.find(reaction.right.emu) == seen_emus.end()) {
@@ -75,15 +80,14 @@ void NewSimulator::FillEmuLists(std::vector<Emu> &unknown_emus, std::vector<Emu>
 }
 
 
-void NewSimulator::CheckAndInsertEmu(const Emu &emu, std::vector<NetworkEmu> &all_known_emus,
-                       std::vector<Emu> &known_emus, std::vector<Emu> &unknown_emus) {
-    auto it = std::find_if(all_known_emus.begin(),
-                           all_known_emus.end(),
+void NewSimulator::CheckAndInsertEmu(const Emu &emu, std::vector<Emu> &known_emus, std::vector<Emu> &unknown_emus) {
+    auto it = std::find_if(all_known_emus_.begin(),
+                           all_known_emus_.end(),
                            [&emu](const NetworkEmu& known_emu) {
                                return known_emu.emu == emu;
                            });
 
-    if (it != all_known_emus.end()) {
+    if (it != all_known_emus_.end()) {
         if (!it->is_usefull) {
             it->is_usefull = true;
             usefull_emus_[it->network].push_back(it->order_in_X);
@@ -97,29 +101,14 @@ void NewSimulator::CheckAndInsertEmu(const Emu &emu, std::vector<NetworkEmu> &al
 }
 
 
-void NewSimulator::ConvolveReaction(const EmuReaction& reaction, std::vector<NetworkEmu> &all_known_emus,
-                                           std::set<Emu>& seen_emus, std::vector<Convolution>& convolutions) {
+Convolution NewSimulator::ConvolveReaction(const EmuReaction& reaction) {
     int reaction_id = reaction.id;
-/*
-    auto it = std::find_if(convolutions.begin(), convolutions.end(),
-                            [reaction_id](const Convolution& convolution) {
-                                return convolution.flux_id == reaction_id;
-                            });
-    if (it != convolutions.end()) {
-        return;
-    }
-    */
 
     Convolution convolution;
     convolution.flux_id = reaction.id;
     for (const EmuSubstrate& emu : reaction.left) {
-        if (seen_emus.find(emu.emu) != seen_emus.end()) {
-            // continue;
-        }
-        seen_emus.insert(emu.emu);
-
-        auto it = std::find_if(all_known_emus.begin(),
-                               all_known_emus.end(),
+        auto it = std::find_if(all_known_emus_.begin(),
+                               all_known_emus_.end(),
                                [&emu](const NetworkEmu& known_emu) {
                                    return known_emu.emu == emu.emu;
                                });
@@ -136,7 +125,7 @@ void NewSimulator::ConvolveReaction(const EmuReaction& reaction, std::vector<Net
         convolution.elements.emplace_back(new_known_emu);
     }
 
-    convolutions.push_back(convolution);
+    return convolution;
 }
 
 
@@ -163,11 +152,14 @@ void NewSimulator::CreateSymbolicMatrices(const std::vector<Emu>& unknown_emus,
         }
 
         if (reaction.left.size() > 1) {
-            int position_of_convolution = FindConvolutionPosition(reaction.id, convolutions);
+            Convolution convolution = ConvolveReaction(reaction);
+            auto it = std::find(convolutions.begin(), convolutions.end(), convolution);
+            int position_of_convolution = it - convolutions.begin();
             FluxAndCoefficient convolution_element;
             convolution_element.coefficient = -reaction.rate;
             convolution_element.id = reaction.id;
             B[position_of_product][known_emus.size() + position_of_convolution].fluxes.emplace_back(convolution_element);
+
         } else {
             EmuSubstrate substrate = reaction.left[0];
 
@@ -187,7 +179,6 @@ void NewSimulator::CreateSymbolicMatrices(const std::vector<Emu>& unknown_emus,
             }
         }
     }
-
     ConvertToSparseMatrix(A, symbolic_Ai_[network_]);
     ConvertToSparseMatrix(B, symbolic_Bi_[network_]);
 }
@@ -218,19 +209,6 @@ int NewSimulator::FindKnownEmuPosition(const Emu &emu,
         return -1;
     }
 }
-
-
-int NewSimulator::FindConvolutionPosition(const int reaction_id,
-                                          const std::vector<Convolution>& convolutions) {
-    auto position = find_if(convolutions.begin(),
-                            convolutions.end(),
-                            [reaction_id](const Convolution& convolution) {
-                                return reaction_id == convolution.flux_id;
-                            });
-
-    return position - convolutions.begin();
-}
-
 
 void NewSimulator::ConvertToSparseMatrix(const std::vector<std::vector<FluxCombination>>& dense_matrix,
                                          std::vector<FluxCombination>& sparse_matrix) {
@@ -268,15 +246,14 @@ void NewSimulator::FillFinalEmu(const std::vector<Emu>& unknown_emus) {
 }
 
 
-void NewSimulator::InsertIntoAllKnownEmus(std::vector<Emu>& unknown_emus,
-                                          std::vector<NetworkEmu> &all_known_emus) {
+void NewSimulator::InsertIntoAllKnownEmus(std::vector<Emu>& unknown_emus) {
     for (size_t i = 0; i < unknown_emus.size(); ++i) {
         NetworkEmu new_emu;
         new_emu.order_in_X = i;
         new_emu.emu = unknown_emus[i];
         new_emu.is_usefull = false;
         new_emu.network = network_;
-        all_known_emus.push_back(new_emu);
+        all_known_emus_.push_back(new_emu);
     }
 }
 
@@ -326,16 +303,16 @@ SimulatorResult NewSimulator::CalculateMids(const std::vector<Flux> &fluxes) {
             size_t position = 0;
             for (int id : free_fluxes_id_) {
                 Matrix dBdv = GenerateDiffFluxMatrix(symbolic_Bi_[network_], known_size_[network_] + convolutions_[network_].size(), id, position);
-                // std::cout << dBdv << std::endl;
+                //std::cout << dBdv << std::endl;
                 dBdv *= Y;
                 Matrix dAdv = GenerateDiffFluxMatrix(symbolic_Ai_[network_], unknown_size_[network_], id, position);
-                // std::cout << dAdv << std::endl;
+                //std::cout << dAdv << std::endl;
                 dAdv *= X;
-                Matrix dYdv = B;
-                dYdv *= GenerateDiffYMatrix(known_d_mids[position], known_mids);
-                dBdv += dYdv - dAdv;
+                Matrix dYdv = GenerateDiffYMatrix(known_d_mids[position], known_mids);
+                //std::cout << dYdv << std::endl;
+                dBdv += B*dYdv - dAdv;
                 Matrix dXdv = A.householderQr().solve(dBdv);
-                // std::cout << dXdv << std::endl;
+                //std::cout << dXdv << std::endl;
                 SaveNewEmus(dXdv, known_d_mids[position], diff_results[position]);
                 ++position;
             }
@@ -435,7 +412,7 @@ void NewSimulator::SaveNewEmus(const Matrix& X,
 Matrix NewSimulator::GenerateDiffFluxMatrix(const std::vector<FluxCombination>& symbolic_matrix,
                                             int cols,
                                             int id, int position) {
-    Matrix matrix =  Matrix::Zero(unknown_size_[network_], cols);
+    Matrix matrix = Matrix::Zero(unknown_size_[network_], cols);
     for (const FluxCombination& combination : symbolic_matrix) {
         double value = 0.0;
         for (const FluxAndCoefficient& flux : combination.fluxes) {
@@ -444,7 +421,7 @@ Matrix NewSimulator::GenerateDiffFluxMatrix(const std::vector<FluxCombination>& 
                     value += flux.coefficient;
                 }
             } else {
-                value += -nullspace_(id_to_pos_[flux.id], position);
+                value += -nullspace_(id_to_pos_[flux.id], position) * flux.coefficient;
             }
 
         }
@@ -472,34 +449,37 @@ Matrix NewSimulator::GenerateDiffYMatrix(const std::vector<std::vector<Mid>>& kn
 
     size_t position = known_size_[network_];
     for (const Convolution& convolution : convolutions_[network_]) {
-        std::optional<Mid> mid;
+        Mid mid = std::vector<double> (network_size_[network_] + 1, 0.0);
         for (int i = 0; i < convolution.elements.size(); ++i) {
             Mid mid_part(1, 1.0);
             for (int j = 0; j < convolution.elements.size(); ++j) {
                 const PositionOfKnownEmu& emu = convolution.elements[j];
-                if (emu.network == -1) {
-                    mid_part = std::vector<double> (network_size_[network_] + 1, 0.0);
+                if (i == j) {
+                    if (emu.network == -1) {
+                        mid_part = std::vector<double> (network_size_[network_] + 1, 0.0);
+                        break;
+                    }
+                    mid_part = mid_part * known_d_mids[emu.network][emu.position];
                 } else {
-                    if (i == j) {
-                        mid_part = mid_part * known_d_mids[emu.network][emu.position];
+                    if (emu.network == -1) {
+                        mid_part = mid_part * input_mids_[emu.position].mid;
                     } else {
                         mid_part = mid_part * known_mids[emu.network][emu.position];
                     }
-                }
 
+                }
             }
 
-            if (mid) {
-                for (int j = 0; j < mid->size(); ++j) {
-                    (*mid)[j] += mid_part[j];
-                }
-            } else {
-                *mid = mid_part;
+            if (mid.size() != mid_part.size()) {
+                throw std::runtime_error("asd");
+            }
+            for (int j = 0; j < mid.size(); ++j) {
+                mid[j] += mid_part[j];
             }
         }
 
-        for (size_t mass_shift = 0; mass_shift < mid->size(); ++mass_shift) {
-            Y(position, mass_shift) = (*mid)[mass_shift];
+        for (size_t mass_shift = 0; mass_shift < mid.size(); ++mass_shift) {
+            Y(position, mass_shift) = mid[mass_shift];
         }
         ++position;
     }

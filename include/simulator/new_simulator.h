@@ -28,18 +28,15 @@ public:
 private:
     // Preprocessing functions
     void FillEmuLists(std::vector<Emu> &unknown_emus, std::vector<Emu> &known_emus,
-                      std::vector<Convolution> &convolutions, std::vector<NetworkEmu> &all_known_emus);
+                      std::vector<Convolution> &convolutions);
 
-    void CheckAndInsertEmu(const Emu &emu, std::vector<NetworkEmu> &all_known_emus,
-                           std::vector<Emu> &known_emus, std::vector<Emu> &unknown_emus);
+    void CheckAndInsertEmu(const Emu &emu, std::vector<Emu> &known_emus, std::vector<Emu> &unknown_emus);
 
-    void InsertIntoAllKnownEmus(std::vector<Emu>& unknown_emus,
-                                std::vector<NetworkEmu> &all_known_emus);
+    void InsertIntoAllKnownEmus(std::vector<Emu>& unknown_emus);
 
     void FillFinalEmu(const std::vector<Emu>& unknown_emus);
 
-    void ConvolveReaction(const EmuReaction& reaction, std::vector<NetworkEmu> &all_known_emus,
-                                 std::set<Emu>& seen_emus, std::vector<Convolution>& convolutions);
+    Convolution ConvolveReaction(const EmuReaction& reaction);
 
     void CreateSymbolicMatrices(const std::vector<Emu>& unknown_emus,
                                 const std::vector<Emu>& known_emus,
@@ -50,9 +47,6 @@ private:
 
     int FindKnownEmuPosition(const Emu &emu,
                              const std::vector<Emu>& known_emus);
-
-    int FindConvolutionPosition(const int reaction_id,
-                                const std::vector<Convolution>& convolutions);
 
     void ConvertToSparseMatrix(const std::vector<std::vector<FluxCombination>>& dense_matrix,
                                std::vector<FluxCombination>& sparse_matrix);
@@ -88,6 +82,7 @@ private:
     const std::vector<EmuNetwork> networks_;
     const std::vector<EmuAndMid> input_mids_;
     const std::vector<Emu> measured_isotopes_;
+    std::vector<NetworkEmu> all_known_emus_;
 
     // number of known/unknown emus in the i'th network
     std::vector<int> unknown_size_; //
