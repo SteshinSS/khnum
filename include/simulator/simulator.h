@@ -1,63 +1,108 @@
 #pragma once
 
 #include <vector>
+#include <set>
 
+#include "simulator/flux_combination.h"
 #include "utilities/emu.h"
 #include "utilities/emu_and_mid.h"
 #include "utilities/reaction.h"
 #include "utilities/matrix.h"
+#include "utilities/problem.h"
+
 
 
 namespace khnum {
+
+struct SimulatorResult {
+    std::vector<EmuAndMid> simulated_mids;
+    Matrix jacobian;
+};
+
 class Simulator {
 public:
-    Simulator(const std::vector<EmuNetwork> &networks, const std::vector<EmuAndMid> &all_known_emus,
-              const std::vector<Emu> &measured_isotopes);
+    Simulator(const SimulatorParameters& parameters);
 
-    std::vector<EmuAndMid> CalculateMids(const std::vector<Flux>& fluxes);
-
-private:
-
-    static int FindNetworkSize(const EmuNetwork &network);
-    std::vector<EmuAndMid> SelectMeasuredMID();
-
-    void SolveOneNetwork(const EmuNetwork &network);
-
-    void FillEmuLists(std::vector<Emu> &unknown_emus,
-                      std::vector<EmuAndMid> &known_emus,
-                      const EmuNetwork &network);
-
-    void CheckIsEmuKnown(const Emu &emu, const std::vector<EmuAndMid> &where_find_emu_list,
-                         std::vector<EmuAndMid> &known_emus, std::vector<Emu> &unknown_emus);
-
-    static const Mid *FindMid(const Emu &emu,
-                              const std::vector<EmuAndMid> &mids);
-
-    EmuAndMid ConvolveEmu(const EmuReactionSide &convolve_reaction);
-
-    static Matrix FormYMatrix(const std::vector<EmuAndMid> &known_emus,
-                              const int current_size);
-
-    void FillABMatrices(Matrix &A, Matrix &B,
-                        const EmuNetwork &network,
-                        const std::vector<EmuAndMid> &known_emus,
-                        const std::vector<Emu> &unknown_emus);
-
-    static int FindUnknownEmuPosition(const Emu &emu,
-                                      const std::vector<Emu>& unknown_emus);
-
-    static int FindKnownEmuPosition(const Emu &emu,
-                                    const std::vector<EmuAndMid>& known_emus);
-
-    void AppendNewMids(const Matrix &X,
-                       const std::vector<Emu> &unknown_emus,
-                       const int current_size);
+    SimulatorResult CalculateMids(const std::vector<Flux> &fluxes);
 
 private:
-    std::vector<Flux> fluxes_;
+    // Preprocessing functions
+    void FillEmuLists(std::vector<Emu> &unknown_emus, std::vector<Emu> &known_emus,
+                      std::vector<Convolution> &convolutions);
+
+    void CheckAndInsertEmu(const Emu &emu, std::vector<Emu> &known_emus, std::vector<Emu> &unknown_emus);
+
+    void InsertIntoAllKnownEmus(std::vector<Emu>& unknown_emus);
+
+    void FillFinalEmu(const std::vector<Emu>& unknown_emus);
+
+    Convolution ConvolveReaction(const EmuReaction& reaction);
+
+    void CreateSymbolicMatrices(const std::vector<Emu>& unknown_emus,
+                                const std::vector<Emu>& known_emus,
+                                const std::vector<Convolution>& convolutions);
+
+    int FindUnknownEmuPosition(const Emu &emu,
+                               const std::vector<Emu>& unknown_emus);
+
+    int FindKnownEmuPosition(const Emu &emu,
+                             const std::vector<Emu>& known_emus);
+
+    void ConvertToSparseMatrix(const std::vector<std::vector<FluxCombination>>& dense_matrix,
+                               std::vector<FluxCombination>& sparse_matrix);
+
+    int FindNetworkSize();
+
+    // Calculations functions
+    Matrix GenerateFluxMatrix(const std::vector<FluxCombination>& symbolic_matrix,
+                              const std::vector<Flux>& fluxes,
+                              const int cols);
+
+    Matrix GenerateYMatrix(const std::vector<std::vector<Mid>> &known_mids);
+
+    void SaveNewEmus(const Matrix &X, std::vector<std::vector<Mid>> &known_mids, std::vector<EmuAndMid>& result);
+
+
+    Matrix GenerateDiffFluxMatrix(const std::vector<FluxCombination>& symbolic_matrix,
+                                                int cols,
+                                                int id, int position);
+
+    Matrix GenerateDiffYMatrix(const std::vector<std::vector<Mid>>& known_d_mids,
+                                             std::vector<std::vector<Mid>>& known_mids);
+
+private:
+    size_t network_;
+    Matrix nullspace_;
+    const std::vector<int> id_to_pos_;
+    const std::vector<int>& free_fluxes_id_;
+    bool use_analytic_jacobian_;
+
+
+private:
     const std::vector<EmuNetwork> networks_;
     const std::vector<EmuAndMid> input_mids_;
-    std::vector<EmuAndMid> all_known_emus_;
     const std::vector<Emu> measured_isotopes_;
+    std::vector<NetworkEmu> all_known_emus_;
+
+    // number of known/unknown emus in the i'th network
+    std::vector<int> unknown_size_; //
+    std::vector<int> known_size_; //
+    std::vector<int> network_size_;
+
+    std::vector<int> depended_flux_positions_;
+
+    std::vector<std::vector<FluxCombination>> symbolic_Ai_; //
+    std::vector<std::vector<FluxCombination>> symbolic_Bi_; //
+
+    // This forms Y matrix
+    std::vector<std::vector<PositionOfKnownEmu>> mids_Yi_; //
+    std::vector<std::vector<Convolution>> convolutions_;  //
+
+    // vector usefull_emu_[i] contains positions of Xi emus, which are using later
+    std::vector<std::vector<int>> usefull_emus_; //
+
+    std::vector<std::vector<FinalEmu>> final_emus_;
+
 };
 } // namespace khnum
+

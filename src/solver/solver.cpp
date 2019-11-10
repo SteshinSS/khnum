@@ -5,7 +5,7 @@
 #include <ctime>
 #include "alglib/optimization.h"
 
-#include "simulator/new_simulator.h"
+#include "simulator/simulator.h"
 #include "utilities/debug_utills/debug_prints.h"
 #include "utilities/get_eigen_vec_from_alglib_vec.h"
 
@@ -14,7 +14,7 @@ namespace khnum {
 
 
 Solver::Solver(const Problem &problem) :
-            new_simulator_(problem.simulator_parameters_) {
+    simulator_(problem.simulator_parameters_) {
     reactions_ = problem.reactions;
     nullspace_ = problem.nullspace;
     measured_mids_ = problem.measurements;
@@ -212,7 +212,7 @@ void Solver::FillJacobian(alglib::real_2d_array &jac) {
 void Solver::CalculateResidual(const alglib::real_1d_array &free_fluxes,
                                alglib::real_1d_array &residuals) {
     std::vector<Flux> calculated_fluxes = CalculateAllFluxesFromFree(free_fluxes);
-    SimulatorResult result = new_simulator_.CalculateMids(calculated_fluxes);
+    SimulatorResult result = simulator_.CalculateMids(calculated_fluxes);
 
     last_jacobian_ = result.jacobian;
 
@@ -269,7 +269,7 @@ double Solver::GetSSR(const alglib::real_1d_array &residuals) {
 
 void Solver::PrintFinalMessage(const alglib::real_1d_array &free_fluxes) {
     std::vector<Flux> final_all_fluxes = CalculateAllFluxesFromFree(free_fluxes);
-    SimulatorResult result = new_simulator_.CalculateMids(final_all_fluxes);
+    SimulatorResult result = simulator_.CalculateMids(final_all_fluxes);
     alglib::real_1d_array residuals;
     residuals.setlength(measurements_count_);
     Fillf0Array(residuals, result.simulated_mids);

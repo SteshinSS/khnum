@@ -6,7 +6,7 @@
 #include "alglib/optimization.h"
 #include "utilities/problem.h"
 #include "simulator/simulator.h"
-#include "simulator/new_simulator.h"
+#include "simulator/simulator.h"
 
 
 namespace khnum {
@@ -78,7 +78,7 @@ public:
 
      std::vector<alglib::real_1d_array> all_solutions_;
 
-     NewSimulator new_simulator_;
+     Simulator simulator_;
 
      Matrix last_jacobian_;
 };

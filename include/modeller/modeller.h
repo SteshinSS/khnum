@@ -39,7 +39,7 @@ private:
     Matrix stoichiometry_matrix_;
     std::vector<EmuAndMid> input_substrate_mids_;
     std::vector<EmuNetwork> emu_networks_;
-    std::vector<int> id_to_pos_;
+    std::vector<int> id_to_position_in_depended_fluxes_;
 
     int measurements_count_ = 0;
 };

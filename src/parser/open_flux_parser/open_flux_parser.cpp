@@ -35,7 +35,6 @@ void ParserOpenFlux::ParseExcludedMetabolites() {
 
 void ParserOpenFlux::ParseMeasuredIsotopes() {
     const std::string measured_isotopes_path = path_ + "/measured_isotopes.txt";
-
     std::vector<std::string> raw_measured_isotopes = open_flux_parser::GetLines(measured_isotopes_path);
     measured_isotopes_ = open_flux_parser::ParseMeasuredIsotopes(raw_measured_isotopes);
 }

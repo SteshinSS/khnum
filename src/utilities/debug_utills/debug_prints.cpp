@@ -65,20 +65,40 @@ void PrintReactions(const std::vector<Reaction>& reactions) {
 
 void PrintReaction(const Reaction& reaction) {
     std::cout << reaction.id << " " << reaction.name << " ";
+    int left_counter = 0;
     for (Substrate sub : reaction.chemical_equation.left) {
-        std::cout << sub.substrate_coefficient_ << sub.name << " + ";
+        std::cout << sub.substrate_coefficient_ << " " << sub.name;
+        ++left_counter;
+        if (left_counter != reaction.chemical_equation.left.size()) {
+            std::cout << " + ";
+        }
     }
     std::cout << " = ";
+    int right_counter = 0;
     for (Substrate sub : reaction.chemical_equation.right) {
-        std::cout << sub.substrate_coefficient_ << sub.name << " + ";
+        std::cout << sub.substrate_coefficient_ << " " << sub.name;
+        ++right_counter;
+        if (right_counter != reaction.chemical_equation.right.size()) {
+            std::cout << " + ";
+        }
     }
     std::cout << ", ";
+    int left_atom_counter = 0;
     for (Substrate sub : reaction.chemical_equation.left) {
-        std::cout << sub.atom_coefficient_ << sub.formula << " + ";
+        std::cout << sub.atom_coefficient_ << " " << sub.formula;
+        ++left_atom_counter;
+        if (left_atom_counter != reaction.chemical_equation.left.size()) {
+            std::cout << " + ";
+        }
     }
     std::cout << " = ";
+    int right_atom_counter = 0;
     for (Substrate sub : reaction.chemical_equation.right) {
-        std::cout << sub.atom_coefficient_ << sub.formula << " + ";
+        std::cout << sub.atom_coefficient_ << " " << sub.formula;
+        ++right_atom_counter;
+        if (right_atom_counter != reaction.chemical_equation.right.size()) {
+            std::cout << " + ";
+        }
     }
     std::cout << ", ";
     if (reaction.type == ReactionType::Irreversible) {
