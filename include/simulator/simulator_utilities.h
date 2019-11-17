@@ -1,0 +1,41 @@
+#pragma once
+
+#include <vector>
+
+#include "utilities/matrix.h"
+#include "simulator/flux_combination.h"
+
+namespace khnum {
+namespace simulator_utilities {
+void FillFluxMatrix(const std::vector<FluxCombination> &symbolic_matrix,
+                    const std::vector<Flux> &fluxes,
+                    Matrix &matrix_out);
+
+void FillYMatrix(const std::vector<PositionOfSavedEmu> &Y_data,
+                 const std::vector<EmuAndMid> &input_mids,
+                 const std::vector<std::vector<Mid>> &saved_mids,
+                 const std::vector<Convolution> &convolutions,
+                 Matrix &Y_out);
+
+void SaveNewEmus(const Matrix &X,
+                 const std::vector<int> &usefull_emus,
+                 const std::vector<FinalEmu> &final_emus,
+                 std::vector<Mid> &saved_mids_out,
+                 std::vector<EmuAndMid> &result_out);
+
+Mid ConvolvePartialDiff(const Convolution& convolution,
+                        const std::vector<std::vector<Mid>>& known_d_mids,
+                        const std::vector<EmuAndMid>& input_mids,
+                        const std::vector<std::vector<Mid>>& saved_mids,
+                        int mid_size,
+                        int diff_position);
+
+void FillDiffYMatrix(const std::vector<PositionOfSavedEmu>& Y_data,
+                     const std::vector<std::vector<Mid>>& known_d_mids,
+                     const std::vector<Convolution>& convolutions,
+                     const std::vector<EmuAndMid>& input_mids,
+                     const std::vector<std::vector<Mid>>& saved_mids,
+                     Matrix& Y_out);
+
+}
+}

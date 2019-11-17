@@ -17,7 +17,7 @@ struct SimulatorParameters {
     Matrix nullspace;
     std::vector<int> id_to_pos;
     std::vector<int> free_fluxes_id;
-    bool use_analytic_jacobian = false;
+    bool use_analytic_jacobian = true;
 };
 
 struct Problem {

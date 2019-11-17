@@ -78,7 +78,7 @@ public:
 
      std::vector<alglib::real_1d_array> all_solutions_;
 
-     Simulator simulator_;
+     OldSimulator simulator_;
 
      Matrix last_jacobian_;
 };

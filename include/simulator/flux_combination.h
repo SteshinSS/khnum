@@ -22,13 +22,13 @@ bool compare(const FluxCombination& lhs, const FluxCombination& rhs);
 
 
 // Yi contains of emus from the mids_Yi_[network][position]
-struct PositionOfKnownEmu {
+struct PositionOfSavedEmu {
     int network;
     int position;
 };
 
 struct Convolution {
-    std::vector<PositionOfKnownEmu> elements;
+    std::vector<PositionOfSavedEmu> elements;
     int flux_id;
 };
 
@@ -50,5 +50,5 @@ struct FinalEmu {
     int position_in_result;
 };
 
-bool operator==(const PositionOfKnownEmu& lhs, const PositionOfKnownEmu& rhs);
+bool operator==(const PositionOfSavedEmu& lhs, const PositionOfSavedEmu& rhs);
 } // namespace khnum

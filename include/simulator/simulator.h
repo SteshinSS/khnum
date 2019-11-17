@@ -19,9 +19,9 @@ struct SimulatorResult {
     Matrix jacobian;
 };
 
-class Simulator {
+class OldSimulator {
 public:
-    Simulator(const SimulatorParameters& parameters);
+    OldSimulator(const SimulatorParameters& parameters);
 
     SimulatorResult CalculateMids(const std::vector<Flux> &fluxes);
 
@@ -95,7 +95,7 @@ private:
     std::vector<std::vector<FluxCombination>> symbolic_Bi_; //
 
     // This forms Y matrix
-    std::vector<std::vector<PositionOfKnownEmu>> mids_Yi_; //
+    std::vector<std::vector<PositionOfSavedEmu>> mids_Yi_; //
     std::vector<std::vector<Convolution>> convolutions_;  //
 
     // vector usefull_emu_[i] contains positions of Xi emus, which are using later
