@@ -11,19 +11,14 @@
 #include "utilities/problem.h"
 
 
-
+/*
 namespace khnum {
-
-struct SimulatorResult {
-    std::vector<EmuAndMid> simulated_mids;
-    Matrix jacobian;
-};
 
 class OldSimulator {
 public:
     OldSimulator(const SimulatorParameters& parameters);
 
-    SimulatorResult CalculateMids(const std::vector<Flux> &fluxes);
+    void CalculateMids(const std::vector<Flux> &fluxes);
 
 private:
     // Preprocessing functions
@@ -106,3 +101,4 @@ private:
 };
 } // namespace khnum
 
+*/

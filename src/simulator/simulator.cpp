@@ -6,7 +6,7 @@
 #include <iostream>
 #include <tuple>
 #include <set>
-
+/*
 
 namespace khnum {
 
@@ -488,3 +488,4 @@ Matrix OldSimulator::GenerateDiffYMatrix(const std::vector<std::vector<Mid>>& kn
 }
 
 } // namespace khnum
+*/

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-#include <alglib/ap.h>
 
 #include "utilities/emu_and_mid.h"
 #include "utilities/matrix.h"
@@ -37,13 +36,20 @@ struct SimulatorNetworkData {
 
 class NewSimulator {
 public:
+    NewSimulator(const std::vector<SimulatorNetworkData>& networks,
+                 const std::vector<EmuAndMid>& input_mids,
+                 const size_t total_free_fluxes);
+
     SimulatorResult CalculateMids(const std::vector<Flux> &fluxes);
 
 private:
-    const size_t total_networks;
-    const size_t total_free_fluxes;
-    const size_t total_measurements;
+    const size_t total_networks_;
+    const size_t total_free_fluxes_;
     const std::vector<EmuAndMid> input_mids_;
     std::vector<SimulatorNetworkData> networks_;
+
+    std::vector<EmuAndMid> simulated_mids_;
+    std::vector<std::vector<EmuAndMid>> diff_results_;
+
 };
 } // namespace khnum

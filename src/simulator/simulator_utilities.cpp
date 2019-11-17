@@ -73,31 +73,6 @@ void SaveNewEmus(const Matrix& X,
     }
 }
 
-Mid ConvolvePartialDiff(const Convolution& convolution,
-                        const std::vector<std::vector<Mid>>& known_d_mids,
-                        const std::vector<EmuAndMid>& input_mids,
-                        const std::vector<std::vector<Mid>>& saved_mids,
-                        int mid_size,
-                        int diff_position) {
-    Mid mid_part(1, 1.0);
-    for (int j = 0; j < convolution.elements.size(); ++j) {
-        const PositionOfSavedEmu& emu = convolution.elements[j];
-        if (diff_position == j) {
-            if (emu.network == -1) {
-                return std::vector<double> (mid_size, 0.0);
-            }
-            mid_part = mid_part * known_d_mids[emu.network][emu.position];
-        } else {
-            if (emu.network == -1) {
-                mid_part = mid_part * input_mids[emu.position].mid;
-            } else {
-                mid_part = mid_part * saved_mids[emu.network][emu.position];
-            }
-
-        }
-    }
-    return mid_part;
-}
 
 void FillDiffYMatrix(const std::vector<PositionOfSavedEmu>& Y_data,
                      const std::vector<std::vector<Mid>>& known_d_mids,
@@ -135,5 +110,31 @@ void FillDiffYMatrix(const std::vector<PositionOfSavedEmu>& Y_data,
         ++position;
     }
 }
+
+Mid ConvolvePartialDiff(const Convolution& convolution,
+                        const std::vector<std::vector<Mid>>& known_d_mids,
+                        const std::vector<EmuAndMid>& input_mids,
+                        const std::vector<std::vector<Mid>>& saved_mids,
+                        int mid_size,
+                        int diff_position) {
+    Mid mid_part(1, 1.0);
+    for (int j = 0; j < convolution.elements.size(); ++j) {
+        const PositionOfSavedEmu& emu = convolution.elements[j];
+        if (diff_position == j) {
+            if (emu.network == -1) {
+                return std::vector<double> (mid_size, 0.0);
+            }
+            mid_part = mid_part * known_d_mids[emu.network][emu.position];
+        } else {
+            if (emu.network == -1) {
+                mid_part = mid_part * input_mids[emu.position].mid;
+            } else {
+                mid_part = mid_part * saved_mids[emu.network][emu.position];
+            }
+
+        }
+    }
+    return mid_part;
 }
-}
+} // namespace simulator_utilities
+} // namespace khnum

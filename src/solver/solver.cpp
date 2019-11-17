@@ -5,16 +5,19 @@
 #include <ctime>
 #include "alglib/optimization.h"
 
-#include "simulator/simulator.h"
+#include "simulator/new_simulator.h"
 #include "utilities/debug_utills/debug_prints.h"
 #include "utilities/get_eigen_vec_from_alglib_vec.h"
+#include "simulator/generator.h"
+
 
 
 namespace khnum {
 
 
-Solver::Solver(const Problem &problem) :
-    simulator_(problem.simulator_parameters_) {
+Solver::Solver(const Problem &problem) {
+    SimulatorGenerator generator(problem.simulator_parameters_);
+    new_simulator_.emplace(generator.Generate());
     reactions_ = problem.reactions;
     nullspace_ = problem.nullspace;
     measured_mids_ = problem.measurements;
@@ -191,17 +194,11 @@ void AlglibCallback(const alglib::real_1d_array &free_fluxes,
 
 
 void Solver::FillJacobian(alglib::real_2d_array &jac) {
-    for (int i = 0; i < last_jacobian_.rows(); ++i) {
-        for (int j = 0; j < last_jacobian_.cols(); ++j) {
-            jac(j, i) = last_jacobian_(i, j);
-        }
-    }
-
     int total_residuals = 0;
     for (size_t isotope = 0; isotope < measured_mids_.size(); ++isotope) {
         for (size_t mass_shift = 0; mass_shift < measured_mids_[isotope].errors.size(); ++mass_shift) {
-            for (int flux = 0; flux < last_jacobian_.cols(); ++flux) {
-                jac(total_residuals, flux) /= measured_mids_[isotope].errors[mass_shift];
+            for (int flux = 0; flux < diff_results_.size(); ++flux) {
+                jac(total_residuals, flux) = diff_results_[flux][isotope].mid[mass_shift] / measured_mids_[isotope].errors[mass_shift];
             }
             ++total_residuals;
         }
@@ -212,9 +209,9 @@ void Solver::FillJacobian(alglib::real_2d_array &jac) {
 void Solver::CalculateResidual(const alglib::real_1d_array &free_fluxes,
                                alglib::real_1d_array &residuals) {
     std::vector<Flux> calculated_fluxes = CalculateAllFluxesFromFree(free_fluxes);
-    SimulatorResult result = simulator_.CalculateMids(calculated_fluxes);
+    SimulatorResult result = new_simulator_->CalculateMids(calculated_fluxes);
 
-    last_jacobian_ = result.jacobian;
+    diff_results_ = result.diff_results;
 
     Fillf0Array(residuals, result.simulated_mids);
 }
@@ -269,7 +266,7 @@ double Solver::GetSSR(const alglib::real_1d_array &residuals) {
 
 void Solver::PrintFinalMessage(const alglib::real_1d_array &free_fluxes) {
     std::vector<Flux> final_all_fluxes = CalculateAllFluxesFromFree(free_fluxes);
-    SimulatorResult result = simulator_.CalculateMids(final_all_fluxes);
+    SimulatorResult result = new_simulator_->CalculateMids(final_all_fluxes);
     alglib::real_1d_array residuals;
     residuals.setlength(measurements_count_);
     Fillf0Array(residuals, result.simulated_mids);
