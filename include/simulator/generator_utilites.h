@@ -6,22 +6,11 @@
 #include "utilities/matrix.h"
 #include "utilities/emu.h"
 #include "simulator/flux_combination.h"
+#include "simulator/simulation_data.h"
 
 
 namespace khnum {
 namespace generator_utilites {
-struct GeneratorNetworkData {
-    int network_num;
-    std::vector<Emu> unknown_emus;
-    std::vector<Emu> known_emus;
-    std::vector<Convolution> convolutions;
-    std::vector<FinalEmu> final_emus;
-    std::vector<PositionOfSavedEmu> Y_data;
-    std::vector<FluxCombination> symbolic_A;
-    std::vector<FluxCombination> symbolic_B;
-    std::unordered_map<int, int> reaction_to_convolution;
-};
-
 void FillEmuLists(const std::vector<EmuReaction>& reactions,
                   std::vector<NetworkEmu>& all_known_emus,
                   GeneratorNetworkData& network_data,

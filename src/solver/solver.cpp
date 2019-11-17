@@ -5,7 +5,7 @@
 #include <ctime>
 #include "alglib/optimization.h"
 
-#include "simulator/new_simulator.h"
+#include "simulator/simulator.h"
 #include "utilities/debug_utills/debug_prints.h"
 #include "utilities/get_eigen_vec_from_alglib_vec.h"
 #include "simulator/generator.h"
@@ -30,7 +30,7 @@ Solver::Solver(const Problem &problem) {
     upper_bounds_.setlength(nullity_);
 
     iteration_ = 0;
-    iteration_total_ = 1000;
+    iteration_total_ = 100;
     reactions_num_ = reactions_.size();
 
 

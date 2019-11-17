@@ -5,7 +5,7 @@
 
 #include "alglib/optimization.h"
 #include "utilities/problem.h"
-#include "simulator/new_simulator.h"
+#include "simulator/simulator.h"
 
 
 namespace khnum {
@@ -78,7 +78,7 @@ public:
 
      std::vector<alglib::real_1d_array> all_solutions_;
 
-     std::optional<NewSimulator> new_simulator_;
+     std::optional<Simulator> new_simulator_;
 
     std::vector<std::vector<EmuAndMid>> diff_results_;
 };

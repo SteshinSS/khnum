@@ -7,6 +7,7 @@
 
 #include "utilities/emu.h"
 #include "simulator/flux_combination.h"
+#include "simulator/simulation_data.h"
 #include "utilities/matrix.h"
 
 

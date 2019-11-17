@@ -7,7 +7,7 @@ option(BUILD_TESTS "Determines whether to build tests." OFF)
 
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 ELSE()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
 ENDIF()
