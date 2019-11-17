@@ -30,7 +30,7 @@ Solver::Solver(const Problem &problem) {
     upper_bounds_.setlength(nullity_);
 
     iteration_ = 0;
-    iteration_total_ = 100;
+    iteration_total_ = 1000;
     reactions_num_ = reactions_.size();
 
 
@@ -97,7 +97,7 @@ void Solver::SetOptimizationParameters() {
 
     if (use_analytic_gradient_) {
         alglib::minlmcreatevj(nullity_, measurements_count_, free_fluxes_, state_);
-        alglib::minlmoptguardgradient(state_, 0.001);
+        // alglib::minlmoptguardgradient(state_, 0.001);
     } else {
         alglib::minlmcreatev(nullity_, measurements_count_, free_fluxes_, 0.001, state_);
     }
@@ -179,8 +179,10 @@ alglib::real_1d_array Solver::RunOptimization() {
 void JacobianCallback(const alglib::real_1d_array &free_fluxes,
                       alglib::real_1d_array &fi,
                       alglib::real_2d_array &jac, void *ptr) {
-    AlglibCallback(free_fluxes, fi, ptr);
     Solver* solver = static_cast<Solver*>(ptr);
+    solver->in_jacobian = true;
+    AlglibCallback(free_fluxes, fi, ptr);
+    solver->in_jacobian = false;
     solver->FillJacobian(jac);
 }
 
@@ -209,7 +211,7 @@ void Solver::FillJacobian(alglib::real_2d_array &jac) {
 void Solver::CalculateResidual(const alglib::real_1d_array &free_fluxes,
                                alglib::real_1d_array &residuals) {
     std::vector<Flux> calculated_fluxes = CalculateAllFluxesFromFree(free_fluxes);
-    SimulatorResult result = new_simulator_->CalculateMids(calculated_fluxes);
+    SimulatorResult result = new_simulator_->CalculateMids(calculated_fluxes, in_jacobian);
 
     diff_results_ = result.diff_results;
 
@@ -266,7 +268,7 @@ double Solver::GetSSR(const alglib::real_1d_array &residuals) {
 
 void Solver::PrintFinalMessage(const alglib::real_1d_array &free_fluxes) {
     std::vector<Flux> final_all_fluxes = CalculateAllFluxesFromFree(free_fluxes);
-    SimulatorResult result = new_simulator_->CalculateMids(final_all_fluxes);
+    SimulatorResult result = new_simulator_->CalculateMids(final_all_fluxes, in_jacobian);
     alglib::real_1d_array residuals;
     residuals.setlength(measurements_count_);
     Fillf0Array(residuals, result.simulated_mids);

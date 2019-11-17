@@ -55,6 +55,7 @@ private:
     void FillJacobian(alglib::real_2d_array &jac);
 
 public:
+     bool in_jacobian = false;
      int iteration_total_;
      int iteration_;
      bool use_analytic_gradient_ = false;

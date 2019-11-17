@@ -3,7 +3,7 @@
 #include "simulator/simulator_utilities.h"
 
 namespace khnum {
-SimulatorResult NewSimulator::CalculateMids(const std::vector<Flux> &fluxes) {
+SimulatorResult NewSimulator::CalculateMids(const std::vector<Flux> &fluxes, bool calculate_jacobian) {
     std::vector<std::vector<Mid>> saved_mids(total_networks_);
 
     // contains MID's derivative at [free_flux][network][mid]
@@ -22,6 +22,9 @@ SimulatorResult NewSimulator::CalculateMids(const std::vector<Flux> &fluxes) {
         const Matrix X = network.A.householderQr().solve(BY);
         simulator_utilities::SaveNewEmus(X, network.usefull_emus, network.final_emus, saved_mids[network_num], simulated_mids_);
 
+        if (!calculate_jacobian) {
+            continue;
+        }
         for (int flux = 0; flux < network.derivatives.size(); ++flux) {
             DerivativeData& derivatives = network.derivatives[flux];
             simulator_utilities::FillDiffYMatrix(network.Y_data, saved_diff_mids[flux], network.convolutions,

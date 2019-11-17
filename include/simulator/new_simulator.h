@@ -40,7 +40,7 @@ public:
                  const std::vector<EmuAndMid>& input_mids,
                  const size_t total_free_fluxes);
 
-    SimulatorResult CalculateMids(const std::vector<Flux> &fluxes);
+    SimulatorResult CalculateMids(const std::vector<Flux> &fluxes, bool calculate_jacobian);
 
 private:
     const size_t total_networks_;
