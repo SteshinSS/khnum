@@ -9,23 +9,30 @@
 
 
 namespace khnum {
+struct ReactionsName {
+    int id;
+    std::string name;
+};
 
-struct SimulatorParameters {
+struct GeneratorParameters {
     std::vector<EmuNetwork> networks;
     std::vector<EmuAndMid> input_mids;
     std::vector<Emu> measured_isotopes;
     Matrix nullspace;
-    std::vector<int> id_to_pos;
+    std::vector<int> free_flux_id_to_nullspace_position;
     std::vector<int> free_fluxes_id;
-    bool use_analytic_jacobian = true;
 };
 
 struct Problem {
-    std::vector<Reaction> reactions;
+    std::vector<ReactionsName> reactions;
+    size_t reactions_total;
     std::vector<Emu> measured_isotopes;
     Matrix nullspace;
     std::vector<Measurement> measurements;
     int measurements_count;
-    SimulatorParameters simulator_parameters_;
+    bool use_analytic_jacobian = true;
+    std::vector<double> lower_bounds;
+    std::vector<double> upper_bounds;
+    GeneratorParameters simulator_parameters_;
 };
 } //namesapce khnum

@@ -32,8 +32,7 @@ Matrix CreateStoichiometryMatrix(const std::vector<Reaction> &reactions,
                 std::string current_metabolite_name = metabolite_list.at(metabolite);
                 stoichiometry_matrix(metabolite, stoichiometry_reaction_number) = GetTotalCoefficient(
                     reaction.chemical_equation,
-                    current_metabolite_name,
-                    reaction.id);
+                    current_metabolite_name);
             }
             ++stoichiometry_reaction_number;
 
@@ -45,7 +44,7 @@ Matrix CreateStoichiometryMatrix(const std::vector<Reaction> &reactions,
 }
 
 
-double GetTotalCoefficient(const ChemicalEquation &chemical_equation, const std::string &metabolite, const int id) {
+double GetTotalCoefficient(const ChemicalEquation &chemical_equation, const std::string &metabolite) {
     double result{0.0};
     for (const Substrate &substrate : chemical_equation.left) {
         if (substrate.name == metabolite) {

@@ -86,6 +86,7 @@ void FillDiffYMatrix(const std::vector<PositionOfSavedEmu>& Y_data,
         if (known_emu.network == -1) {
             // Do nothing. Because:
             // mid = std::vector<double> (Y_out.cols(), 0.0);
+            // and Y_out(i, ...) is already zero
         } else {
             mid = known_d_mids[known_emu.network][known_emu.position];
         }
@@ -97,9 +98,14 @@ void FillDiffYMatrix(const std::vector<PositionOfSavedEmu>& Y_data,
     size_t position = Y_data.size();
     for (const Convolution& convolution : convolutions) {
         Mid mid = std::vector<double> (Y_out.cols(), 0.0);
-        for (int diff_position = 0; diff_position < convolution.elements.size(); ++diff_position) {
-            Mid mid_part = ConvolvePartialDiff(convolution, known_d_mids, input_mids, saved_mids, Y_out.cols(), diff_position);
-            for (int j = 0; j < mid.size(); ++j) {
+        for (size_t diff_position = 0; diff_position < convolution.elements.size(); ++diff_position) {
+            Mid mid_part = ConvolvePartialDiff(convolution,
+                                               known_d_mids,
+                                               input_mids,
+                                               saved_mids,
+                                               Y_out.cols(),
+                                               diff_position);
+            for (size_t j = 0; j < mid.size(); ++j) {
                 mid[j] += mid_part[j];
             }
         }
@@ -115,12 +121,12 @@ Mid ConvolvePartialDiff(const Convolution& convolution,
                         const std::vector<std::vector<Mid>>& known_d_mids,
                         const std::vector<EmuAndMid>& input_mids,
                         const std::vector<std::vector<Mid>>& saved_mids,
-                        int mid_size,
-                        int diff_position) {
+                        size_t mid_size,
+                        size_t diff_position) {
     Mid mid_part(1, 1.0);
-    for (int j = 0; j < convolution.elements.size(); ++j) {
-        const PositionOfSavedEmu& emu = convolution.elements[j];
-        if (diff_position == j) {
+    for (size_t i = 0; i < convolution.elements.size(); ++i) {
+        const PositionOfSavedEmu& emu = convolution.elements[i];
+        if (diff_position == i) {
             if (emu.network == -1) {
                 return std::vector<double> (mid_size, 0.0);
             }

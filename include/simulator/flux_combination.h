@@ -45,7 +45,6 @@ struct NetworkEmu {
 
 struct FinalEmu {
     Emu emu;
-    int network;
     int order_in_X;
     int position_in_result;
 };

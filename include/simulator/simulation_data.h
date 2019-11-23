@@ -7,8 +7,12 @@
 #include "simulator/flux_combination.h"
 
 namespace khnum {
+
+// contains result of simulation
 struct SimulatorResult {
     std::vector<EmuAndMid> simulated_mids;
+
+    // contains derivative of i'th mid by v free flux at [v][i]
     std::vector<std::vector<EmuAndMid>> diff_results;
 };
 
@@ -32,7 +36,6 @@ struct SimulatorNetworkData {
 };
 
 struct GeneratorNetworkData {
-    int network_num;
     std::vector<Emu> unknown_emus;
     std::vector<Emu> known_emus;
     std::vector<Convolution> convolutions;

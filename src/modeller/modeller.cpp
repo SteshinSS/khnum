@@ -40,6 +40,14 @@ void Modeller::CreateEmuNetworks() {
 
 void Modeller::CalculateFluxBounds() {
     modelling_utills::CalculateFluxBounds(reactions_, stoichiometry_matrix_);
+    int nullity = nullspace_.cols();
+
+    lower_bounds_.resize(nullity);
+    upper_bounds_.resize(nullity);
+    for (int i = 0; i < nullity; ++i) {
+        lower_bounds_[i] = reactions_[reactions_.size() - nullity + i].computed_lower_bound;
+        upper_bounds_[i] = reactions_[reactions_.size() - nullity + i].computed_upper_bound;
+    }
 }
 
 
@@ -51,8 +59,8 @@ void Modeller::CreateNullspaceMatrix() {
     stoichiometry_matrix_ = modelling_utills::CreateStoichiometryMatrix(reactions_, included_metabolites);
     nullspace_ = modelling_utills::GetNullspace(stoichiometry_matrix_, reactions_);
     id_to_position_in_depended_fluxes_.resize(reactions_.size());
-    const int isotopomer_balance_reactions_total = reactions_.size() - nullspace_.rows() - nullspace_.cols();
-    for (int i = 0; i < reactions_.size(); ++i) {
+    const size_t isotopomer_balance_reactions_total = reactions_.size() - nullspace_.rows() - nullspace_.cols();
+    for (size_t i = 0; i < reactions_.size(); ++i) {
         if (i < isotopomer_balance_reactions_total) {
             id_to_position_in_depended_fluxes_[reactions_[i].id] = -1;
         } else {
@@ -64,7 +72,7 @@ void Modeller::CreateNullspaceMatrix() {
         }
     }
 
-    for (int i = reactions_.size() - nullspace_.cols(); i < reactions_.size(); ++i) {
+    for (size_t i = reactions_.size() - nullspace_.cols(); i < reactions_.size(); ++i) {
         free_fluxes_id_.push_back(reactions_[i].id);
     }
 }
@@ -85,19 +93,30 @@ void Modeller::CheckModelForErrors() {
 
 Problem Modeller::GetProblem() {
     Problem problem;
-    problem.reactions = reactions_;
     problem.measured_isotopes = measured_isotopes_;
     problem.nullspace = nullspace_;
     problem.measurements = measurements_;
     problem.measurements_count = measurements_count_;
+    problem.lower_bounds = lower_bounds_;
+    problem.upper_bounds = upper_bounds_;
+    problem.reactions_total = reactions_.size();
 
-    SimulatorParameters& simulator_parameters = problem.simulator_parameters_;
+    GeneratorParameters& simulator_parameters = problem.simulator_parameters_;
     simulator_parameters.networks = emu_networks_;
     simulator_parameters.input_mids = input_substrate_mids_;
     simulator_parameters.measured_isotopes = measured_isotopes_;
     simulator_parameters.nullspace = nullspace_;
-    simulator_parameters.id_to_pos = id_to_position_in_depended_fluxes_;
+    simulator_parameters.free_flux_id_to_nullspace_position = id_to_position_in_depended_fluxes_;
     simulator_parameters.free_fluxes_id = free_fluxes_id_;
+
+    std::vector<ReactionsName> reactions_names;
+    for (const Reaction& reaction : reactions_) {
+        ReactionsName reaction_name;
+        reaction_name.id = reaction.id;
+        reaction_name.name = reaction.name;
+        reactions_names.push_back(reaction_name);
+    }
+    problem.reactions = reactions_names;
 
     return problem;
 }

@@ -21,8 +21,6 @@ public:
     std::vector<alglib::real_1d_array> GetResult();
 
 private:
-    void FillBoundVectors();
-
     void SetOptimizationParameters();
 
     // Set constraints so the fluxes always > 0
@@ -55,32 +53,27 @@ private:
     void FillJacobian(alglib::real_2d_array &jac);
 
 public:
-     bool in_jacobian = false;
-     int iteration_total_;
-     int iteration_;
-     bool use_analytic_gradient_ = false;
-
-     int nullity_;
-     int reactions_num_;
-     int measurements_count_;
-
-     std::vector<Reaction> reactions_;
-     Matrix nullspace_;
-     std::vector<Measurement> measured_mids_;
-
-     alglib::real_1d_array free_fluxes_;
-     alglib::real_1d_array lower_bounds_;
-     alglib::real_1d_array upper_bounds_;
-     std::vector<int> free_flux_id_;
-
-     alglib::minlmstate state_;
-     alglib::minlmreport report_;
-
-     std::vector<alglib::real_1d_array> all_solutions_;
-
-     std::optional<Simulator> new_simulator_;
-
+    bool in_jacobian = false;
+    int iteration_;
+    alglib::real_1d_array free_fluxes_;
+    alglib::minlmstate state_;
+    alglib::minlmreport report_;
+    std::vector<alglib::real_1d_array> all_solutions_;
+    std::optional<Simulator> new_simulator_;
     std::vector<std::vector<EmuAndMid>> diff_results_;
+
+    int nullity_;
+    int reactions_num_;
+    int measurements_count_;
+    int iteration_total_;
+    bool use_analytic_gradient_ = false;
+    std::vector<ReactionsName> reactions_;
+
+    Matrix nullspace_;
+    std::vector<Measurement> measured_mids_;
+
+    alglib::real_1d_array lower_bounds_;
+    alglib::real_1d_array upper_bounds_;
 };
 
 void AlglibCallback(const alglib::real_1d_array &free_fluxes,

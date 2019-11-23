@@ -4,14 +4,13 @@
 #include "simulator/simulation_data.h"
 
 namespace khnum {
-SimulatorGenerator::SimulatorGenerator(const SimulatorParameters& parameters) {
+SimulatorGenerator::SimulatorGenerator(const GeneratorParameters& parameters) {
     parameters_ = parameters;
 
     std::vector<std::vector<int>> usefull_emus(parameters.networks.size());
     std::vector<NetworkEmu> all_known_emus = InitializeInputEmus(parameters.input_mids);
-    for (int network_num = 0; network_num < parameters.networks.size(); ++network_num) {
+    for (size_t network_num = 0; network_num < parameters.networks.size(); ++network_num) {
         GeneratorNetworkData network_data;
-        network_data.network_num = network_num;
         const std::vector<EmuReaction>& reactions = parameters.networks[network_num];
 
         generator_utilites::FillEmuLists(reactions, all_known_emus, network_data, usefull_emus);
@@ -23,15 +22,15 @@ SimulatorGenerator::SimulatorGenerator(const SimulatorParameters& parameters) {
         simulator_network_data_.emplace_back(FillSimulatorNetworkData(network_data, network_size));
     }
 
-    for (int network_num = 0; network_num < parameters.networks.size(); ++network_num) {
-        for (int position : usefull_emus[network_num]) {
+    for (size_t network_num = 0; network_num < parameters.networks.size(); ++network_num) {
+        for (size_t position : usefull_emus[network_num]) {
             simulator_network_data_[network_num].usefull_emus.push_back(position);
         }
     }
 }
 
 Simulator SimulatorGenerator::Generate() {
-    return Simulator(simulator_network_data_, parameters_.input_mids, parameters_.free_fluxes_id.size());
+    return Simulator(simulator_network_data_, parameters_.input_mids, parameters_.measured_isotopes.size());
 }
 
 std::vector<NetworkEmu> SimulatorGenerator::InitializeInputEmus(const std::vector<EmuAndMid>& input_mids) const {
@@ -63,17 +62,17 @@ SimulatorNetworkData SimulatorGenerator::FillSimulatorNetworkData(const Generato
     simulator_network_data.Y = Matrix::Zero(network_data.known_emus.size() + network_data.convolutions.size(), network_size + 1);
 
     std::vector<DerivativeData> derivatives(parameters_.free_fluxes_id.size());
-    int position = 0;
+    size_t position = 0;
     for (int id : parameters_.free_fluxes_id) {
         derivatives[position].dA = generator_utilites::GenerateDiffFluxMatrix(network_data.symbolic_A,
                                                                               network_data.unknown_emus.size(),
                                                                               network_data.unknown_emus.size(),
-                                                                              id, position, parameters_.id_to_pos, parameters_.nullspace);
+                                                                              id, position, parameters_.free_flux_id_to_nullspace_position, parameters_.nullspace);
 
         derivatives[position].dB = generator_utilites::GenerateDiffFluxMatrix(network_data.symbolic_B,
                                                                               network_data.unknown_emus.size(),
                                                                               network_data.known_emus.size() + network_data.convolutions.size(),
-                                                                              id, position, parameters_.id_to_pos, parameters_.nullspace);
+                                                                              id, position, parameters_.free_flux_id_to_nullspace_position, parameters_.nullspace);
 
         derivatives[position].dY = Matrix::Zero(network_data.known_emus.size() + network_data.convolutions.size(), network_size + 1);
         ++position;

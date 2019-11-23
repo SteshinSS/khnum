@@ -41,6 +41,9 @@ private:
     std::vector<EmuNetwork> emu_networks_;
     std::vector<int> id_to_position_in_depended_fluxes_;
 
+    std::vector<double> lower_bounds_;
+    std::vector<double> upper_bounds_;
+
     int measurements_count_ = 0;
 };
 } // namespace khnum

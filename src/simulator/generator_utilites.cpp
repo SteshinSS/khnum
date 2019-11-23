@@ -19,7 +19,7 @@ void FillEmuLists(const std::vector<EmuReaction>& reactions,
                   GeneratorNetworkData& network_data,
                   std::vector<std::vector<int>>& usefull_emus) {
     std::set<Emu> seen_emus;
-    int reaction_num = 0;
+    size_t reaction_num = 0;
     for (const EmuReaction &reaction : reactions) {
         if (reaction.left.size() == 1) {
             if (seen_emus.find(reaction.left[0].emu) == seen_emus.end()) {
@@ -115,9 +115,9 @@ void CreateSymbolicMatrices(const std::vector<EmuReaction>& reactions,
     // B[unknown_size][known_size]
     std::vector<std::vector<FluxCombination>> B(unknown_size, std::vector<FluxCombination>(known_size));
 
-    int reaction_num = 0;
+    size_t reaction_num = 0;
     for (const EmuReaction &reaction : reactions) {
-        int position_of_product = FindUnknownEmuPosition(reaction.right.emu, unknown_emus);
+        size_t position_of_product = FindUnknownEmuPosition(reaction.right.emu, unknown_emus);
 
         {
             FluxAndCoefficient product;
@@ -213,7 +213,6 @@ void FillFinalEmu(const std::vector<Emu>& measured_isotopes,
         if (it != measured_isotopes.end()) {
             FinalEmu final_emu;
             final_emu.emu = emu;
-            final_emu.network = network_data.network_num;
             final_emu.order_in_X = i;
             final_emu.position_in_result = it - measured_isotopes.begin();
             network_data.final_emus.push_back(final_emu);

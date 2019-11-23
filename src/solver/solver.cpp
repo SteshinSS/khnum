@@ -18,21 +18,25 @@ namespace khnum {
 Solver::Solver(const Problem &problem) {
     SimulatorGenerator generator(problem.simulator_parameters_);
     new_simulator_.emplace(generator.Generate());
-    reactions_ = problem.reactions;
+    reactions_num_ = problem.reactions_total;
     nullspace_ = problem.nullspace;
     measured_mids_ = problem.measurements;
     measurements_count_ = problem.measurements_count;
-    use_analytic_gradient_ = problem.simulator_parameters_.use_analytic_jacobian;
+    use_analytic_gradient_ = problem.use_analytic_jacobian;
+    reactions_ = problem.reactions;
 
     nullity_ = nullspace_.cols();
     free_fluxes_.setlength(nullity_);
-    lower_bounds_.setlength(nullity_);
-    upper_bounds_.setlength(nullity_);
 
     iteration_ = 0;
-    iteration_total_ = 100;
-    reactions_num_ = reactions_.size();
+    iteration_total_ = 50;
 
+    lower_bounds_.setlength(nullity_);
+    upper_bounds_.setlength(nullity_);
+    for (int i = 0; i < nullity_; ++i) {
+        lower_bounds_[i] = problem.lower_bounds[i];
+        upper_bounds_[i] = problem.upper_bounds[i];
+    }
 
 }
 
@@ -43,8 +47,6 @@ std::vector<alglib::real_1d_array> Solver::GetResult() {
 
 
 void Solver::Solve() {
-    FillBoundVectors();
-
     std::random_device randomizer;
     std::mt19937 random_source(randomizer());
 
@@ -73,13 +75,6 @@ void Solver::Solve() {
 }
 
 
-void Solver::FillBoundVectors() {
-    for (int i = 0; i < nullity_; ++i) {
-        lower_bounds_[i] = reactions_[reactions_num_ - nullity_ + i].computed_lower_bound;
-        upper_bounds_[i] = reactions_[reactions_num_ - nullity_ + i].computed_upper_bound;
-    }
-}
-
 void Solver::GenerateInitialPoints(std::mt19937 &random_source) {
     std::uniform_real_distribution<> get_random_point(0.0, 1.0);
 
@@ -97,7 +92,7 @@ void Solver::SetOptimizationParameters() {
 
     if (use_analytic_gradient_) {
         alglib::minlmcreatevj(nullity_, measurements_count_, free_fluxes_, state_);
-        // alglib::minlmoptguardgradient(state_, 0.001);
+        alglib::minlmoptguardgradient(state_, 0.001);
     } else {
         alglib::minlmcreatev(nullity_, measurements_count_, free_fluxes_, 0.001, state_);
     }
@@ -134,7 +129,7 @@ void Solver::SetConstraints() {
 void Solver::PrintStartMessage() {
     std::cout << "Start " << iteration_ << " iteration from: " << std::endl;
     for (int i = 0; i < nullity_; ++i) {
-        std::cout << reactions_[reactions_num_ - nullity_ + i].name << " = " << free_fluxes_[i] << std::endl;
+        std::cout << reactions_[reactions_num_ - nullity_ + i].name << ": " <<  free_fluxes_[i] << std::endl;
     }
     std::cout << std::endl;
 }
@@ -162,6 +157,12 @@ alglib::real_1d_array Solver::RunOptimization() {
                 }
                 std::cout << std::endl;
             }
+
+            std::cout << "Fluxes: " << std::endl;
+            for (int i = 0; i < ogrep.badgradxbase.length(); ++i) {
+                std::cout << ogrep.badgradxbase(i) << "  ";
+            }
+            std::cout << std::endl;
         }
     } else {
         alglib::minlmoptimize(state_, AlglibCallback, nullptr, this, alglib::xdefault);
@@ -199,7 +200,7 @@ void Solver::FillJacobian(alglib::real_2d_array &jac) {
     int total_residuals = 0;
     for (size_t isotope = 0; isotope < measured_mids_.size(); ++isotope) {
         for (size_t mass_shift = 0; mass_shift < measured_mids_[isotope].errors.size(); ++mass_shift) {
-            for (int flux = 0; flux < diff_results_.size(); ++flux) {
+            for (size_t flux = 0; flux < diff_results_.size(); ++flux) {
                 jac(total_residuals, flux) = diff_results_[flux][isotope].mid[mass_shift] / measured_mids_[isotope].errors[mass_shift];
             }
             ++total_residuals;
