@@ -2,6 +2,7 @@
 
 #include "emu.h"
 #include "emu_and_mid.h"
+#include "utilities/matrix.h"
 
 #include <vector>
 
@@ -13,5 +14,6 @@ struct Measurement {
     Emu emu;
     Mid mid;
     Errors errors;
+    Matrix correction_matrix;
 };
 } // namespace khnum

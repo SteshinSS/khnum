@@ -2,6 +2,7 @@
 
 #include "parser/parser.h"
 #include "parser/open_flux_parser/open_flux_utills.h"
+#include "utilities/matrix.h"
 
 
 namespace khnum {
@@ -22,6 +23,8 @@ public:
     void ParseMeasuredIsotopes() override;
 
     void ParseMeasurements() override;
+
+    void ParseCorrectionMatrices() override;
 
     void ParseSubstrateInput() override;
 

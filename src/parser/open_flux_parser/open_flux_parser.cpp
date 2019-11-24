@@ -48,6 +48,20 @@ void ParserOpenFlux::ParseMeasurements() {
 }
 
 
+void ParserOpenFlux::ParseCorrectionMatrices() {
+    const std::string correction_matrices_path = path_ + "/correctionMatrices/";
+    for (Measurement& measurement : measurements_) {
+        std::string file = correction_matrices_path + open_flux_parser::GetMeasuredIsotopeName(measurement.emu) + ".txt";
+        try {
+            std::vector<std::string> raw_matrix = open_flux_parser::GetLines(file);
+            measurement.correction_matrix = open_flux_parser::ParseCorrectionMatrix(raw_matrix, delimiters_);
+        } catch (std::runtime_error& error) {
+            continue;
+        }
+    }
+}
+
+
 void ParserOpenFlux::ParseSubstrateInput() {
     const std::string input_substrates_path = path_ + "/substrate_input.csv";
     const std::vector<std::string>& raw_substrates = open_flux_parser::GetLines(input_substrates_path);

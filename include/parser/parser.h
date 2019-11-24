@@ -16,6 +16,8 @@ public:
 
     virtual void ParseMeasuredIsotopes() = 0;
 
+    virtual void ParseCorrectionMatrices() = 0;
+
     virtual void ParseMeasurements() = 0;
 
     virtual void ParseReactions() = 0;

@@ -22,6 +22,7 @@ void RunCli() {
         parser->ParseExcludedMetabolites();
         parser->ParseMeasuredIsotopes();
         parser->ParseMeasurements();
+        parser->ParseCorrectionMatrices();
         parser->ParseReactions();
         parser->ParseSubstrateInput();
 

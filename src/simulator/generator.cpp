@@ -15,7 +15,7 @@ SimulatorGenerator::SimulatorGenerator(const GeneratorParameters& parameters) {
 
         generator_utilites::FillEmuLists(reactions, all_known_emus, network_data, usefull_emus);
         generator_utilites::CreateSymbolicMatrices(reactions, network_data);
-        generator_utilites::FillFinalEmu(parameters.measured_isotopes, network_data);
+        generator_utilites::FillFinalEmu(parameters.measurements, network_data);
         generator_utilites::InsertIntoAllKnownEmus(network_data.unknown_emus, network_num, all_known_emus);
 
         int network_size = generator_utilites::FindNetworkSize(reactions);

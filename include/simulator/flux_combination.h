@@ -4,6 +4,7 @@
 
 #include "utilities/emu_and_mid.h"
 #include "utilities/reaction.h"
+#include "utilities/matrix.h"
 
 
 namespace khnum {
@@ -47,6 +48,7 @@ struct FinalEmu {
     Emu emu;
     int order_in_X;
     int position_in_result;
+    Matrix correction_matrix;
 };
 
 bool operator==(const PositionOfSavedEmu& lhs, const PositionOfSavedEmu& rhs);

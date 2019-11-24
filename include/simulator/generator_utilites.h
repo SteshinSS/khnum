@@ -7,6 +7,7 @@
 #include "utilities/emu.h"
 #include "simulator/flux_combination.h"
 #include "simulator/simulation_data.h"
+#include "utilities/measurement.h"
 
 
 namespace khnum {
@@ -38,7 +39,7 @@ int FindKnownEmuPosition(const Emu &emu,
 void ConvertToSparseMatrix(const std::vector<std::vector<FluxCombination>>& dense_matrix,
                            std::vector<FluxCombination>& sparse_matrix);
 
-void FillFinalEmu(const std::vector<Emu>& measured_isotopes,
+void FillFinalEmu(const std::vector<Measurement>& measured_isotopes,
                   GeneratorNetworkData& network_data);
 
 void InsertIntoAllKnownEmus(const std::vector<Emu>& unknown_emus,

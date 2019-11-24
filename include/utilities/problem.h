@@ -18,6 +18,7 @@ struct GeneratorParameters {
     std::vector<EmuNetwork> networks;
     std::vector<EmuAndMid> input_mids;
     std::vector<Emu> measured_isotopes;
+    std::vector<Measurement> measurements;
     Matrix nullspace;
     std::vector<int> free_flux_id_to_nullspace_position;
     std::vector<int> free_fluxes_id;

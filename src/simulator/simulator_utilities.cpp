@@ -63,9 +63,18 @@ void SaveNewEmus(const Matrix& X,
 
     for (const FinalEmu& final_emu : final_emus) {
         Mid result_mid;
-        for (int mass_shift = 0; mass_shift < X.cols(); ++mass_shift) {
-            result_mid.push_back(X(final_emu.order_in_X, mass_shift));
+        if (final_emu.correction_matrix.rows() > 0) {
+            Matrix original_mid = X.row(final_emu.order_in_X);
+            Matrix corrected_mid = final_emu.correction_matrix * original_mid.transpose();
+            for (int mass_shift = 0; mass_shift < corrected_mid.rows(); ++mass_shift) {
+                result_mid.push_back(corrected_mid(mass_shift, 0));
+            }
+        } else {
+            for (int mass_shift = 0; mass_shift < X.cols(); ++mass_shift) {
+                result_mid.push_back(X(final_emu.order_in_X, mass_shift));
+            }
         }
+
         EmuAndMid result_emu;
         result_emu.emu = final_emu.emu;
         result_emu.mid = result_mid;

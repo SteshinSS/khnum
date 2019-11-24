@@ -199,15 +199,15 @@ void ConvertToSparseMatrix(const std::vector<std::vector<FluxCombination>>& dens
 }
 
 
-void FillFinalEmu(const std::vector<Emu>& measured_isotopes,
+void FillFinalEmu(const std::vector<Measurement>& measured_isotopes,
                   GeneratorNetworkData& network_data) {
     const std::vector<Emu>& unknown_emus = network_data.unknown_emus;
     for (size_t i = 0; i < unknown_emus.size(); ++i) {
         Emu emu = unknown_emus[i];
         auto it = std::find_if(measured_isotopes.begin(),
                                measured_isotopes.end(),
-                               [&emu](const Emu& measured_emu) {
-                                   return measured_emu == emu;
+                               [&emu](const Measurement& measured_emu) {
+                                   return measured_emu.emu == emu;
                                });
 
         if (it != measured_isotopes.end()) {
@@ -215,6 +215,7 @@ void FillFinalEmu(const std::vector<Emu>& measured_isotopes,
             final_emu.emu = emu;
             final_emu.order_in_X = i;
             final_emu.position_in_result = it - measured_isotopes.begin();
+            final_emu.correction_matrix = it->correction_matrix;
             network_data.final_emus.push_back(final_emu);
         }
     }

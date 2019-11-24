@@ -7,6 +7,7 @@
 #include "utilities/measurement.h"
 #include "utilities/input_substrate.h"
 #include "utilities/emu.h"
+#include "utilities/matrix.h"
 
 
 namespace khnum {
@@ -27,6 +28,10 @@ Emu ParseOneMeasuredIsotope(const std::string& raw_measured_isotope, int line_nu
 std::vector<Measurement> ParseMeasurements(const std::vector<std::string>& raw_measurements,
                                            const std::vector<Emu>& measured_isotopes,
                                            const Delimiters& delimiters);
+
+std::string GetMeasuredIsotopeName(const Emu& emu);
+
+Matrix ParseCorrectionMatrix(const std::vector<std::string>& raw_matrix, const Delimiters& delimiters);
 
 std::string GetCell(std::stringstream &line, const Delimiters& delimiters);
 

@@ -106,6 +106,7 @@ Problem Modeller::GetProblem() {
     simulator_parameters.networks = emu_networks_;
     simulator_parameters.input_mids = input_substrate_mids_;
     simulator_parameters.measured_isotopes = measured_isotopes_;
+    simulator_parameters.measurements = measurements_;
     simulator_parameters.nullspace = nullspace_;
     simulator_parameters.free_flux_id_to_nullspace_position = id_to_position_in_depended_fluxes_;
     simulator_parameters.free_fluxes_id = free_fluxes_id_;

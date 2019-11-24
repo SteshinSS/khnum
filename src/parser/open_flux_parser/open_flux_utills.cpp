@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cmath>
 #include <utilities/debug_utills/debug_prints.h>
+#include "utilities/matrix.h"
 
 
 namespace khnum {
@@ -64,6 +65,51 @@ Emu ParseOneMeasuredIsotope(const std::string& raw_measured_isotope, int line_nu
     }
 
     return measured_isotope;
+}
+
+std::string GetMeasuredIsotopeName(const Emu& emu) {
+    std::string name = emu.name;
+    name += ":";
+    for (char state : emu.atom_states) {
+        if (state) {
+            name += "1";
+        } else {
+            name += "0";
+        }
+    }
+    return name;
+}
+
+Matrix ParseCorrectionMatrix(const std::vector<std::string>& raw_matrix, const Delimiters& delimiters) {
+    std::vector<double> first_line;
+    std::stringstream line(raw_matrix.at(0));
+    while (line) {
+        try {
+            double value = std::stod(GetCell(line, delimiters));
+            first_line.push_back(value);
+        } catch (std::invalid_argument& err) {
+            break;
+        }
+
+    }
+    Matrix correction_matrix(first_line.size(), first_line.size());
+    for (int i = 0; i < raw_matrix.size(); ++i) {
+        std::stringstream row(raw_matrix.at(i));
+        int j = 0;
+        while (row) {
+            try {
+                double value = std::stod(GetCell(row, delimiters));
+                correction_matrix(i, j) = value;
+                ++j;
+            } catch (std::invalid_argument& err) {
+                j = 0;
+                break;
+            }
+
+
+        }
+    }
+    return correction_matrix;
 }
 
 std::vector<Measurement> ParseMeasurements(const std::vector<std::string>& raw_measurements,
