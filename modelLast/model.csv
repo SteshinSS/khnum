@@ -1,7 +1,7 @@
 RxnID,rxnEq,rxnCTrans,rates,rxnType,basis,deviation
 1,glc_DS_b = glc_D_e,abcdef = abcdef,,F,
 2,glc_DU_b = glc_D_e,abcdef = abcdef,,F,
-3,glc_D_e = glc_D_c,abcdef = abcdef,,F,8,3
+3,glc_D_e = glc_D_c,abcdef = abcdef,,F,8.3
 4,pep_c + glc_D_c = g6p_c + pyr_c,abc + defghi = defghi + abc,,F,
 5,glc_D_c = g6p_c,abcdef = abcdef,,F,
 6,g6p_c = f6p_c,abcdef = abcdef,,FR,
@@ -70,7 +70,7 @@ RxnID,rxnEq,rxnCTrans,rates,rxnType,basis,deviation
 71,pyr_c = lac_L_c,abc = abc,,F,
 72,accoa_c = acald_c,ab = ab,,FR,
 73,acald_c = accoa_c,ab = ab,,R,X
-74,ac_c = ac_ex,ab = ab,,F,2,2
+74,ac_c = ac_ex,ab = ab,,F,2.2
 75,acald_c = ac_c,ab = ab,,F,
 76,mlthf_c = methf_c ,a = a,,F,
 77,methf_c = 10fthf_c,a = a,,F,
@@ -144,7 +144,7 @@ RxnID,rxnEq,rxnCTrans,rates,rxnType,basis,deviation
 155,eig3p_c = imacp_c,abcdef = abcdef,,F,
 156,glu_L_c + imacp_c = akg_c + hisp_c,abcde + fghijk = abcde + fghijk,,F,
 157,hisp_c = his_L_c,abcdef = abcdef,,F,
-159,co2_c = co2_ex,a = a,,F,14,6
+159,co2_c = co2_ex,a = a,,F,14.6
 160,co2_nat + co2_c = co2_c + co2_nat,a + b = a + b,,F,
 161,asp_L_c + cbp_c = orot_c,abcd + e = abcde,,F,
 162,orot_c = utp_c + co2_c,abcde = bcde + a,,F,
@@ -161,4 +161,4 @@ RxnID,rxnEq,rxnCTrans,rates,rxnType,basis,deviation
 173,5caiz_c + asp_L_c = 25aics_c,X + abcd = abcd,,F,
 174,25aics_c = aicar_c + 0.5 fum + 0.5 fum,abcd = X + 0.5 abcd + 0.5 dcba,,F,
 175,aicar_c + 10fthf_c = imp,X + a = a,,F,
-176,0.054 trp_L_c + 0.205 ser_L_c + 0.21 pro_L_c + 0.229 asn_L_c + 0.229 asp_L_c + 0.241 thr_L_c + 0.25 gln_L_c + 0.25 glu_L_c + 0.276 ile_L_c + 0.281 arg_L_c + 0.326 lys_L_c + 0.402 val_L_c + 0.428 leu_L_c + 0.488 ala_L_c + 0.582 gly_c + 0.087 cys_L_c + 0.09 his_L_c + 0.131 tyr_L_c + 0.146 met_L_c + 0.176 phe_L_c + 0.266 g6p_c + 0.148 f6p_c + 0.052 r5p_c + 0.279 g3p_c + 0.152 3pg_c + 0.1 pep_c + 0.143 pyr_c + 4.755 accoa_c + 0.0476 akg_c + 0.0476 oaa_c + 0.121 atp_c + 0.141 gtp_c + 0.101 ctp_c + 0.102 utp_c + 0.007 ttp_c = Biomass,,,B,0,658
+176,0.054 trp_L_c + 0.205 ser_L_c + 0.21 pro_L_c + 0.229 asn_L_c + 0.229 asp_L_c + 0.241 thr_L_c + 0.25 gln_L_c + 0.25 glu_L_c + 0.276 ile_L_c + 0.281 arg_L_c + 0.326 lys_L_c + 0.402 val_L_c + 0.428 leu_L_c + 0.488 ala_L_c + 0.582 gly_c + 0.087 cys_L_c + 0.09 his_L_c + 0.131 tyr_L_c + 0.146 met_L_c + 0.176 phe_L_c + 0.266 g6p_c + 0.148 f6p_c + 0.052 r5p_c + 0.279 g3p_c + 0.152 3pg_c + 0.1 pep_c + 0.143 pyr_c + 4.755 accoa_c + 0.0476 akg_c + 0.0476 oaa_c + 0.121 atp_c + 0.141 gtp_c + 0.101 ctp_c + 0.102 utp_c + 0.007 ttp_c = Biomass,,,B,0.658

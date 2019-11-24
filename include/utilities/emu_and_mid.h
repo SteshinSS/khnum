@@ -16,6 +16,8 @@ struct EmuAndMid {
 // convolution
 Mid operator*(const Mid &lhs, const Mid &rhs);
 
+Mid Normalize(Mid mid);
+
 // need this for stl containers
 bool operator==(const EmuAndMid &lhs, const EmuAndMid &rhs);
 

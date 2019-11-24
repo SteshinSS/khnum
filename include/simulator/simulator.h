@@ -27,5 +27,7 @@ private:
     const size_t total_mids_to_simulate_;
     const std::vector<EmuAndMid> input_mids_;
     std::vector<SimulatorNetworkData> networks_;
+
+    std::vector<Matrix> corrections;
 };
 } // namespace khnum

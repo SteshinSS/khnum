@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <glpk/glpk.h>
+#include <iostream>
 
 #include "utilities/reaction.h"
 #include "utilities/matrix.h"
@@ -38,11 +39,31 @@ void CalculateFluxBounds(std::vector<Reaction>& reactions, const Matrix& stoichi
         }
         glp_set_obj_dir(linear_problem, GLP_MAX);
         glp_simplex(linear_problem, NULL);
-        reactions[reaction + metabolite_balance_reactions_total].computed_upper_bound = glp_get_obj_val(linear_problem);
+        // reactions[reaction + metabolite_balance_reactions_total].computed_upper_bound = glp_get_obj_val(linear_problem);
+        Reaction& rea = reactions[reaction + metabolite_balance_reactions_total];
+
+        if (std::isnan(rea.basis)) {
+            double upper_bound = rea.setted_upper_bound ?
+                                 *rea.setted_upper_bound : 125;
+            double lower_bound = rea.setted_lower_bound ?
+                                 *rea.setted_lower_bound : 0.001;
+            rea.computed_upper_bound = upper_bound;
+            rea.computed_lower_bound = lower_bound;
+        } else {
+            if (std::isnan(rea.deviation)) {
+                rea.computed_lower_bound = rea.basis;
+                rea.computed_upper_bound = rea.basis;
+            } else {
+                double upper_bound  = rea.basis + rea.deviation;
+                double lower_bound = rea.basis - rea.deviation;
+                rea.computed_upper_bound = rea.basis + rea.deviation;
+                rea.computed_lower_bound = rea.basis - rea.deviation;
+            }
+        }
 
         glp_set_obj_dir(linear_problem, GLP_MIN);
         glp_simplex(linear_problem, NULL);
-        reactions[reaction + metabolite_balance_reactions_total].computed_lower_bound = glp_get_obj_val(linear_problem);
+        // reactions[reaction + metabolite_balance_reactions_total].computed_lower_bound = glp_get_obj_val(linear_problem);
     }
 
     glp_delete_prob(linear_problem);
@@ -57,7 +78,7 @@ void PrepareLinearProblem(std::vector<Reaction>& reactions, const Matrix& stoich
         const Reaction& reaction = reactions.at(reaction_num + metabolite_balance_reactions_total);
         if (std::isnan(reaction.basis)) {
             double upper_bound = reaction.setted_upper_bound ?
-                                 *reaction.setted_upper_bound : 30;
+                                 *reaction.setted_upper_bound : 125;
             double lower_bound = reaction.setted_lower_bound ?
                                  *reaction.setted_lower_bound : 0;
             glp_set_col_bnds(linear_problem, reaction_num + 1, GLP_DB, lower_bound, upper_bound);

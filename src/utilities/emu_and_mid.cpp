@@ -31,4 +31,16 @@ bool operator==(const EmuAndMid &lhs, const EmuAndMid &rhs) {
 bool operator<(const EmuAndMid &lhs, const EmuAndMid &rhs) {
     return std::tie(lhs.emu, lhs.mid) < std::tie(rhs.emu, rhs.mid);
 }
+
+Mid Normalize(Mid mid) {
+    double sum = 0.0;
+    for (double part : mid) {
+        sum += part;
+    }
+
+    for (double& part : mid) {
+        part /= sum;
+    }
+    return mid;
+}
 } //namespace khnum

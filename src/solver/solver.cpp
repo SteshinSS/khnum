@@ -29,7 +29,7 @@ Solver::Solver(const Problem &problem) {
     free_fluxes_.setlength(nullity_);
 
     iteration_ = 0;
-    iteration_total_ = 50;
+    iteration_total_ = 30;
 
     lower_bounds_.setlength(nullity_);
     upper_bounds_.setlength(nullity_);
@@ -92,7 +92,7 @@ void Solver::SetOptimizationParameters() {
 
     if (use_analytic_gradient_) {
         alglib::minlmcreatevj(nullity_, measurements_count_, free_fluxes_, state_);
-        alglib::minlmoptguardgradient(state_, 0.001);
+        // alglib::minlmoptguardgradient(state_, 0.001);
     } else {
         alglib::minlmcreatev(nullity_, measurements_count_, free_fluxes_, 0.001, state_);
     }
@@ -129,7 +129,7 @@ void Solver::SetConstraints() {
 void Solver::PrintStartMessage() {
     std::cout << "Start " << iteration_ << " iteration from: " << std::endl;
     for (int i = 0; i < nullity_; ++i) {
-        std::cout << reactions_[reactions_num_ - nullity_ + i].name << ": " <<  free_fluxes_[i] << std::endl;
+        std::cout << reactions_[reactions_num_ - nullity_ + i].id + 1 << ": " <<  free_fluxes_[i] << std::endl;
     }
     std::cout << std::endl;
 }
@@ -279,7 +279,7 @@ void Solver::PrintFinalMessage(const alglib::real_1d_array &free_fluxes) {
     std::cout << "Finish at: " << std::endl;
 
     for (int i = 0; i < free_fluxes.length(); ++i) {
-        std::cout << reactions_[reactions_num_ - free_fluxes.length() + i].name <<
+        std::cout << reactions_[reactions_num_ - free_fluxes.length() + i].id + 1 <<
                   " = " << free_fluxes[i] << std::endl;
     }
     std::cout << "with SSR: " << ssr << " in " << report_.iterationscount << " steps." << std::endl << std::endl;

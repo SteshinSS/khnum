@@ -57,6 +57,7 @@ void Modeller::CreateNullspaceMatrix() {
                                                                                  excluded_metabolites_);
 
     stoichiometry_matrix_ = modelling_utills::CreateStoichiometryMatrix(reactions_, included_metabolites);
+
     nullspace_ = modelling_utills::GetNullspace(stoichiometry_matrix_, reactions_);
     id_to_position_in_depended_fluxes_.resize(reactions_.size());
     const size_t isotopomer_balance_reactions_total = reactions_.size() - nullspace_.rows() - nullspace_.cols();

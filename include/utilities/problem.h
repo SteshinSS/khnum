@@ -30,7 +30,7 @@ struct Problem {
     Matrix nullspace;
     std::vector<Measurement> measurements;
     int measurements_count;
-    bool use_analytic_jacobian = true;
+    bool use_analytic_jacobian = false;
     std::vector<double> lower_bounds;
     std::vector<double> upper_bounds;
     GeneratorParameters simulator_parameters_;
