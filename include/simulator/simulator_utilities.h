@@ -17,11 +17,25 @@ void FillYMatrix(const std::vector<PositionOfSavedEmu> &Y_data,
                  const std::vector<Convolution> &convolutions,
                  Matrix &Y_out);
 
-void SaveNewEmus(const Matrix &X,
-                 const std::vector<int> &usefull_emus,
-                 const std::vector<FinalEmu> &final_emus,
-                 std::vector<Mid> &saved_mids_out,
-                 std::vector<EmuAndMid> &result_out);
+void SaveNewEmus(const Matrix& X,
+                 const std::vector<int>& usefull_emus,
+                 const std::vector<FinalEmu>& final_emus,
+                 std::vector<Mid>& saved_mids_out,
+                 std::vector<EmuAndMid>& result_out,
+                 std::vector<double>& sums_out);
+
+void SaveNewDiffEmus(const Matrix& X,
+                     const std::vector<int>& usefull_emus,
+                     const std::vector<FinalEmu>& final_emus,
+                     const std::vector<EmuAndMid> result,
+                     const std::vector<double>& sums,
+                     std::vector<Mid>& saved_mids_out,
+                     std::vector<EmuAndMid>& diff_result_out);
+
+Matrix GetCorrectedDiffMid(const Matrix& correction_matrix,
+                           Matrix mid,
+                           const Matrix& diff_mid,
+                           double sum);
 
 Mid ConvolvePartialDiff(const Convolution& convolution,
                         const std::vector<std::vector<Mid>>& known_d_mids,

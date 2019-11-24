@@ -92,7 +92,7 @@ void Solver::SetOptimizationParameters() {
 
     if (use_analytic_gradient_) {
         alglib::minlmcreatevj(nullity_, measurements_count_, free_fluxes_, state_);
-        // alglib::minlmoptguardgradient(state_, 0.001);
+        alglib::minlmoptguardgradient(state_, 0.001);
     } else {
         alglib::minlmcreatev(nullity_, measurements_count_, free_fluxes_, 0.001, state_);
     }

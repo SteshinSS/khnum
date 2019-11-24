@@ -52,7 +52,8 @@ void SaveNewEmus(const Matrix& X,
                  const std::vector<int>& usefull_emus,
                  const std::vector<FinalEmu>& final_emus,
                  std::vector<Mid>& saved_mids_out,
-                 std::vector<EmuAndMid>& result_out) {
+                 std::vector<EmuAndMid>& result_out,
+                 std::vector<double>& sums_out) {
     for (int position : usefull_emus) {
         Mid new_mid;
         for (int mass_shift = 0; mass_shift < X.cols(); ++mass_shift) {
@@ -66,8 +67,13 @@ void SaveNewEmus(const Matrix& X,
         if (final_emu.correction_matrix.rows() > 0) {
             Matrix original_mid = X.row(final_emu.order_in_X);
             Matrix corrected_mid = final_emu.correction_matrix * original_mid.transpose();
+            double sum = 0.0;
+            for (int i = 0; i < corrected_mid.rows(); ++i) {
+                sum += corrected_mid(i, 0);
+            }
+            sums_out[final_emu.position_in_result] = sum;
             for (int mass_shift = 0; mass_shift < corrected_mid.rows(); ++mass_shift) {
-                result_mid.push_back(corrected_mid(mass_shift, 0));
+                result_mid.push_back(corrected_mid(mass_shift, 0) / sum);
             }
         } else {
             for (int mass_shift = 0; mass_shift < X.cols(); ++mass_shift) {
@@ -80,6 +86,67 @@ void SaveNewEmus(const Matrix& X,
         result_emu.mid = result_mid;
         result_out[final_emu.position_in_result] = result_emu;
     }
+}
+
+void SaveNewDiffEmus(const Matrix& X,
+                     const std::vector<int>& usefull_emus,
+                     const std::vector<FinalEmu>& final_emus,
+                     const std::vector<EmuAndMid> result,
+                     const std::vector<double>& sums,
+                     std::vector<Mid>& saved_mids_out,
+                     std::vector<EmuAndMid>& diff_result_out) {
+    for (int position : usefull_emus) {
+        Mid new_mid;
+        for (int mass_shift = 0; mass_shift < X.cols(); ++mass_shift) {
+            new_mid.push_back(X(position, mass_shift));
+        }
+        saved_mids_out.push_back(new_mid);
+    }
+
+    for (const FinalEmu& final_emu : final_emus) {
+        Mid result_mid;
+        if (final_emu.correction_matrix.rows() > 0) {
+            Matrix mid(result[final_emu.position_in_result].mid.size(), 1);
+            for (int i = 0; i < result[final_emu.position_in_result].mid.size(); ++i) {
+                mid(i, 0) = result[final_emu.position_in_result].mid[i];
+            }
+
+            Matrix diff_mid = X.row(final_emu.order_in_X);
+            Matrix corrected_mid = GetCorrectedDiffMid(final_emu.correction_matrix,
+                                                       mid,
+                                                       diff_mid.transpose(),
+                                                       sums[final_emu.position_in_result]);
+
+
+            for (int mass_shift = 0; mass_shift < corrected_mid.rows(); ++mass_shift) {
+                result_mid.push_back(corrected_mid(mass_shift, 0));
+            }
+        } else {
+            for (int mass_shift = 0; mass_shift < X.cols(); ++mass_shift) {
+                result_mid.push_back(X(final_emu.order_in_X, mass_shift));
+            }
+        }
+
+        EmuAndMid result_emu;
+        result_emu.emu = final_emu.emu;
+        result_emu.mid = result_mid;
+        diff_result_out[final_emu.position_in_result] = result_emu;
+    }
+}
+
+Matrix GetCorrectedDiffMid(const Matrix& correction_matrix,
+                           Matrix mid,
+                           const Matrix& diff_mid,
+                           double sum) {
+    Matrix corrected_diff_mid = correction_matrix * diff_mid;
+    double diff_sum = 0.0;
+    for (int i = 0; i < corrected_diff_mid.rows(); ++i) {
+        diff_sum += corrected_diff_mid(i, 0);
+    }
+    mid *= diff_sum;
+    corrected_diff_mid -= mid;
+    corrected_diff_mid /= sum;
+    return corrected_diff_mid;
 }
 
 

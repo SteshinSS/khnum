@@ -11,6 +11,7 @@ namespace khnum {
 
 SimulatorResult Simulator::CalculateMids(const std::vector<Flux> &fluxes, bool calculate_jacobian) {
     SimulatorResult result;
+    std::vector<double> sums(total_mids_to_simulate_);
     std::vector<EmuAndMid>& simulated_mids = result.simulated_mids;
     simulated_mids.resize(total_mids_to_simulate_);
 
@@ -35,7 +36,8 @@ SimulatorResult Simulator::CalculateMids(const std::vector<Flux> &fluxes, bool c
                                          network.convolutions, network.Y);
         const Matrix BY = network.B * network.Y;
         const Matrix X = network.A.householderQr().solve(BY);
-        simulator_utilities::SaveNewEmus(X, network.usefull_emus, network.final_emus, saved_mids[network_num], simulated_mids);
+        simulator_utilities::SaveNewEmus(X, network.usefull_emus, network.final_emus, saved_mids[network_num], simulated_mids,
+                                        sums);
 
         if (!calculate_jacobian) {
             continue;
@@ -47,8 +49,8 @@ SimulatorResult Simulator::CalculateMids(const std::vector<Flux> &fluxes, bool c
             // Right Part of A * dX = (...)
             Matrix RightPart = derivatives.dB * network.Y + network.B * derivatives.dY - derivatives.dA * X;
             Matrix dX = network.A.householderQr().solve(RightPart);
-            simulator_utilities::SaveNewEmus(dX, network.usefull_emus, network.final_emus,
-                                             saved_diff_mids[flux][network_num], diff_results[flux]);
+            simulator_utilities::SaveNewDiffEmus(dX, network.usefull_emus, network.final_emus, simulated_mids,
+                                             sums, saved_diff_mids[flux][network_num], diff_results[flux]);
         }
     }
 
