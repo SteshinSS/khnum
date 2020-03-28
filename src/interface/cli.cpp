@@ -1,13 +1,12 @@
 #include "interface/cli.h"
 
 #include <iostream>
-#include <fstream>
 #include <exception>
 #include <vector>
-#include <string>
 #include <memory>
+#include <thread>
 #include "alglib/ap.h"
-#include "utilities/matrix.h"
+#include <chrono>
 
 #include "modeller/modeller.h"
 #include "parser/open_flux_parser/open_flux_parser.h"
@@ -36,10 +35,56 @@ void RunCli() {
         modeller.CheckModelForErrors();
 
         Problem problem = modeller.GetProblem();
+        std::vector<alglib::real_1d_array> allSolutions;
 
-        Solver solver(problem);
-        solver.Solve();
-        std::vector<alglib::real_1d_array> allSolutions = solver.GetResult();
+        bool use_multithread = false;
+        if (use_multithread) {
+            const unsigned int num_threads = std::thread::hardware_concurrency() / 2;
+
+            std::vector<std::vector<alglib::real_1d_array>> one_thread_solutions(num_threads);
+            auto one_thread = [](const Problem &problem, std::vector<alglib::real_1d_array> &result) {
+                Solver solver(problem);
+                solver.Solve();
+                result = solver.GetResult();
+            };
+
+            std::vector<std::thread> threads;
+            for (int i = 0; i < num_threads; ++i) {
+                threads.push_back(std::thread(one_thread, std::ref(problem), std::ref(one_thread_solutions[i])));
+
+                cpu_set_t cpuset;
+                CPU_ZERO(&cpuset);
+                CPU_SET(2*i, &cpuset);
+                int rc = pthread_setaffinity_np(threads[i].native_handle(),
+                                                sizeof(cpu_set_t), &cpuset);
+                if (rc != 0) {
+                    std::cerr << "Error calling pthread_setaffinity_np: " << rc << "\n";
+                }
+            }
+            std::chrono::time_point<std::chrono::system_clock> start, end;
+            start = std::chrono::system_clock::now();
+            for (std::thread &t : threads) {
+                t.join();
+            }
+            end = std::chrono::system_clock::now();
+            double elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>
+                    (end-start).count();
+
+            elapsed_milliseconds /= 1000;
+            std::cout << "Average time: " << static_cast<double>(elapsed_milliseconds) / 80
+                << " seconds per iteration" << std::endl;
+
+            for (const auto &vec : one_thread_solutions) {
+                for (const alglib::real_1d_array &solution : vec) {
+                    allSolutions.push_back(solution);
+                }
+            }
+
+        } else {
+            Solver solver(problem);
+            solver.Solve();
+            std::vector<alglib::real_1d_array> allSolutions = solver.GetResult();
+        }
 
         Clasterizer clusterizer(allSolutions);
         clusterizer.Start();

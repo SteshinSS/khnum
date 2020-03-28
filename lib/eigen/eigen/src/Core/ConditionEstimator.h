@@ -77,7 +77,7 @@ typename Decomposition::RealScalar rcond_invmatrix_L1_norm_estimate(const Decomp
   #pragma warning pop
 #endif
 
-  // setted_lower_bound is a lower bound on
+  // lower_bound is a lower bound on
   //   ||inv(matrix)||_1  = sup_v ||inv(matrix) v||_1 / ||v||_1
   // and is the objective maximized by the ("super-") gradient ascent
   // algorithm below.
@@ -111,7 +111,7 @@ typename Decomposition::RealScalar rcond_invmatrix_L1_norm_estimate(const Decomp
     v = dec.solve(Vector::Unit(n, v_max_abs_index));  // v = inv(matrix) * e_j.
     lower_bound = v.template lpNorm<1>();
     if (lower_bound <= old_lower_bound) {
-      // Break if the gradient step did not increase the setted_lower_bound.
+      // Break if the gradient step did not increase the lower_bound.
       break;
     }
     if (!is_complex) {

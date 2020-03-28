@@ -29,7 +29,7 @@ Solver::Solver(const Problem &problem) {
     free_fluxes_.setlength(nullity_);
 
     iteration_ = 0;
-    iteration_total_ = 30;
+    iteration_total_ = 10;
 
     lower_bounds_.setlength(nullity_);
     upper_bounds_.setlength(nullity_);
@@ -87,7 +87,7 @@ void Solver::GenerateInitialPoints(std::mt19937 &random_source) {
 
 
 void Solver::SetOptimizationParameters() {
-    alglib::ae_int_t maxits = 0;
+    alglib::ae_int_t maxits = 500;
     const double epsx = 0.1e-12;
 
     if (use_analytic_gradient_) {
@@ -127,11 +127,12 @@ void Solver::SetConstraints() {
 
 
 void Solver::PrintStartMessage() {
-    std::cout << "Start " << iteration_ << " iteration from: " << std::endl;
+    //std::cout << "Start " << iteration_ << " iteration from: " << std::endl;
+    /*
     for (int i = 0; i < nullity_; ++i) {
         std::cout << reactions_[reactions_num_ - nullity_ + i].id + 1 << ": " <<  free_fluxes_[i] << std::endl;
     }
-    std::cout << std::endl;
+    std::cout << std::endl; */
 }
 
 
@@ -275,13 +276,13 @@ void Solver::PrintFinalMessage(const alglib::real_1d_array &free_fluxes) {
     Fillf0Array(residuals, result.simulated_mids);
 
     double ssr = GetSSR(residuals);
-
+/*
     std::cout << "Finish at: " << std::endl;
 
     for (int i = 0; i < free_fluxes.length(); ++i) {
         std::cout << reactions_[reactions_num_ - free_fluxes.length() + i].id + 1 <<
                   " = " << free_fluxes[i] << std::endl;
-    }
-    std::cout << "with SSR: " << ssr << " in " << report_.iterationscount << " steps." << std::endl << std::endl;
+    } */
+    std::cout << " Finish with SSR: " << ssr << " in " << report_.iterationscount << " steps." << std::endl;
 }
 } // namespace khnum

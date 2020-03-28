@@ -4,12 +4,12 @@ set(CMAKE_CXX_STANDARD 17)
 
 option(BUILD_TESTS "Determines whether to build tests." OFF)
 
-
+set(CMAKE_BUILD_TYPE=Release)
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -march=native")
 ELSE()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -march=native")
 ENDIF()
 
 if(" ${CMAKE_SOURCE_DIR}" STREQUAL " ${CMAKE_BINARY_DIR}")
@@ -21,7 +21,7 @@ endif()
 add_subdirectory(lib/alglib)
 add_subdirectory(lib/eigen)
 add_subdirectory(lib/glpk)
-
+find_library(PTHREAD_LIBRARY pthread)
 # Create khnum library
 
 file(GLOB_RECURSE KHNUM_SOURCES
@@ -35,8 +35,9 @@ file(GLOB_RECURSE KHNUM_SOURCES
 
 set_source_files_properties(${KHNUM_SOURCES} PROPERTIES COMPILE_FLAGS "-Wall -Wpedantic -Wextra")
 
+add_compile_definitions(EIGEN_MALLOC_ALREADY_ALIGNED=0)
 add_library(khnum_lib ${KHNUM_SOURCES})
-target_link_libraries(khnum_lib eigen alglib glpk)
+target_link_libraries(khnum_lib eigen alglib glpk ${PTHREAD_LIBRARY})
 target_include_directories(khnum_lib PUBLIC include)
 
 # Create khnum binary
