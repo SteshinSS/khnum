@@ -29,7 +29,7 @@ Solver::Solver(const Problem &problem) {
     free_fluxes_.setlength(nullity_);
 
     iteration_ = 0;
-    iteration_total_ = 10;
+    iteration_total_ = 62;
 
     lower_bounds_.setlength(nullity_);
     upper_bounds_.setlength(nullity_);
@@ -70,8 +70,8 @@ void Solver::Solve() {
 
     elapsed_milliseconds /= 1000;
 
-    std::cout << "Average time: " << static_cast<double>(elapsed_milliseconds) / iteration_total_
-        << " seconds per iteration" << std::endl;
+    //std::cout << "Average time: " << static_cast<double>(elapsed_milliseconds) / iteration_total_
+     //   << " seconds per iteration" << std::endl;
 }
 
 

@@ -17,7 +17,7 @@
 namespace khnum {
 void RunCli() {
     try {
-        std::unique_ptr<IParser> parser(new ParserOpenFlux("../modelLast"));
+        std::unique_ptr<IParser> parser(new ParserOpenFlux("../modelTca"));
         parser->ParseExcludedMetabolites();
         parser->ParseMeasuredIsotopes();
         parser->ParseMeasurements();
@@ -37,9 +37,10 @@ void RunCli() {
         Problem problem = modeller.GetProblem();
         std::vector<alglib::real_1d_array> allSolutions;
 
-        bool use_multithread = false;
+        bool use_multithread = true;
         if (use_multithread) {
-            const unsigned int num_threads = std::thread::hardware_concurrency() / 2;
+            const unsigned int num_threads = std::thread::hardware_concurrency();
+            std::cout << num_threads << std::endl;
 
             std::vector<std::vector<alglib::real_1d_array>> one_thread_solutions(num_threads);
             auto one_thread = [](const Problem &problem, std::vector<alglib::real_1d_array> &result) {
@@ -54,7 +55,7 @@ void RunCli() {
 
                 cpu_set_t cpuset;
                 CPU_ZERO(&cpuset);
-                CPU_SET(2*i, &cpuset);
+                CPU_SET(i, &cpuset);
                 int rc = pthread_setaffinity_np(threads[i].native_handle(),
                                                 sizeof(cpu_set_t), &cpuset);
                 if (rc != 0) {
@@ -71,7 +72,7 @@ void RunCli() {
                     (end-start).count();
 
             elapsed_milliseconds /= 1000;
-            std::cout << "Average time: " << static_cast<double>(elapsed_milliseconds) / 80
+            std::cout << "Average time: " << static_cast<double>(elapsed_milliseconds) / 1000
                 << " seconds per iteration" << std::endl;
 
             for (const auto &vec : one_thread_solutions) {
