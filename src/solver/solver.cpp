@@ -29,7 +29,7 @@ Solver::Solver(const Problem &problem) {
     free_fluxes_.setlength(nullity_);
 
     iteration_ = 0;
-    iteration_total_ = 62;
+    iteration_total_ = 5;
 
     lower_bounds_.setlength(nullity_);
     upper_bounds_.setlength(nullity_);
@@ -70,8 +70,8 @@ void Solver::Solve() {
 
     elapsed_milliseconds /= 1000;
 
-    //std::cout << "Average time: " << static_cast<double>(elapsed_milliseconds) / iteration_total_
-     //   << " seconds per iteration" << std::endl;
+    std::cout << "Average time: " << static_cast<double>(elapsed_milliseconds) / iteration_total_
+        << " seconds per iteration" << std::endl;
 }
 
 
@@ -88,15 +88,16 @@ void Solver::GenerateInitialPoints(std::mt19937 &random_source) {
 
 void Solver::SetOptimizationParameters() {
     alglib::ae_int_t maxits = 500;
-    const double epsx = 0.1e-12;
+    const double epsx = 0.00001;
 
     if (use_analytic_gradient_) {
         alglib::minlmcreatevj(nullity_, measurements_count_, free_fluxes_, state_);
-        alglib::minlmoptguardgradient(state_, 0.001);
+        alglib::minlmoptguardgradient(state_, 0);
     } else {
         alglib::minlmcreatev(nullity_, measurements_count_, free_fluxes_, 0.001, state_);
     }
 
+    alglib::minlmsetacctype(state_, 1);
     alglib::minlmsetcond(state_, epsx, maxits);
     alglib::minlmsetbc(state_, lower_bounds_, upper_bounds_);
 
@@ -139,7 +140,7 @@ void Solver::PrintStartMessage() {
 alglib::real_1d_array Solver::RunOptimization() {
     if (use_analytic_gradient_) {
         alglib::minlmoptimize(state_, AlglibCallback, JacobianCallback, nullptr, this, alglib::xdefault);
-
+/*
         alglib::optguardreport ogrep;
         alglib::minlmoptguardresults(state_, ogrep);
         if (ogrep.badgradsuspected) {
@@ -164,11 +165,10 @@ alglib::real_1d_array Solver::RunOptimization() {
                 std::cout << ogrep.badgradxbase(i) << "  ";
             }
             std::cout << std::endl;
-        }
+        } */
     } else {
         alglib::minlmoptimize(state_, AlglibCallback, nullptr, this, alglib::xdefault);
     }
-
 
     alglib::real_1d_array final_free_fluxes;
     alglib::minlmresults(state_, final_free_fluxes, report_);

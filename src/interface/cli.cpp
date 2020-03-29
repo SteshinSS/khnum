@@ -17,7 +17,7 @@
 namespace khnum {
 void RunCli() {
     try {
-        std::unique_ptr<IParser> parser(new ParserOpenFlux("../modelTca"));
+        std::unique_ptr<IParser> parser(new ParserOpenFlux("../modelLast"));
         parser->ParseExcludedMetabolites();
         parser->ParseMeasuredIsotopes();
         parser->ParseMeasurements();
@@ -37,7 +37,7 @@ void RunCli() {
         Problem problem = modeller.GetProblem();
         std::vector<alglib::real_1d_array> allSolutions;
 
-        bool use_multithread = true;
+        bool use_multithread = false;
         if (use_multithread) {
             const unsigned int num_threads = std::thread::hardware_concurrency();
             std::cout << num_threads << std::endl;
@@ -52,15 +52,6 @@ void RunCli() {
             std::vector<std::thread> threads;
             for (int i = 0; i < num_threads; ++i) {
                 threads.push_back(std::thread(one_thread, std::ref(problem), std::ref(one_thread_solutions[i])));
-
-                cpu_set_t cpuset;
-                CPU_ZERO(&cpuset);
-                CPU_SET(i, &cpuset);
-                int rc = pthread_setaffinity_np(threads[i].native_handle(),
-                                                sizeof(cpu_set_t), &cpuset);
-                if (rc != 0) {
-                    std::cerr << "Error calling pthread_setaffinity_np: " << rc << "\n";
-                }
             }
             std::chrono::time_point<std::chrono::system_clock> start, end;
             start = std::chrono::system_clock::now();
@@ -72,7 +63,7 @@ void RunCli() {
                     (end-start).count();
 
             elapsed_milliseconds /= 1000;
-            std::cout << "Average time: " << static_cast<double>(elapsed_milliseconds) / 1000
+            std::cout << "Average time: " << static_cast<double>(elapsed_milliseconds) / 160
                 << " seconds per iteration" << std::endl;
 
             for (const auto &vec : one_thread_solutions) {
@@ -84,7 +75,7 @@ void RunCli() {
         } else {
             Solver solver(problem);
             solver.Solve();
-            std::vector<alglib::real_1d_array> allSolutions = solver.GetResult();
+            allSolutions = solver.GetResult();
         }
 
         Clasterizer clusterizer(allSolutions);
