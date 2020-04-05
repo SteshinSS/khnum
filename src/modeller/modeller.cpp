@@ -9,6 +9,7 @@
 #include "modeller/create_emu_reactions.h"
 #include "modeller/create_emu_list.h"
 #include "modeller/create_metabolite_list.h"
+#include "modeller/create_network_components.h"
 #include "modeller/create_stoichiometry_matrix.h"
 #include "modeller/create_nullspace.h"
 #include "modeller/calculate_flux_bounds.h"
@@ -28,13 +29,39 @@ Modeller::Modeller(ParserResults parser_results) {
 
 void Modeller::CalculateInputSubstrateMids() {
     all_emu_reactions_ = modelling_utills::CreateAllEmuReactions(reactions_, measured_isotopes_);
+    std::cout << "All EMUs:" << std::endl;
+    for (const EmuReaction &reaction : all_emu_reactions_) {
+        PrintEmuReaction(reaction);
+    }
+    std::cout << std::endl << std::endl;
+
     input_emu_list_ = modelling_utills::CreateInputEmuList(all_emu_reactions_, input_substrate_);
+    std::cout << "Input EMUs:" << std::endl;
+    for (const Emu &emu : input_emu_list_) {
+        PrintEmu(emu);
+        std::cout << std::endl;
+    }
+    std::cout << std::endl << std::endl;
+
     input_substrate_mids_ = modelling_utills::CalculateInputMid(input_substrate_, input_emu_list_);
+
+    std::cout << "Measured Isotopes:" << std::endl;
+    for (const Emu &emu : measured_isotopes_) {
+        PrintEmu(emu);
+        std::cout << std::endl;
+    }
 }
 
 
 void Modeller::CreateEmuNetworks() {
-    emu_networks_ = modelling_utills::CreateEmuNetworks(all_emu_reactions_, input_emu_list_, measured_isotopes_);
+
+    std::vector<EmuNetwork> networks = modelling_utills::CreateEmuNetworks(all_emu_reactions_, input_emu_list_, measured_isotopes_);
+    for (EmuNetwork &network : networks) {
+        std::vector<EmuNetworkComponent> components = modelling_utills::CreateNetworkComponents(network);
+        for (const EmuNetworkComponent &component : components) {
+            emu_networks_.push_back(component);
+        }
+    }
 }
 
 

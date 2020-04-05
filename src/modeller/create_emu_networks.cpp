@@ -61,6 +61,8 @@ std::vector<EmuNetwork> CreateEmuNetworks(const std::vector<EmuReaction> &reacti
         }),
         emu_networks.end());
 
+
+
     return emu_networks;
 }
 
@@ -95,5 +97,6 @@ bool IsEmuAlreadyChecked(const Emu &emu, const std::vector<Emu> &already_checked
                              emu);
     return emu_position != already_checked_emus.end();
 }
+
 } // namespace modelling_utills
 } // namespace khnum

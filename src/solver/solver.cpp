@@ -88,11 +88,11 @@ void Solver::GenerateInitialPoints(std::mt19937 &random_source) {
 
 void Solver::SetOptimizationParameters() {
     alglib::ae_int_t maxits = 500;
-    const double epsx = 0.00001;
+    const double epsx = 0.001;
 
     if (use_analytic_gradient_) {
         alglib::minlmcreatevj(nullity_, measurements_count_, free_fluxes_, state_);
-        alglib::minlmoptguardgradient(state_, 0);
+        alglib::minlmoptguardgradient(state_, 0.000);
     } else {
         alglib::minlmcreatev(nullity_, measurements_count_, free_fluxes_, 0.001, state_);
     }
@@ -140,7 +140,7 @@ void Solver::PrintStartMessage() {
 alglib::real_1d_array Solver::RunOptimization() {
     if (use_analytic_gradient_) {
         alglib::minlmoptimize(state_, AlglibCallback, JacobianCallback, nullptr, this, alglib::xdefault);
-/*
+
         alglib::optguardreport ogrep;
         alglib::minlmoptguardresults(state_, ogrep);
         if (ogrep.badgradsuspected) {
@@ -165,7 +165,7 @@ alglib::real_1d_array Solver::RunOptimization() {
                 std::cout << ogrep.badgradxbase(i) << "  ";
             }
             std::cout << std::endl;
-        } */
+        }
     } else {
         alglib::minlmoptimize(state_, AlglibCallback, nullptr, this, alglib::xdefault);
     }

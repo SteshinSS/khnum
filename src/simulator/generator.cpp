@@ -11,10 +11,11 @@ SimulatorGenerator::SimulatorGenerator(const GeneratorParameters& parameters) {
     std::vector<NetworkEmu> all_known_emus = InitializeInputEmus(parameters.input_mids);
     for (size_t network_num = 0; network_num < parameters.networks.size(); ++network_num) {
         GeneratorNetworkData network_data;
-        const std::vector<EmuReaction>& reactions = parameters.networks[network_num];
+        const std::vector<EmuReaction>& reactions = parameters.networks[network_num].reactions;
+        const std::vector<EmuReaction> &additional_reactions = parameters.networks[network_num].additional_reactions;
 
         generator_utilites::FillEmuLists(reactions, all_known_emus, network_data, usefull_emus);
-        generator_utilites::CreateSymbolicMatrices(reactions, network_data);
+        generator_utilites::CreateSymbolicMatrices(reactions, additional_reactions, network_data);
         generator_utilites::FillFinalEmu(parameters.measurements, network_data);
         generator_utilites::InsertIntoAllKnownEmus(network_data.unknown_emus, network_num, all_known_emus);
 

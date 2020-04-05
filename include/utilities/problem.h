@@ -15,7 +15,7 @@ struct ReactionsName {
 };
 
 struct GeneratorParameters {
-    std::vector<EmuNetwork> networks;
+    std::vector<EmuNetworkComponent> networks;
     std::vector<EmuAndMid> input_mids;
     std::vector<Emu> measured_isotopes;
     std::vector<Measurement> measurements;

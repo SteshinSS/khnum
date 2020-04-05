@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <set>
 #include <unordered_map>
+#include <iostream>
 
 #include "utilities/emu.h"
 #include "simulator/flux_combination.h"
@@ -101,6 +102,7 @@ Convolution ConvolveReaction(const EmuReaction& reaction,
 
 
 void CreateSymbolicMatrices(const std::vector<EmuReaction>& reactions,
+                            const std::vector<EmuReaction> &additional_reactions,
                             GeneratorNetworkData& network_data) {
     const std::vector<Emu>& unknown_emus = network_data.unknown_emus;
     const std::vector<Emu> known_emus = network_data.known_emus;
@@ -119,13 +121,6 @@ void CreateSymbolicMatrices(const std::vector<EmuReaction>& reactions,
     for (const EmuReaction &reaction : reactions) {
         size_t position_of_product = FindUnknownEmuPosition(reaction.right.emu, unknown_emus);
 
-        {
-            FluxAndCoefficient product;
-            product.coefficient = -reaction.rate;
-            product.id = reaction.id;
-            A[position_of_product][position_of_product].fluxes.emplace_back(product);
-        }
-
         if (reaction.left.size() > 1) {
             int position_of_convolution = network_data.reaction_to_convolution.at(reaction_num);
             FluxAndCoefficient convolution_element;
@@ -139,11 +134,19 @@ void CreateSymbolicMatrices(const std::vector<EmuReaction>& reactions,
             // returns -1 if emu is unknown
             int position_of_substrate = FindKnownEmuPosition(substrate.emu, known_emus);
             if (position_of_substrate == -1) {
-                FluxAndCoefficient substrate_element;
-                substrate_element.coefficient = reaction.rate;
-                substrate_element.id = reaction.id;
                 position_of_substrate = FindUnknownEmuPosition(substrate.emu, unknown_emus);
-                A[position_of_product][position_of_substrate].fluxes.emplace_back(substrate_element);
+                {
+                    FluxAndCoefficient product;
+                    product.coefficient = reaction.rate;
+                    product.id = reaction.id;
+                    A[position_of_product][position_of_substrate].fluxes.emplace_back(product);
+                }
+                {
+                    FluxAndCoefficient substrate_element;
+                    substrate_element.coefficient = -reaction.rate;
+                    substrate_element.id = reaction.id;
+                    A[position_of_substrate][position_of_substrate].fluxes.emplace_back(substrate_element);
+                }
             } else {
                 FluxAndCoefficient substrate_element;
                 substrate_element.coefficient = -reaction.rate;
@@ -153,6 +156,17 @@ void CreateSymbolicMatrices(const std::vector<EmuReaction>& reactions,
         }
         ++reaction_num;
     }
+    for (const EmuReaction &reaction : additional_reactions) {
+        EmuSubstrate substrate = reaction.left[0];
+
+        FluxAndCoefficient substrate_element;
+        substrate_element.coefficient = reaction.rate;
+        substrate_element.id = reaction.id;
+        int position_of_substrate = FindUnknownEmuPosition(substrate.emu, unknown_emus);
+        A[position_of_substrate][position_of_substrate].fluxes.emplace_back(substrate_element);
+
+    }
+
     ConvertToSparseMatrix(A, network_data.symbolic_A);
     ConvertToSparseMatrix(B, network_data.symbolic_B);
 }
@@ -186,6 +200,7 @@ int FindKnownEmuPosition(const Emu &emu,
 
 void ConvertToSparseMatrix(const std::vector<std::vector<FluxCombination>>& dense_matrix,
                            std::vector<FluxCombination>& sparse_matrix) {
+    std::cout << "M:" << std::endl;
     for (size_t i = 0; i < dense_matrix.size(); ++i) {
         for (size_t j = 0; j < dense_matrix[0].size(); ++j) {
             if (!dense_matrix[i][j].fluxes.empty()) {
@@ -193,9 +208,14 @@ void ConvertToSparseMatrix(const std::vector<std::vector<FluxCombination>>& dens
                 matrix_element.i = i;
                 matrix_element.j = j;
                 sparse_matrix.emplace_back(matrix_element);
+                std::cout << matrix_element.fluxes.size() << " ";
+            } else {
+                std::cout << 0 << " ";
             }
         }
+        std::cout << std::endl;
     }
+    std::cout << std::endl;
 }
 
 

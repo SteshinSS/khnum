@@ -20,14 +20,15 @@ void PrintEmuReaction(const EmuReaction &reaction) {
     }
     std::cout << "= ";
     PrintEmuSubstrate(reaction.right);
-    std::cout << "    rate: " << reaction.rate;
+    //std::cout << "    rate: " << reaction.rate;
+    //std::cout << "    id: " << reaction.id;
     std::cout << std::endl;
 }
 
 void PrintEmuSubstrate(const EmuSubstrate& emu) {
-    if (fabs(emu.coefficient - 1.0) > 0.0001) {
-        std::cout << emu.coefficient << " ";
-    }
+    //if (fabs(emu.coefficient - 1.0) > 0.0001) {
+    //    std::cout << emu.coefficient << " ";
+    //}
     PrintEmu(emu.emu);
 }
 

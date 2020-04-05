@@ -35,6 +35,11 @@ struct EmuReaction {
 
 using EmuNetwork = std::vector<EmuReaction>;
 
+struct EmuNetworkComponent {
+    std::vector<EmuReaction> reactions;
+    std::vector<EmuReaction> additional_reactions;
+};
+
 // need this for stl containers
 bool comparator(const Emu& lhs, const Emu& rhs);
 
