@@ -6,7 +6,7 @@
 
 namespace khnum {
     namespace modelling_utills {
-        std::vector<EmuNetworkComponent> CreateNetworkComponents(const EmuNetwork &network);
+        std::vector<EmuNetworkComponent> CreateNetworkComponents(const EmuNetwork &network, const std::vector<EmuReaction> &all_emu_reactions);
 
         void dfs1(int v, const EmuNetwork &network, std::vector<char> &visited, std::vector<size_t> &ordered_reactions, const std::vector<Emu> &all_emus);
         void dfs2(int v, const EmuNetwork &emu_network, std::vector<char> &visited, std::vector<size_t> &component, const std::vector<Emu> &all_emus);

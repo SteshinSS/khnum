@@ -10,7 +10,7 @@
 
 namespace khnum {
     namespace modelling_utills {
-        std::vector<EmuNetworkComponent> CreateNetworkComponents(const EmuNetwork& network) {
+        std::vector<EmuNetworkComponent> CreateNetworkComponents(const EmuNetwork &network, const std::vector<EmuReaction> &all_emu_reactions) {
             std::vector<EmuNetworkComponent> components;
 
             std::vector<Emu> all_emus;
@@ -42,18 +42,31 @@ namespace khnum {
                     std::vector<size_t> vertices_of_component;
                     dfs2(v, network, visited, vertices_of_component, all_emus);
                     EmuNetworkComponent component;
-                    for (const EmuReaction &reaction : network) {
+                    for (const EmuReaction &reaction : all_emu_reactions) {
                         bool is_reaction_of_component = false;
                         for (size_t v : vertices_of_component) {
                             if (reaction.right.emu == all_emus[v]) {
                                 is_reaction_of_component = true;
                                 component.reactions.push_back(reaction);
+                                break;
                             }
                         }
                         if (!is_reaction_of_component) {
                             for (size_t v : vertices_of_component) {
-                                if (reaction.left.size() == 1 && reaction.left[0].emu == all_emus[v]) {
-                                    component.additional_reactions.push_back(reaction);
+                                if (reaction.left.size() == 1) {
+                                    if (reaction.left[0].emu == all_emus[v]) {
+                                        component.additional_reactions.push_back(reaction);
+                                    }
+                                } else {
+                                    if (reaction.left[0].emu == all_emus[v] || reaction.left[1].emu == all_emus[v]) {
+                                        auto it = std::find(component.additional_reactions.begin(),
+                                                            component.additional_reactions.end(),
+                                                            reaction);
+
+                                        if (it == component.additional_reactions.end()) {
+                                            component.additional_reactions.push_back(reaction);
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -62,15 +75,7 @@ namespace khnum {
                         // it is input mid, so do nothing
                     } else {
 
-                        std::cout << "New component found" << std::endl << "Reactions: " << std::endl;
-                        for (const EmuReaction &reaction : component.reactions) {
-                            PrintEmuReaction(reaction);
-                        }
-                        std::cout << "Additional:" << std::endl;
-                        for (const EmuReaction &reaction : component.additional_reactions) {
-                            PrintEmuReaction(reaction);
-                        }
-                        std::cout << std::endl;
+
                         components.push_back(component);
                     }
                 }

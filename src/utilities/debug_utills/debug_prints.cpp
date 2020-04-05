@@ -21,7 +21,7 @@ void PrintEmuReaction(const EmuReaction &reaction) {
     std::cout << "= ";
     PrintEmuSubstrate(reaction.right);
     //std::cout << "    rate: " << reaction.rate;
-    //std::cout << "    id: " << reaction.id;
+    // std::cout << "    id: " << reaction.id;
     std::cout << std::endl;
 }
 

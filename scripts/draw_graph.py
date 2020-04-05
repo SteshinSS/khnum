@@ -49,6 +49,8 @@ if __name__ == '__main__':
             colors.append('red')
         elif node in input_emu:
             colors.append('orange')
+        elif G.in_degree()[node] == 0:
+            colors.append('orange')
         else:
             colors.append('blue')
 

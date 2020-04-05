@@ -157,14 +157,20 @@ void CreateSymbolicMatrices(const std::vector<EmuReaction>& reactions,
         ++reaction_num;
     }
     for (const EmuReaction &reaction : additional_reactions) {
-        EmuSubstrate substrate = reaction.left[0];
-
         FluxAndCoefficient substrate_element;
-        substrate_element.coefficient = reaction.rate;
+        substrate_element.coefficient = -reaction.rate;
         substrate_element.id = reaction.id;
-        int position_of_substrate = FindUnknownEmuPosition(substrate.emu, unknown_emus);
-        A[position_of_substrate][position_of_substrate].fluxes.emplace_back(substrate_element);
-
+        EmuSubstrate substrate = reaction.left[0];
+        int position_of_first_substrate = FindUnknownEmuPosition(substrate.emu, unknown_emus);
+        if (position_of_first_substrate != -1) {
+            A[position_of_first_substrate][position_of_first_substrate].fluxes.emplace_back(substrate_element);
+        }
+        if (reaction.left.size() == 2) {
+            int position_of_second_substrate = FindUnknownEmuPosition(reaction.left[1].emu, unknown_emus);
+            if (position_of_second_substrate != -1) {
+                A[position_of_second_substrate][position_of_second_substrate].fluxes.emplace_back(substrate_element);
+            }
+        }
     }
 
     ConvertToSparseMatrix(A, network_data.symbolic_A);
@@ -178,8 +184,11 @@ int FindUnknownEmuPosition(const Emu &emu,
     auto position = find(unknown_emus.begin(),
                          unknown_emus.end(),
                          emu);
-
-    return position - unknown_emus.begin();
+    if (position != unknown_emus.end()) {
+        return position - unknown_emus.begin();
+    } else {
+        return -1;
+    }
 }
 
 
@@ -200,7 +209,7 @@ int FindKnownEmuPosition(const Emu &emu,
 
 void ConvertToSparseMatrix(const std::vector<std::vector<FluxCombination>>& dense_matrix,
                            std::vector<FluxCombination>& sparse_matrix) {
-    std::cout << "M:" << std::endl;
+    std::cout << "A:" << std::endl;
     for (size_t i = 0; i < dense_matrix.size(); ++i) {
         for (size_t j = 0; j < dense_matrix[0].size(); ++j) {
             if (!dense_matrix[i][j].fluxes.empty()) {
@@ -215,7 +224,18 @@ void ConvertToSparseMatrix(const std::vector<std::vector<FluxCombination>>& dens
         }
         std::cout << std::endl;
     }
-    std::cout << std::endl;
+/*
+    while (true) {
+        int i, j;
+        std::cin >> i >> j;
+        if (i == -1) {
+            break;
+        }
+        FluxCombination m = dense_matrix[i][j];
+        for (const FluxAndCoefficient &f : m.fluxes) {
+            std::cout << "id " << f.id << " rate " << f.coefficient << std::endl;
+        }
+    } */
 }
 
 

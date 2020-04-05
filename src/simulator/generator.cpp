@@ -1,3 +1,4 @@
+#include <iostream>
 #include "simulator/generator.h"
 #include "simulator/generator_utilites.h"
 #include "simulator/simulator.h"
@@ -10,6 +11,7 @@ SimulatorGenerator::SimulatorGenerator(const GeneratorParameters& parameters) {
     std::vector<std::vector<int>> usefull_emus(parameters.networks.size());
     std::vector<NetworkEmu> all_known_emus = InitializeInputEmus(parameters.input_mids);
     for (size_t network_num = 0; network_num < parameters.networks.size(); ++network_num) {
+        std::cout << "Component No " << network_num << std::endl;
         GeneratorNetworkData network_data;
         const std::vector<EmuReaction>& reactions = parameters.networks[network_num].reactions;
         const std::vector<EmuReaction> &additional_reactions = parameters.networks[network_num].additional_reactions;

@@ -10,7 +10,6 @@ namespace khnum {
 
 
 SimulatorResult Simulator::CalculateMids(const std::vector<Flux> &fluxes, bool calculate_jacobian) {
-    std::vector<Flux> false_fluxes(fluxes.size(), 1.0);
     SimulatorResult result;
     std::vector<double> sums(total_mids_to_simulate_);
     std::vector<EmuAndMid>& simulated_mids = result.simulated_mids;
@@ -28,13 +27,23 @@ SimulatorResult Simulator::CalculateMids(const std::vector<Flux> &fluxes, bool c
     for (auto& vec : saved_diff_mids) {
         vec.resize(total_networks_);
     }
-
+    //std::cout << "New Iteration" << std::endl;
     for (size_t network_num = 0; network_num < total_networks_; ++network_num) {
+        //std::cout << "Component No " << network_num << std::endl;
         SimulatorNetworkData& network = networks_[network_num];
-        simulator_utilities::FillFluxMatrix(network.symbolic_A, false_fluxes, network.A);
-        simulator_utilities::FillFluxMatrix(network.symbolic_B, false_fluxes, network.B);
+
+        simulator_utilities::FillFluxMatrix(network.symbolic_A, fluxes, network.A);
+        simulator_utilities::FillFluxMatrix(network.symbolic_B, fluxes, network.B);
         simulator_utilities::FillYMatrix(network.Y_data,input_mids_, saved_mids,
                                          network.convolutions, network.Y);
+        Matrix X;
+        if (network.symbolic_A.empty() && network.symbolic_B.size() == 1) {
+            X = network.Y;
+        } else {
+            const Matrix BY = network.B * network.Y;
+            X = network.A.householderQr().solve(BY);
+        }
+        /*
         std::cout << "A: " << std::endl;
         std::cout << network.A << std::endl << std::endl;
 
@@ -44,11 +53,9 @@ SimulatorResult Simulator::CalculateMids(const std::vector<Flux> &fluxes, bool c
         std::cout << "Y: " << std::endl;
         std::cout << network.Y << std::endl << std::endl;
 
-        const Matrix BY = network.B * network.Y;
-        const Matrix X = network.A.householderQr().solve(BY);
 
         std::cout << "Result X: " << std::endl;
-        std::cout << X << std::endl << "--------------------------------------------------" << std::endl << std::endl;
+        std::cout << X << std::endl << "--------------------------------------------------" << std::endl << std::endl; */
         simulator_utilities::SaveNewEmus(X, network.usefull_emus, network.final_emus, saved_mids[network_num], simulated_mids,
                                         sums);
 
