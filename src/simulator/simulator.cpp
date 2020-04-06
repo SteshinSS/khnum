@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <iostream>
+#include <chrono>
 
 #include "simulator/simulation_data.h"
 #include "simulator/simulator_utilities.h"
@@ -41,7 +42,8 @@ SimulatorResult Simulator::CalculateMids(const std::vector<Flux> &fluxes, bool c
                                              network.convolutions, Y);
 
             const Matrix BY = B * Y;
-            const Matrix X = A.householderQr().solve(BY);
+            auto A_decomposition = A.householderQr();
+            const Matrix X = A_decomposition.solve(BY);
             simulator_utilities::SaveNewEmus(X, network.usefull_emus, network.final_emus, saved_mids[network_num], simulated_mids,
                                              sums);
             if (!calculate_jacobian) {
@@ -58,13 +60,13 @@ SimulatorResult Simulator::CalculateMids(const std::vector<Flux> &fluxes, bool c
                                                      input_mids_, saved_mids, dY);
 
                 dA.setZero();
-                for (const SparseElement &element : derivatives.symbolic_dA) {
-                    dA(element.i, element.j) = element.value;
+                for (const Triplet &triplet : derivatives.symbolic_dA) {
+                    dA(triplet.row(), triplet.col()) = triplet.value();
                 }
 
                 dB.setZero();
-                for (const SparseElement &element : derivatives.symbolic_dB) {
-                    dB(element.i, element.j) = element.value;
+                for (const Triplet &triplet : derivatives.symbolic_dB) {
+                    dB(triplet.row(), triplet.col()) = triplet.value();
                 }
 
                 // Right Part of A * dX = (...)
@@ -91,7 +93,8 @@ SimulatorResult Simulator::CalculateMids(const std::vector<Flux> &fluxes, bool c
             const Matrix BY = B * Y;
             Eigen::BiCGSTAB<SparseMatrix, Eigen::IncompleteLUT<SparseMatrix::Scalar>> solver;
             solver.compute(A);
-            const Matrix X = solver.solve(BY);
+            const Matrix guess = Matrix::Constant(network.A_rows, network.Y_cols, 1.0 / network.Y_cols);
+            const Matrix X = solver.solveWithGuess(BY, guess);
             if (solver.info() != Eigen::Success) {
                 std::cout << "NOT SUCCESS " << solver.info() << std::endl;
                 std::cout << solver.error() << std::endl;
@@ -103,6 +106,31 @@ SimulatorResult Simulator::CalculateMids(const std::vector<Flux> &fluxes, bool c
             if (!calculate_jacobian) {
                 continue;
             }
+            SparseMatrix dA(network.A_rows, network.A_cols);
+            SparseMatrix dB(network.B_rows, network.B_cols);
+            Matrix dY = Matrix::Zero(network.Y_rows, network.Y_cols);
+            for (size_t flux = 0; flux < total_free_fluxes_; ++flux) {
+                const DerivativeData &derivatives = network.derivatives.at(flux);
+
+                dY.setZero();
+                simulator_utilities::FillDiffYMatrix(network.Y_data, saved_diff_mids[flux], network.convolutions,
+                                                     input_mids_, saved_mids, dY);
+
+                dA.setFromTriplets(derivatives.symbolic_dA.begin(), derivatives.symbolic_dA.end());
+                dB.setFromTriplets(derivatives.symbolic_dB.begin(), derivatives.symbolic_dB.end());
+
+                // Right Part of A * dX = (...)
+                Matrix RightPart = dB * Y - dA * X + B * dY;
+                Matrix dX = solver.solve(RightPart);
+                if (solver.info() != Eigen::Success) {
+                    std::cout << "NOT SUCCESS " << solver.info() << std::endl;
+                    std::cout << solver.error() << std::endl;
+                    std::cout << solver.iterations() << std::endl;
+                }
+                simulator_utilities::SaveNewDiffEmus(dX, network.usefull_emus, network.final_emus, simulated_mids,
+                                                     sums, saved_diff_mids[flux][network_num], diff_results[flux]);
+            }
+
         }
 
 

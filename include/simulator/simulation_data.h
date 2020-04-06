@@ -17,8 +17,8 @@ struct SimulatorResult {
 };
 
 struct DerivativeData {
-    std::vector<SparseElement> symbolic_dA;
-    std::vector<SparseElement> symbolic_dB;
+    std::vector<Triplet> symbolic_dA;
+    std::vector<Triplet> symbolic_dB;
 };
 
 enum class NetworkSize {small, big};

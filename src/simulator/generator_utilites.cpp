@@ -246,10 +246,10 @@ int FindNetworkSize(const std::vector<EmuReaction>& reactions) {
     return current_size;
 }
 
-std::vector<SparseElement> GenerateDiffFluxMatrix(const std::vector<FluxCombination>& symbolic_matrix,
+std::vector<Triplet> GenerateDiffFluxMatrix(const std::vector<FluxCombination>& symbolic_matrix,
                               int rows, int cols, int id, int position, const std::vector<int>& id_to_pos,
                               const Matrix& nullspace) {
-    std::vector<SparseElement> matrix;
+    std::vector<Triplet> matrix;
     for (const FluxCombination& combination : symbolic_matrix) {
         double value = 0.0;
         for (const FluxAndCoefficient& flux : combination.fluxes) {
@@ -262,11 +262,7 @@ std::vector<SparseElement> GenerateDiffFluxMatrix(const std::vector<FluxCombinat
             }
 
         }
-        SparseElement element;
-        element.i = combination.i;
-        element.j = combination.j;
-        element.value = value;
-        matrix.push_back(element);
+        matrix.push_back(Triplet(combination.i, combination.j, value));
     }
     return matrix;
 }
