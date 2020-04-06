@@ -1,6 +1,6 @@
 #include "modeller/create_network_components.h"
 
-#include <algorithm>>
+#include <algorithm>
 #include <vector>
 #include <iostream>
 

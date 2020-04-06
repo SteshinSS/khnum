@@ -8,6 +8,7 @@
 #include "alglib/ap.h"
 #include <chrono>
 
+#include "simulator/generator.h"
 #include "modeller/modeller.h"
 #include "parser/open_flux_parser/open_flux_parser.h"
 #include "solver/solver.h"
@@ -35,16 +36,17 @@ void RunCli() {
         modeller.CheckModelForErrors();
 
         Problem problem = modeller.GetProblem();
+        SimulatorGenerator generator(problem.simulator_parameters_);
         std::vector<alglib::real_1d_array> allSolutions;
 
-        bool use_multithread = false;
+        bool use_multithread = true;
         if (use_multithread) {
             const unsigned int num_threads = std::thread::hardware_concurrency();
             std::cout << num_threads << std::endl;
 
             std::vector<std::vector<alglib::real_1d_array>> one_thread_solutions(num_threads);
-            auto one_thread = [](const Problem &problem, std::vector<alglib::real_1d_array> &result) {
-                Solver solver(problem);
+            auto one_thread = [&generator](const Problem &problem, std::vector<alglib::real_1d_array> &result) {
+                Solver solver(problem, generator);
                 solver.Solve();
                 result = solver.GetResult();
             };
@@ -73,7 +75,7 @@ void RunCli() {
             }
 
         } else {
-            Solver solver(problem);
+            Solver solver(problem, generator);
             solver.Solve();
             allSolutions = solver.GetResult();
         }

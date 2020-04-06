@@ -15,8 +15,7 @@
 namespace khnum {
 
 
-Solver::Solver(const Problem &problem) {
-    SimulatorGenerator generator(problem.simulator_parameters_);
+Solver::Solver(const Problem &problem, const SimulatorGenerator &generator) {
     new_simulator_.emplace(generator.Generate());
     reactions_num_ = problem.reactions_total;
     nullspace_ = problem.nullspace;
@@ -29,7 +28,7 @@ Solver::Solver(const Problem &problem) {
     free_fluxes_.setlength(nullity_);
 
     iteration_ = 0;
-    iteration_total_ = 5;
+    iteration_total_ = 20;
 
     lower_bounds_.setlength(nullity_);
     upper_bounds_.setlength(nullity_);
@@ -71,7 +70,7 @@ void Solver::Solve() {
     elapsed_milliseconds /= 1000;
 
     std::cout << "Average time: " << static_cast<double>(elapsed_milliseconds) / iteration_total_
-        << " seconds per iteration" << std::endl;
+       << " seconds per iteration" << std::endl;
 }
 
 
@@ -114,7 +113,7 @@ void Solver::SetConstraints() {
         for (int col = 0; col < nullspace_.cols(); ++col) {
             constraint(row, col) = nullspace_(row, col);
         }
-        constraint(row, nullspace_.cols()) = 0.0;
+        constraint(row, nullspace_.cols()) = 0;
     }
 
     alglib::integer_1d_array types;

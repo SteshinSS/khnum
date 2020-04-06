@@ -48,7 +48,7 @@ void InsertIntoAllKnownEmus(const std::vector<Emu>& unknown_emus,
 
 int FindNetworkSize(const std::vector<EmuReaction>& reactions);
 
-Matrix GenerateDiffFluxMatrix(const std::vector<FluxCombination>& symbolic_matrix,
+std::vector<SparseElement> GenerateDiffFluxMatrix(const std::vector<FluxCombination>& symbolic_matrix,
                               int rows, int cols, int id, int position, const std::vector<int>& id_to_pos,
                               const Matrix& nullspace);
 }

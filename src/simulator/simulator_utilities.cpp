@@ -2,15 +2,27 @@
 
 namespace khnum {
 namespace simulator_utilities {
-void FillFluxMatrix(const std::vector<FluxCombination>& symbolic_matrix,
-                    const std::vector<Flux>& fluxes,
-                    Matrix& matrix_out) {
+void FillSmallFluxMatrix(const std::vector<FluxCombination>& symbolic_matrix,
+                         const std::vector<Flux>& fluxes,
+                         Matrix& matrix_out) {
     for (const FluxCombination& combination : symbolic_matrix) {
         double value = 0.0;
         for (const FluxAndCoefficient& flux : combination.fluxes) {
             value += flux.coefficient * fluxes[flux.id];
         }
         matrix_out(combination.i, combination.j) = value;
+    }
+}
+
+void FillBigFluxMatrix(const std::vector<FluxCombination>& symbolic_matrix,
+                       const std::vector<Flux>& fluxes,
+                       std::vector<Triplet> &triplets_out) {
+    for (const FluxCombination& combination : symbolic_matrix) {
+        double value = 0.0;
+        for (const FluxAndCoefficient& flux : combination.fluxes) {
+            value += flux.coefficient * fluxes[flux.id];
+        }
+        triplets_out.push_back(Triplet(combination.i, combination.j, value));
     }
 }
 

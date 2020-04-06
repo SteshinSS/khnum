@@ -6,6 +6,7 @@
 #include "alglib/optimization.h"
 #include "utilities/problem.h"
 #include "simulator/simulator.h"
+#include "simulator/generator.h"
 
 
 namespace khnum {
@@ -14,7 +15,7 @@ namespace khnum {
 
 class Solver {
 public:
-    Solver(const Problem &problem);
+    Solver(const Problem &problem, const SimulatorGenerator &generator);
 
     void Solve();
 

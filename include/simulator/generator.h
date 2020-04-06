@@ -8,7 +8,7 @@ class SimulatorGenerator {
 public:
     SimulatorGenerator(const GeneratorParameters& parameters);
 
-    Simulator Generate();
+    Simulator Generate() const;
 
 private:
     std::vector<NetworkEmu> InitializeInputEmus(const std::vector<EmuAndMid>& input_mids) const;

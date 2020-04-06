@@ -7,9 +7,13 @@
 
 namespace khnum {
 namespace simulator_utilities {
-void FillFluxMatrix(const std::vector<FluxCombination> &symbolic_matrix,
-                    const std::vector<Flux> &fluxes,
-                    Matrix &matrix_out);
+void FillSmallFluxMatrix(const std::vector<FluxCombination> &symbolic_matrix,
+                         const std::vector<Flux> &fluxes,
+                         Matrix &matrix_out);
+
+void FillBigFluxMatrix(const std::vector<FluxCombination> &symbolic_matrix,
+                       const std::vector<Flux> &fluxes,
+                       std::vector<Triplet> &triplet_out);
 
 void FillYMatrix(const std::vector<PositionOfSavedEmu> &Y_data,
                  const std::vector<EmuAndMid> &input_mids,

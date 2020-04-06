@@ -17,21 +17,26 @@ struct SimulatorResult {
 };
 
 struct DerivativeData {
-    Matrix dA;
-    Matrix dB;
-    Matrix dY;
+    std::vector<SparseElement> symbolic_dA;
+    std::vector<SparseElement> symbolic_dB;
 };
 
+enum class NetworkSize {small, big};
+
 struct SimulatorNetworkData {
+    NetworkSize size;
     std::vector<FluxCombination> symbolic_A;
     std::vector<FluxCombination> symbolic_B;
     std::vector<PositionOfSavedEmu> Y_data;
     std::vector<Convolution> convolutions;
     std::vector<int> usefull_emus;
     std::vector<FinalEmu> final_emus;
-    Matrix A;
-    Matrix B;
-    Matrix Y;
+    size_t A_rows;
+    size_t A_cols;
+    size_t B_rows;
+    size_t B_cols;
+    size_t Y_rows;
+    size_t Y_cols;
     std::vector<DerivativeData> derivatives;
 };
 

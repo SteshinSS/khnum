@@ -2,6 +2,7 @@
 
 #include <math.h>
 #include <iostream>
+#include <map>
 
 #include "utilities/matrix.h"
 #include "modeller/create_emu_networks.h"
@@ -42,7 +43,6 @@ void Modeller::CreateEmuNetworks() {
             emu_networks_.push_back(component);
         }
     }
-    PrintNetwork(emu_networks_);
 }
 
 

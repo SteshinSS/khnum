@@ -13,6 +13,11 @@ struct FluxAndCoefficient {
     double coefficient;
 };
 
+struct SparseElement {
+    size_t i, j;
+    double value;
+};
+
 struct FluxCombination {
     size_t i, j;
     std::vector<FluxAndCoefficient> fluxes;

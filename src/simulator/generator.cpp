@@ -30,7 +30,7 @@ SimulatorGenerator::SimulatorGenerator(const GeneratorParameters& parameters) {
     }
 }
 
-Simulator SimulatorGenerator::Generate() {
+Simulator SimulatorGenerator::Generate() const {
     return Simulator(simulator_network_data_, parameters_.input_mids, parameters_.measured_isotopes.size());
 }
 
@@ -51,31 +51,37 @@ std::vector<NetworkEmu> SimulatorGenerator::InitializeInputEmus(const std::vecto
 
 SimulatorNetworkData SimulatorGenerator::FillSimulatorNetworkData(const GeneratorNetworkData& network_data, int network_size) const {
     SimulatorNetworkData simulator_network_data;
+    if (network_data.unknown_emus.size() > 10) {
+        simulator_network_data.size = NetworkSize::big;
+    } else {
+        simulator_network_data.size = NetworkSize::small;
+    }
+
     simulator_network_data.symbolic_A = network_data.symbolic_A;
     simulator_network_data.symbolic_B = network_data.symbolic_B;
     simulator_network_data.Y_data = network_data.Y_data;
     simulator_network_data.convolutions = network_data.convolutions;
 
     simulator_network_data.final_emus = network_data.final_emus;
-    simulator_network_data.A = Matrix::Zero(network_data.unknown_emus.size(), network_data.unknown_emus.size());
-    simulator_network_data.B = Matrix::Zero(network_data.unknown_emus.size(), network_data.known_emus.size() + network_data.convolutions.size());
-
-    simulator_network_data.Y = Matrix::Zero(network_data.known_emus.size() + network_data.convolutions.size(), network_size + 1);
+    simulator_network_data.A_rows = network_data.unknown_emus.size();
+    simulator_network_data.A_cols = network_data.unknown_emus.size();
+    simulator_network_data.B_rows = network_data.unknown_emus.size();
+    simulator_network_data.B_cols = network_data.known_emus.size() + network_data.convolutions.size();
+    simulator_network_data.Y_rows = network_data.known_emus.size() + network_data.convolutions.size();
+    simulator_network_data.Y_cols = network_size + 1;
 
     std::vector<DerivativeData> derivatives(parameters_.free_fluxes_id.size());
     size_t position = 0;
     for (int id : parameters_.free_fluxes_id) {
-        derivatives[position].dA = generator_utilites::GenerateDiffFluxMatrix(network_data.symbolic_A,
+        derivatives[position].symbolic_dA = generator_utilites::GenerateDiffFluxMatrix(network_data.symbolic_A,
                                                                               network_data.unknown_emus.size(),
                                                                               network_data.unknown_emus.size(),
                                                                               id, position, parameters_.free_flux_id_to_nullspace_position, parameters_.nullspace);
 
-        derivatives[position].dB = generator_utilites::GenerateDiffFluxMatrix(network_data.symbolic_B,
+        derivatives[position].symbolic_dB = generator_utilites::GenerateDiffFluxMatrix(network_data.symbolic_B,
                                                                               network_data.unknown_emus.size(),
                                                                               network_data.known_emus.size() + network_data.convolutions.size(),
                                                                               id, position, parameters_.free_flux_id_to_nullspace_position, parameters_.nullspace);
-
-        derivatives[position].dY = Matrix::Zero(network_data.known_emus.size() + network_data.convolutions.size(), network_size + 1);
         ++position;
     }
 
