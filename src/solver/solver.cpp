@@ -88,7 +88,7 @@ void Solver::GenerateInitialPoints(std::mt19937 &random_source) {
 
 void Solver::SetOptimizationParameters() {
     alglib::ae_int_t maxits = 500;
-    const double epsx = 0.001;
+    const double epsx = 0.000001;
 
     if (use_analytic_gradient_) {
         alglib::minlmcreatevj(nullity_, measurements_count_, free_fluxes_, state_);

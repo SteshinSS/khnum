@@ -133,4 +133,18 @@ void PrintReaction(const Reaction& reaction) {
 
 }
 
+void PrintNetworkComponent(const EmuNetwork &component) {
+    for (const EmuReaction &reaction : component) {
+        PrintEmuReaction(reaction);
+    }
+}
+
+void PrintNetwork(const std::vector<EmuNetwork> &network) {
+    for (size_t i = 0; i < network.size(); ++i) {
+        std::cout << "Component No.: " << i << std::endl;
+        PrintNetworkComponent(network.at(i));
+        std::cout << std::endl;
+    }
+}
+
 } // namespace khnum

@@ -2,7 +2,6 @@
 
 #include <algorithm>>
 #include <vector>
-#include <set>
 #include <iostream>
 
 #include "utilities/emu.h"
@@ -10,8 +9,8 @@
 
 namespace khnum {
     namespace modelling_utills {
-        std::vector<EmuNetworkComponent> CreateNetworkComponents(const EmuNetwork &network, const std::vector<EmuReaction> &all_emu_reactions) {
-            std::vector<EmuNetworkComponent> components;
+        std::vector<EmuNetwork> CreateNetworkComponents(const EmuNetwork &network) {
+            std::vector<EmuNetwork> components;
 
             std::vector<Emu> all_emus;
 
@@ -41,41 +40,16 @@ namespace khnum {
                 if (!visited[v]) {
                     std::vector<size_t> vertices_of_component;
                     dfs2(v, network, visited, vertices_of_component, all_emus);
-                    EmuNetworkComponent component;
-                    for (const EmuReaction &reaction : all_emu_reactions) {
-                        bool is_reaction_of_component = false;
+                    EmuNetwork component;
+                    for (const EmuReaction &reaction : network) {
                         for (size_t v : vertices_of_component) {
                             if (reaction.right.emu == all_emus[v]) {
-                                is_reaction_of_component = true;
-                                component.reactions.push_back(reaction);
+                                component.push_back(reaction);
                                 break;
                             }
                         }
-                        if (!is_reaction_of_component) {
-                            for (size_t v : vertices_of_component) {
-                                if (reaction.left.size() == 1) {
-                                    if (reaction.left[0].emu == all_emus[v]) {
-                                        component.additional_reactions.push_back(reaction);
-                                    }
-                                } else {
-                                    if (reaction.left[0].emu == all_emus[v] || reaction.left[1].emu == all_emus[v]) {
-                                        auto it = std::find(component.additional_reactions.begin(),
-                                                            component.additional_reactions.end(),
-                                                            reaction);
-
-                                        if (it == component.additional_reactions.end()) {
-                                            component.additional_reactions.push_back(reaction);
-                                        }
-                                    }
-                                }
-                            }
-                        }
                     }
-                    if (component.reactions.size() == 0 && component.additional_reactions.size() == 1) {
-                        // it is input mid, so do nothing
-                    } else {
-
-
+                    if (!component.empty()) {
                         components.push_back(component);
                     }
                 }

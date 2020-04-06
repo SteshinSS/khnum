@@ -18,4 +18,8 @@ namespace khnum {
     void PrintReactions(const std::vector<Reaction>& reactions);
 
     void PrintReaction(const Reaction& reaction);
+
+    void PrintNetworkComponent(const EmuNetwork& component);
+
+    void PrintNetwork(const std::vector<EmuNetwork> &network);
 } // namespace khnum

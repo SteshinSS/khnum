@@ -37,22 +37,12 @@ void Modeller::CalculateInputSubstrateMids() {
 void Modeller::CreateEmuNetworks() {
     std::vector<EmuNetwork> networks = modelling_utills::CreateEmuNetworks(all_emu_reactions_, input_emu_list_, measured_isotopes_);
     for (EmuNetwork &network : networks) {
-        std::vector<EmuNetworkComponent> components = modelling_utills::CreateNetworkComponents(network, all_emu_reactions_);
-        for (const EmuNetworkComponent &component : components) {
+        std::vector<EmuNetwork> components = modelling_utills::CreateNetworkComponents(network);
+        for (const EmuNetwork &component : components) {
             emu_networks_.push_back(component);
         }
     }
-    for (size_t i = 0; i < emu_networks_.size(); ++i) {
-        std::cout << "Component No " << i << std::endl;
-        for (const EmuReaction &reaction : emu_networks_[i].reactions) {
-            PrintEmuReaction(reaction);
-        }
-        std::cout << "Additional:" << std::endl;
-        for (const EmuReaction &reaction : emu_networks_[i].additional_reactions) {
-            PrintEmuReaction(reaction);
-        }
-        std::cout << std::endl;
-    }
+    PrintNetwork(emu_networks_);
 }
 
 

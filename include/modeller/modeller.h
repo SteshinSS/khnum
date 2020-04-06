@@ -38,7 +38,7 @@ private:
     Matrix nullspace_;
     Matrix stoichiometry_matrix_;
     std::vector<EmuAndMid> input_substrate_mids_;
-    std::vector<EmuNetworkComponent> emu_networks_;
+    std::vector<EmuNetwork> emu_networks_;
     std::vector<int> id_to_position_in_depended_fluxes_;
 
     std::vector<double> lower_bounds_;

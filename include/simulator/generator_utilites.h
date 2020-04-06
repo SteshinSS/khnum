@@ -28,7 +28,6 @@ Convolution ConvolveReaction(const EmuReaction& reaction,
                              std::vector<std::vector<int>>& usefull_emus);
 
 void CreateSymbolicMatrices(const std::vector<EmuReaction>& reactions,
-                            const std::vector<EmuReaction>& additional_reactions,
                             GeneratorNetworkData& network_data);
 
 int FindUnknownEmuPosition(const Emu &emu,
