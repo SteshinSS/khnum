@@ -87,11 +87,11 @@ void Solver::GenerateInitialPoints(std::mt19937 &random_source) {
 
 void Solver::SetOptimizationParameters() {
     alglib::ae_int_t maxits = 500;
-    const double epsx = 0.000001;
+    const double epsx = 0.0001;
 
     if (use_analytic_gradient_) {
         alglib::minlmcreatevj(nullity_, measurements_count_, free_fluxes_, state_);
-        alglib::minlmoptguardgradient(state_, 0.000);
+        //alglib::minlmoptguardgradient(state_, 0.001);
     } else {
         alglib::minlmcreatev(nullity_, measurements_count_, free_fluxes_, 0.001, state_);
     }
@@ -201,7 +201,8 @@ void Solver::FillJacobian(alglib::real_2d_array &jac) {
     for (size_t isotope = 0; isotope < measured_mids_.size(); ++isotope) {
         for (size_t mass_shift = 0; mass_shift < measured_mids_[isotope].errors.size(); ++mass_shift) {
             for (size_t flux = 0; flux < diff_results_.size(); ++flux) {
-                jac(total_residuals, flux) = diff_results_[flux][isotope].mid[mass_shift] / measured_mids_[isotope].errors[mass_shift];
+                float temp = diff_results_[flux][isotope].mid[mass_shift] / measured_mids_[isotope].errors[mass_shift];
+                jac(total_residuals, flux) = temp;
             }
             ++total_residuals;
         }
@@ -212,6 +213,8 @@ void Solver::FillJacobian(alglib::real_2d_array &jac) {
 void Solver::CalculateResidual(const alglib::real_1d_array &free_fluxes,
                                alglib::real_1d_array &residuals) {
     std::vector<Flux> calculated_fluxes = CalculateAllFluxesFromFree(free_fluxes);
+
+
     SimulatorResult result = new_simulator_->CalculateMids(calculated_fluxes, in_jacobian);
 
     diff_results_ = result.diff_results;
@@ -269,11 +272,10 @@ double Solver::GetSSR(const alglib::real_1d_array &residuals) {
 
 void Solver::PrintFinalMessage(const alglib::real_1d_array &free_fluxes) {
     std::vector<Flux> final_all_fluxes = CalculateAllFluxesFromFree(free_fluxes);
-    SimulatorResult result = new_simulator_->CalculateMids(final_all_fluxes, in_jacobian);
+    SimulatorResult result = new_simulator_->CalculateMids(final_all_fluxes, false);
     alglib::real_1d_array residuals;
     residuals.setlength(measurements_count_);
     Fillf0Array(residuals, result.simulated_mids);
-
     double ssr = GetSSR(residuals);
 /*
     std::cout << "Finish at: " << std::endl;

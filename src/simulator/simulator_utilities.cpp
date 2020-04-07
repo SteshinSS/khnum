@@ -103,7 +103,7 @@ void SaveNewEmus(const Matrix& X,
 void SaveNewDiffEmus(const Matrix& X,
                      const std::vector<int>& usefull_emus,
                      const std::vector<FinalEmu>& final_emus,
-                     const std::vector<EmuAndMid> result,
+                     const std::vector<EmuAndMid> &result,
                      const std::vector<double>& sums,
                      std::vector<Mid>& saved_mids_out,
                      std::vector<EmuAndMid>& diff_result_out) {

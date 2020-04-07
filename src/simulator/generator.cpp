@@ -73,15 +73,39 @@ SimulatorNetworkData SimulatorGenerator::FillSimulatorNetworkData(const Generato
     std::vector<DerivativeData> derivatives(parameters_.free_fluxes_id.size());
     size_t position = 0;
     for (int id : parameters_.free_fluxes_id) {
-        derivatives[position].symbolic_dA = generator_utilites::GenerateDiffFluxMatrix(network_data.symbolic_A,
+        std::vector<Triplet> symbolic_dA = generator_utilites::GenerateDiffFluxMatrix(network_data.symbolic_A,
                                                                               network_data.unknown_emus.size(),
                                                                               network_data.unknown_emus.size(),
                                                                               id, position, parameters_.free_flux_id_to_nullspace_position, parameters_.nullspace);
 
-        derivatives[position].symbolic_dB = generator_utilites::GenerateDiffFluxMatrix(network_data.symbolic_B,
+        if (simulator_network_data.size == NetworkSize::small) {
+            Matrix &dA = derivatives[position].dA_small;
+            dA = Matrix::Zero(network_data.unknown_emus.size(), network_data.unknown_emus.size());
+            for (const Triplet &triplet : symbolic_dA) {
+                dA(triplet.row(), triplet.col()) = triplet.value();
+            }
+        } else if (simulator_network_data.size == NetworkSize::big) {
+            SparseMatrix &dA = derivatives[position].dA_big;
+            dA = SparseMatrix(simulator_network_data.A_rows, simulator_network_data.A_cols);
+            dA.setFromTriplets(symbolic_dA.begin(), symbolic_dA.end());
+        }
+
+        std::vector<Triplet> symbolic_dB = generator_utilites::GenerateDiffFluxMatrix(network_data.symbolic_B,
                                                                               network_data.unknown_emus.size(),
                                                                               network_data.known_emus.size() + network_data.convolutions.size(),
                                                                               id, position, parameters_.free_flux_id_to_nullspace_position, parameters_.nullspace);
+        if (simulator_network_data.size == NetworkSize::small) {
+            Matrix &dB = derivatives[position].dB_small;
+            dB = Matrix::Zero(simulator_network_data.B_rows, simulator_network_data.B_cols);
+            for (const Triplet &triplet : symbolic_dB) {
+                dB(triplet.row(), triplet.col()) = triplet.value();
+            }
+        } else if (simulator_network_data.size == NetworkSize::big) {
+            SparseMatrix &dB = derivatives[position].dB_big;
+            dB = SparseMatrix(simulator_network_data.B_rows, simulator_network_data.B_cols);
+            dB.setFromTriplets(symbolic_dB.begin(), symbolic_dB.end());
+        }
+
         ++position;
     }
 

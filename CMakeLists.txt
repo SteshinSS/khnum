@@ -8,9 +8,9 @@ set(CMAKE_BUILD_TYPE=Release)
 #set(CMAKE_BUILD_TYPE Debug)
 # -shared-libgcc -fno-omit-frame-pointer -g
 if (CMAKE_BUILD_TYPE MATCHES Debug)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -shared-libgcc -fno-omit-frame-pointer -g -march=native")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -march=native")
 ELSE()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -shared-libgcc -fno-omit-frame-pointer -g -march=native")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -march=native")
 ENDIF()
 
 if(" ${CMAKE_SOURCE_DIR}" STREQUAL " ${CMAKE_BINARY_DIR}")

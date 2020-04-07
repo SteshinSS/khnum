@@ -17,8 +17,10 @@ struct SimulatorResult {
 };
 
 struct DerivativeData {
-    std::vector<Triplet> symbolic_dA;
-    std::vector<Triplet> symbolic_dB;
+    Matrix dA_small;
+    Matrix dB_small;
+    SparseMatrix dA_big;
+    SparseMatrix dB_big;
 };
 
 enum class NetworkSize {small, big};

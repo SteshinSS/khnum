@@ -50,8 +50,6 @@ SimulatorResult Simulator::CalculateMids(const std::vector<Flux> &fluxes, bool c
                 continue;
             }
             Matrix dY = Matrix::Zero(network.Y_rows, network.Y_cols);
-            Matrix dA = Matrix::Zero(network.A_rows, network.A_cols);
-            Matrix dB = Matrix::Zero(network.B_rows, network.B_cols);
             for (size_t flux = 0; flux < total_free_fluxes_; ++flux) {
                 const DerivativeData &derivatives = network.derivatives.at(flux);
 
@@ -59,19 +57,9 @@ SimulatorResult Simulator::CalculateMids(const std::vector<Flux> &fluxes, bool c
                 simulator_utilities::FillDiffYMatrix(network.Y_data, saved_diff_mids[flux], network.convolutions,
                                                      input_mids_, saved_mids, dY);
 
-                dA.setZero();
-                for (const Triplet &triplet : derivatives.symbolic_dA) {
-                    dA(triplet.row(), triplet.col()) = triplet.value();
-                }
-
-                dB.setZero();
-                for (const Triplet &triplet : derivatives.symbolic_dB) {
-                    dB(triplet.row(), triplet.col()) = triplet.value();
-                }
-
                 // Right Part of A * dX = (...)
-                Matrix RightPart = dB * Y + B * dY - dA * X;
-                Matrix dX = A.householderQr().solve(RightPart);
+                Matrix RightPart = derivatives.dB_small * Y + B * dY - derivatives.dA_small * X;
+                Matrix dX = A_decomposition.solve(RightPart);
                 simulator_utilities::SaveNewDiffEmus(dX, network.usefull_emus, network.final_emus, simulated_mids,
                                                      sums, saved_diff_mids[flux][network_num], diff_results[flux]);
             }
@@ -106,8 +94,6 @@ SimulatorResult Simulator::CalculateMids(const std::vector<Flux> &fluxes, bool c
             if (!calculate_jacobian) {
                 continue;
             }
-            SparseMatrix dA(network.A_rows, network.A_cols);
-            SparseMatrix dB(network.B_rows, network.B_cols);
             Matrix dY = Matrix::Zero(network.Y_rows, network.Y_cols);
             for (size_t flux = 0; flux < total_free_fluxes_; ++flux) {
                 const DerivativeData &derivatives = network.derivatives.at(flux);
@@ -116,11 +102,8 @@ SimulatorResult Simulator::CalculateMids(const std::vector<Flux> &fluxes, bool c
                 simulator_utilities::FillDiffYMatrix(network.Y_data, saved_diff_mids[flux], network.convolutions,
                                                      input_mids_, saved_mids, dY);
 
-                dA.setFromTriplets(derivatives.symbolic_dA.begin(), derivatives.symbolic_dA.end());
-                dB.setFromTriplets(derivatives.symbolic_dB.begin(), derivatives.symbolic_dB.end());
-
                 // Right Part of A * dX = (...)
-                Matrix RightPart = dB * Y - dA * X + B * dY;
+                Matrix RightPart = derivatives.dB_big * Y - derivatives.dA_big * X + B * dY;
                 Matrix dX = solver.solve(RightPart);
                 if (solver.info() != Eigen::Success) {
                     std::cout << "NOT SUCCESS " << solver.info() << std::endl;
@@ -132,6 +115,7 @@ SimulatorResult Simulator::CalculateMids(const std::vector<Flux> &fluxes, bool c
             }
 
         }
+
 
 
     }
