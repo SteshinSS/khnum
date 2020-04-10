@@ -65,7 +65,7 @@ void RunCli() {
                     (end-start).count();
 
             elapsed_milliseconds /= 1000;
-            std::cout << "Average time: " << static_cast<double>(elapsed_milliseconds) / 160
+            std::cout << "Average time: " << static_cast<double>(elapsed_milliseconds) / (num_threads * 30)
                 << " seconds per iteration" << std::endl;
 
             for (const auto &vec : one_thread_solutions) {

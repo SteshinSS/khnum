@@ -37,6 +37,7 @@ file(GLOB_RECURSE KHNUM_SOURCES
 set_source_files_properties(${KHNUM_SOURCES} PROPERTIES COMPILE_FLAGS "-Wall -Wpedantic -Wextra")
 
 add_compile_definitions(EIGEN_MALLOC_ALREADY_ALIGNED=0)
+add_compile_definitions(EIGEN_NO_DEBUG)
 add_library(khnum_lib ${KHNUM_SOURCES})
 target_link_libraries(khnum_lib eigen alglib glpk ${PTHREAD_LIBRARY})
 target_include_directories(khnum_lib PUBLIC include)

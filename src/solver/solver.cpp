@@ -28,7 +28,7 @@ Solver::Solver(const Problem &problem, const SimulatorGenerator &generator) {
     free_fluxes_.setlength(nullity_);
 
     iteration_ = 0;
-    iteration_total_ = 10;
+    iteration_total_ = 30;
 
     lower_bounds_.setlength(nullity_);
     upper_bounds_.setlength(nullity_);

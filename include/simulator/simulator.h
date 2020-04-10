@@ -27,6 +27,7 @@ private:
     const size_t total_mids_to_simulate_;
     const std::vector<EmuAndMid> &input_mids_;
     const std::vector<SimulatorNetworkData> &networks_;
+    std::vector<Eigen::BiCGSTAB<SparseMatrix, Eigen::IncompleteLUT<SparseMatrix::Scalar>>> solvers_;
 
     std::vector<Matrix> corrections;
 };

@@ -28,6 +28,7 @@ SimulatorResult Simulator::CalculateMids(const std::vector<Flux> &fluxes, bool c
     for (auto& vec : saved_diff_mids) {
         vec.resize(total_networks_);
     }
+    size_t total_big_networks = 0;
     for (size_t network_num = 0; network_num < total_networks_; ++network_num) {
         const SimulatorNetworkData &network = networks_[network_num];
         if (network.size == NetworkSize::small) {
@@ -79,9 +80,10 @@ SimulatorResult Simulator::CalculateMids(const std::vector<Flux> &fluxes, bool c
                                              network.convolutions, Y);
 
             const Matrix BY = B * Y;
-            Eigen::BiCGSTAB<SparseMatrix, Eigen::IncompleteLUT<SparseMatrix::Scalar>> solver;
-            solver.compute(A);
+            Eigen::BiCGSTAB<SparseMatrix, Eigen::IncompleteLUT<SparseMatrix::Scalar>> &solver = solvers_[total_big_networks++];
+            solver.factorize(A);
             const Matrix guess = Matrix::Constant(network.A_rows, network.Y_cols, 1.0 / network.Y_cols);
+
             const Matrix X = solver.solveWithGuess(BY, guess);
             if (solver.info() != Eigen::Success) {
                 std::cout << "NOT SUCCESS " << solver.info() << std::endl;
@@ -105,6 +107,8 @@ SimulatorResult Simulator::CalculateMids(const std::vector<Flux> &fluxes, bool c
                 // Right Part of A * dX = (...)
                 Matrix RightPart = derivatives.dB_big * Y - derivatives.dA_big * X + B * dY;
                 Matrix dX = solver.solve(RightPart);
+
+
                 if (solver.info() != Eigen::Success) {
                     std::cout << "NOT SUCCESS " << solver.info() << std::endl;
                     std::cout << solver.error() << std::endl;
@@ -129,6 +133,20 @@ Simulator::Simulator(const std::vector<SimulatorNetworkData>& networks,
                                             total_free_fluxes_{networks[0].derivatives.size()},
                                             total_mids_to_simulate_{total_mids_to_simulate},
                                             input_mids_{input_mids},
-                                            networks_{networks} {
+                                            networks_{networks},
+                                            solvers_{networks_.size()}{
+    int total_big_networks = 0;
+    for (const SimulatorNetworkData &network : networks) {
+        if (network.size == NetworkSize::big) {
+            SparseMatrix A(network.A_rows, network.A_cols);
+            std::vector<Triplet> A_triplets;
+            for (const FluxCombination &fc : network.symbolic_A) {
+                A_triplets.push_back(Triplet(fc.i, fc.j, 1));
+            }
+            A.setFromTriplets(A_triplets.begin(), A_triplets.end());
+            solvers_[total_big_networks].analyzePattern(A);
+            ++total_big_networks;
+        }
+    }
 }
 } // namespace khnum
