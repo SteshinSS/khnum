@@ -11,6 +11,7 @@ using SubstrateCoefficient = double;
 using AtomCoefficient = double;
 
 struct Substrate {
+    int size; // 3
     std::string name;                 // for example, "PYR_EX"
     AtomRepresentation formula;       // "abc"
     SubstrateCoefficient substrate_coefficient_ = 0.0; // 1.0
@@ -22,9 +23,17 @@ bool operator==(const Substrate &lhs, const Substrate &rhs);
 
 using ChemicalEquationSide = std::vector<Substrate>;
 
+struct AtomTransition {
+  int substrate_pos;
+  int product_pos;
+  int substrate_atom;
+  int product_atom;
+};
+
 struct ChemicalEquation {
     ChemicalEquationSide left;
     ChemicalEquationSide right;
+    std::vector<AtomTransition> atom_transitions;
 };
 
 
@@ -43,10 +52,13 @@ using Basis = double;
 using Deviation = double;
 using Flux = double;
 
+
+
 struct Reaction {
     int id;
     std::string name;
     ChemicalEquation chemical_equation;
+
     ReactionType type;
     Basis basis;
     Deviation deviation;

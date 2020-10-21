@@ -39,7 +39,7 @@ void RunCli() {
         SimulatorGenerator generator(problem.simulator_parameters_);
         std::vector<alglib::real_1d_array> allSolutions;
 
-        bool use_multithread = true;
+        bool use_multithread = false;
         if (use_multithread) {
             const unsigned int num_threads = std::thread::hardware_concurrency();
             std::cout << num_threads << std::endl;

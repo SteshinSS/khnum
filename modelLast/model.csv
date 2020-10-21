@@ -28,11 +28,11 @@ RxnID,rxnEq,rxnCTrans,rates,rxnType,basis,deviation
 28,ru5p_D_c = r5p_c,abcde = abcde,,FR,
 29,r5p_c = ru5p_D_c,abcde = abcde,,R,X
 30,xu5p_D_c = c2 + g3p_c,abcde = ab + cde,,FR,
-31,c2 + g3p_c = xu5p_D_c,ab + cde= abcde,,R,X
+31,c2 + g3p_c = xu5p_D_c,ab + cde = abcde,,R,X
 32,f6p_c = c2 + e4p_c,abcdef = ab + cdef,,FR,
-33,c2 + e4p_c = f6p_c,ab + cdef= abcdef,,R,X
+33,c2 + e4p_c = f6p_c,ab + cdef = abcdef,,R,X
 34,s7p_c = c2 + r5p_c,abcdefg = ab + cdefg,,FR,
-35,c2 + r5p_c = s7p_c,ab + cdefg= abcdefg,,R,X
+35,c2 + r5p_c = s7p_c,ab + cdefg = abcdefg,,R,X
 36,f6p_c = c3 + g3p_c,abcdef = abc + def,,FR,
 37,c3 + g3p_c = f6p_c,abc + def = abcdef,,R,X
 38,s7p_c = c3 + e4p_c,abcdefg = abc + defg,,FR,

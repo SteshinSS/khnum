@@ -47,6 +47,8 @@ Reaction FillReaction(const std::string& raw_line, int id, const Delimiters& del
 
 ChemicalEquation ParseChemicalEquation(std::stringstream &line, const Delimiters& delimiters);
 
+std::vector<AtomTransition> ParseAtomTransitions(const std::string &atom_equation, const Delimiters& delimiters);
+
 ChemicalEquationSide FillEquationSide(const std::string &substrate_equation, const std::string &atom_equation,
                                       const Delimiters& delimiters);
 

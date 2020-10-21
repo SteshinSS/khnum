@@ -1,5 +1,6 @@
 #include "parser/open_flux_parser/open_flux_utills.h"
 
+#include <iostream>
 #include <vector>
 #include <string>
 #include <fstream>
@@ -252,11 +253,12 @@ ChemicalEquation ParseChemicalEquation(std::stringstream &line, const Delimiters
     bool is_atom_equation_ok = (atom_delimiter_position != std::string::npos) || atom_equation.empty();
 
     if (reaction_delimiter_position != std::string::npos && is_atom_equation_ok) {
+        ChemicalEquation result;
         const std::string left_side_substrate_equation = substrate_equation.substr(0, reaction_delimiter_position);
         const std::string left_side_atom_equation = atom_equation.empty() ? "" :
                                                     atom_equation.substr(0, atom_delimiter_position);
 
-        ChemicalEquationSide left = FillEquationSide(
+        result.left = FillEquationSide(
             left_side_substrate_equation, left_side_atom_equation, delimiters);
 
         const std::string right_side_substrate_equation = substrate_equation.substr(
@@ -264,10 +266,12 @@ ChemicalEquation ParseChemicalEquation(std::stringstream &line, const Delimiters
         const std::string right_side_atom_equation = atom_equation.empty() ? "" :
                                                      atom_equation.substr(atom_delimiter_position + 2);
 
-        ChemicalEquationSide right = FillEquationSide(
+        result.right = FillEquationSide(
             right_side_substrate_equation, right_side_atom_equation, delimiters);
 
-        return ChemicalEquation{left, right};
+        result.atom_transitions = ParseAtomTransitions(atom_equation, delimiters);
+
+        return result;
     } else {
         throw std::runtime_error("There is reaction without = sign!");
     }
@@ -377,6 +381,7 @@ void ParseAtomEquationSide(const std::string &atom_equation, const Delimiters& d
                     previous_token_is_coefficient = false;
                     current_substance->formula = token;
                     current_substance->atom_coefficient_ = last_coefficient;
+                    current_substance->size = token.size();
                     ++current_substance;
                 }
             }
@@ -390,6 +395,92 @@ void ParseAtomEquationSide(const std::string &atom_equation, const Delimiters& d
             throw std::runtime_error("There is contradiction between substance and atom reactions!");
         }
     }
+}
+
+std::vector<AtomTransition> ParseAtomTransitions(const std::string &atom_equation, const Delimiters& delimiters) {
+    std::vector<AtomTransition> result;
+
+    // It's ok if atom_equation is empty
+    if (atom_equation.empty()) {
+        return result;
+    }
+
+    std::vector<std::string> left;
+    std::vector<std::string> right;
+    bool is_left = true;
+
+    std::stringstream equation{atom_equation};
+    std::string token;
+    bool previous_token_is_coefficient{false}; // true, if previous iteration have found a coefficient
+    SubstrateCoefficient last_coefficient{}; // contains previous coefficient, if previous token is a coefficient
+
+    getline(equation, token, ' ');
+    while (!token.empty()) {
+        try {
+
+            // We are trying to convert token into a double
+            // std::stod throws an exception when token is a substrate name
+            std::size_t position_of_not_number; // see second argument of std::stod
+            last_coefficient = std::stod(token, &position_of_not_number);
+
+            if (position_of_not_number != token.size()) { // because std::stod won't throw when substrate name
+                throw std::invalid_argument("");          // starts with digits
+            }
+
+            // We found a coefficient
+            if (!previous_token_is_coefficient) {
+                previous_token_is_coefficient = true;
+            } else {
+                throw std::runtime_error("There is reaction with two coefficient in a row!");
+            }
+        } catch (std::invalid_argument&) {
+            if (token != delimiters.substrate_delimiter) {
+                if (token != delimiters.reaction_side_delimiter) {
+                    if (!previous_token_is_coefficient) {
+                        last_coefficient = 1.0;
+                    }
+                    previous_token_is_coefficient = false;
+                    if (is_left) {
+                        left.push_back(token);
+                    } else {
+                        right.push_back(token);
+                    }
+                } else {
+                    is_left = false;
+                }
+            }
+        }
+        if (equation.eof()) {
+            break;
+        } else {
+            getline(equation, token, ' ');
+        }
+    }
+
+    for (int substrate_pos = 0; substrate_pos < left.size(); ++substrate_pos) {
+        const std::string &substrate = left.at(substrate_pos);
+        for (int substrate_atom = 0; substrate_atom < substrate.size(); ++substrate_atom) {
+            AtomTransition transition;
+            transition.substrate_pos = substrate_pos;
+            transition.substrate_atom = substrate_atom;
+
+            for (int product_pos = 0; product_pos < right.size(); ++product_pos) {
+                const std::string &product = right.at(product_pos);
+                for (int product_atom = 0; product_atom < product.size(); ++product_atom) {
+                    if (substrate[substrate_atom] == product[product_atom]) {
+                        transition.product_pos = product_pos;
+                        transition.product_atom = product_atom;
+                        result.push_back(transition);
+                        break;
+                    }
+                }
+            }
+
+
+        }
+    }
+
+    return result;
 }
 
 

@@ -29,6 +29,10 @@ EmuReaction CreateOneEmuReaction(const Reaction &reaction,
                                  const Substrate &substrate,
                                  const Emu &emu);
 
+EmuReaction CreateOneEmuReactionPrev(const Reaction &reaction,
+                                 const Substrate &substrate,
+                                 const Emu &emu);
+
 std::vector<EmuReaction> SelectUniqueEmuReactions(const std::vector<EmuReaction> &emu_reactions);
 
 void AddNewEmusInQueue(std::queue<Emu> *queue,
