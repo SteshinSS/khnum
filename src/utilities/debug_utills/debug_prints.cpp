@@ -86,7 +86,6 @@ void PrintReaction(const Reaction& reaction) {
     std::cout << ", ";
     size_t left_atom_counter = 0;
     for (Substrate sub : reaction.chemical_equation.left) {
-        std::cout << sub.atom_coefficient_ << " " << sub.formula;
         ++left_atom_counter;
         if (left_atom_counter != reaction.chemical_equation.left.size()) {
             std::cout << " + ";
@@ -95,7 +94,6 @@ void PrintReaction(const Reaction& reaction) {
     std::cout << " = ";
     size_t right_atom_counter = 0;
     for (Substrate sub : reaction.chemical_equation.right) {
-        std::cout << sub.atom_coefficient_ << " " << sub.formula;
         ++right_atom_counter;
         if (right_atom_counter != reaction.chemical_equation.right.size()) {
             std::cout << " + ";

@@ -81,13 +81,6 @@ std::vector<EmuReaction> CreateNewEmuReactions(const Reaction &reaction,
     // find all occurrences of the emu in the reaction
     for (const Substrate &substrate : reaction.chemical_equation.right) {
         if (substrate.name == emu.name) {
-            EmuReaction a = CreateOneEmuReaction(reaction, substrate, emu);
-            EmuReaction b = CreateOneEmuReactionPrev(reaction, substrate, emu);
-            if (!(a == b)) {
-                PrintEmuReaction(a);
-                PrintEmuReaction(b);
-                std::cout << std::endl;
-            }
             new_emu_reactions.push_back(CreateOneEmuReaction(reaction, substrate, emu));
         }
     }
@@ -120,7 +113,6 @@ EmuReaction CreateOneEmuReaction(const Reaction &reaction,
 
     // contains all substrates that already included in the equation's left side
     // and their position
-    std::vector<std::pair<Substrate, int>> included_substrates;
     std::map<int, int> reactionpos2emupos;
     // form left side
     // find sources of all atoms included in the emu
@@ -146,120 +138,6 @@ EmuReaction CreateOneEmuReaction(const Reaction &reaction,
                     left_side.push_back(new_precursor);
                     reactionpos2emupos.insert({transition.substrate_pos, left_side.size() - 1});
                 }
-            }
-            /*
-            char atom = substrate.formula[atom_position]; // letter represents atom in the formula
-
-            // finding precursor substrate that produces this atom
-            bool is_atom_found = false;
-            for (const Substrate &precursor : reaction.chemical_equation.left) {
-                size_t substrate_atom_position = precursor.formula.find(atom);
-                if (substrate_atom_position != std::string::npos) {
-                    is_atom_found = true;
-
-                    // checking if this precursor substrate is already in our elementary reaction
-                    auto precursor_iterator = std::find_if(included_substrates.begin(),
-                                                           included_substrates.end(),
-                                                           [&precursor](const std::pair<Substrate, int> pair) {
-                                                               return pair.first == precursor;
-                                                           });
-
-                    if (precursor_iterator != included_substrates.end()) {
-                        int precursor_position = precursor_iterator->second;
-                        left_side[precursor_position].emu.atom_states[substrate_atom_position] = true;
-                    } else {
-                        EmuSubstrate new_precursor;
-                        new_precursor.emu.name = precursor.name;
-                        new_precursor.emu.atom_states = AtomStates(precursor.formula.size(), false);
-                        new_precursor.emu.atom_states[substrate_atom_position] = true;
-                        new_precursor.coefficient = precursor.substrate_coefficient_;
-                        left_side.push_back(new_precursor);
-                        included_substrates.push_back({precursor, left_side.size() - 1});
-                    }
-                    break;
-                }
-            }
-
-            if (!is_atom_found) {
-                throw std::runtime_error("There is reaction in which there are atoms "
-                                         "in the right side such that are not in the left one " +
-                    std::to_string(reaction.id));
-
-            } */
-        }
-    }
-    for (const EmuSubstrate& precursor : result_reaction.left) {
-        rate *= precursor.coefficient;
-    }
-
-    result_reaction.left = left_side;
-    result_reaction.rate = rate;
-
-    return result_reaction;
-}
-
-
-
-EmuReaction CreateOneEmuReactionPrev(const Reaction &reaction,
-                                 const Substrate &substrate,
-                                 const Emu &emu) {
-    EmuReaction result_reaction;
-    result_reaction.id = reaction.id;
-    Rate rate = 1.0;
-
-    // form right side
-    EmuSubstrate product;
-    product.emu = emu;
-    product.coefficient = substrate.substrate_coefficient_;
-    result_reaction.right = product;
-    rate *= product.coefficient;
-
-    EmuReactionSide left_side;
-
-    // contains all substrates that already included in the equation's left side
-    // and their position
-    std::vector<std::pair<Substrate, int>> included_substrates;
-    // form left side
-    // find sources of all atoms included in the emu
-    for (size_t atom_position = 0; atom_position < emu.atom_states.size(); ++atom_position) {
-        if (emu.atom_states[atom_position]) {
-            char atom = substrate.formula[atom_position]; // letter represents atom in the formula
-
-            // finding precursor substrate that produces this atom
-            bool is_atom_found = false;
-            for (const Substrate &precursor : reaction.chemical_equation.left) {
-                size_t substrate_atom_position = precursor.formula.find(atom);
-                if (substrate_atom_position != std::string::npos) {
-                    is_atom_found = true;
-
-                    // checking if this precursor substrate is already in our elementary reaction
-                    auto precursor_iterator = std::find_if(included_substrates.begin(),
-                                                           included_substrates.end(),
-                                                           [&precursor](const std::pair<Substrate, int> pair) {
-                                                               return pair.first == precursor;
-                                                           });
-
-                    if (precursor_iterator != included_substrates.end()) {
-                        int precursor_position = precursor_iterator->second;
-                        left_side[precursor_position].emu.atom_states[substrate_atom_position] = true;
-                    } else {
-                        EmuSubstrate new_precursor;
-                        new_precursor.emu.name = precursor.name;
-                        new_precursor.emu.atom_states = AtomStates(precursor.formula.size(), false);
-                        new_precursor.emu.atom_states[substrate_atom_position] = true;
-                        new_precursor.coefficient = precursor.substrate_coefficient_;
-                        left_side.push_back(new_precursor);
-                        included_substrates.push_back({precursor, left_side.size() - 1});
-                    }
-                    break;
-                }
-            }
-
-            if (!is_atom_found) {
-                throw std::runtime_error("There is reaction in which there are atoms "
-                                         "in the right side such that are not in the left one " +
-                    std::to_string(reaction.id));
-
             }
         }
     }

@@ -269,7 +269,7 @@ ChemicalEquation ParseChemicalEquation(std::stringstream &line, const Delimiters
         result.right = FillEquationSide(
             right_side_substrate_equation, right_side_atom_equation, delimiters);
 
-        result.atom_transitions = ParseAtomTransitions(atom_equation, delimiters);
+        result.atom_transitions = ParseAtomTransitions(atom_equation, delimiters, &result.left, &result.right);
 
         return result;
     } else {
@@ -282,7 +282,6 @@ ChemicalEquation ParseChemicalEquation(std::stringstream &line, const Delimiters
 ChemicalEquationSide FillEquationSide(const std::string &substrate_equation, const std::string &atom_equation,
                                       const Delimiters& delimiters) {
     ChemicalEquationSide equation_side = ParseSubstrateEquationSide(substrate_equation, delimiters);
-    ParseAtomEquationSide(atom_equation, delimiters, &equation_side);
     return equation_side;
 }
 
@@ -321,6 +320,7 @@ ChemicalEquationSide ParseSubstrateEquationSide(const std::string &raw_equation,
                 }
                 previous_token_is_coefficient = false;
                 Substrate new_substrate;
+                new_substrate.id = result.size();
                 new_substrate.name = token;
                 new_substrate.substrate_coefficient_ = last_coefficient;
                 result.push_back(new_substrate);
@@ -344,60 +344,7 @@ ChemicalEquationSide ParseSubstrateEquationSide(const std::string &raw_equation,
 }
 
 
-void ParseAtomEquationSide(const std::string &atom_equation, const Delimiters& delimiters,
-                           ChemicalEquationSide *equation_side) {
-    // It's ok if atom_equation is empty
-    if (!atom_equation.empty()) {
-        std::stringstream equation{atom_equation};
-        std::string token;
-        bool previous_token_is_coefficient{false}; // true, if previous iteration have found a coefficient
-        SubstrateCoefficient last_coefficient{}; // contains previous coefficient, if previous token is a coefficient
-
-        auto current_substance = equation_side->begin();
-        getline(equation, token, ' ');
-        while (!token.empty()) {
-            try {
-
-                // We are trying to convert token into a double
-                // std::stod throws an exception when token is a substrate name
-                std::size_t position_of_not_number; // see second argument of std::stod
-                last_coefficient = std::stod(token, &position_of_not_number);
-
-                if (position_of_not_number != token.size()) { // because std::stod won't throw when substrate name
-                    throw std::invalid_argument("");          // starts with digits
-                }
-
-                // We found a coefficient
-                if (!previous_token_is_coefficient) {
-                    previous_token_is_coefficient = true;
-                } else {
-                    throw std::runtime_error("There is reaction with two coefficient in a row!");
-                }
-            } catch (std::invalid_argument&) {
-                if (token != delimiters.substrate_delimiter) {
-                    if (!previous_token_is_coefficient) {
-                        last_coefficient = 1.0;
-                    }
-                    previous_token_is_coefficient = false;
-                    current_substance->formula = token;
-                    current_substance->atom_coefficient_ = last_coefficient;
-                    current_substance->size = token.size();
-                    ++current_substance;
-                }
-            }
-            if (equation.eof()) {
-                break;
-            } else {
-                getline(equation, token, ' ');
-            }
-        }
-        if (current_substance != equation_side->end()) {
-            throw std::runtime_error("There is contradiction between substance and atom reactions!");
-        }
-    }
-}
-
-std::vector<AtomTransition> ParseAtomTransitions(const std::string &atom_equation, const Delimiters& delimiters) {
+std::vector<AtomTransition> ParseAtomTransitions(const std::string &atom_equation, const Delimiters& delimiters, ChemicalEquationSide *left_side, ChemicalEquationSide *right_side) {
     std::vector<AtomTransition> result;
 
     // It's ok if atom_equation is empty
@@ -413,6 +360,8 @@ std::vector<AtomTransition> ParseAtomTransitions(const std::string &atom_equatio
     std::string token;
     bool previous_token_is_coefficient{false}; // true, if previous iteration have found a coefficient
     SubstrateCoefficient last_coefficient{}; // contains previous coefficient, if previous token is a coefficient
+
+    auto current_substance = left_side->begin();
 
     getline(equation, token, ' ');
     while (!token.empty()) {
@@ -440,6 +389,8 @@ std::vector<AtomTransition> ParseAtomTransitions(const std::string &atom_equatio
                         last_coefficient = 1.0;
                     }
                     previous_token_is_coefficient = false;
+                    current_substance->size = token.size();
+                    ++current_substance;
                     if (is_left) {
                         left.push_back(token);
                     } else {
@@ -447,6 +398,8 @@ std::vector<AtomTransition> ParseAtomTransitions(const std::string &atom_equatio
                     }
                 } else {
                     is_left = false;
+                    previous_token_is_coefficient = false;
+                    current_substance = right_side->begin();
                 }
             }
         }

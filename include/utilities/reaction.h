@@ -8,14 +8,13 @@
 namespace khnum {
 using AtomRepresentation = std::string;
 using SubstrateCoefficient = double;
-using AtomCoefficient = double;
 
 struct Substrate {
     int size; // 3
+    int id; // 0
     std::string name;                 // for example, "PYR_EX"
     AtomRepresentation formula;       // "abc"
     SubstrateCoefficient substrate_coefficient_ = 0.0; // 1.0
-    AtomCoefficient atom_coefficient_ = 0.0;
 };
 
 // need for stl containers
