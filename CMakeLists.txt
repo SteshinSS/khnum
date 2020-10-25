@@ -23,6 +23,8 @@ add_subdirectory(lib/alglib)
 add_subdirectory(lib/eigen)
 add_subdirectory(lib/glpk)
 find_library(PTHREAD_LIBRARY pthread)
+find_package(PythonLibs REQUIRED)
+include_directories(${PYTHON_INCLUDE_DIRS})
 # Create khnum library
 
 file(GLOB_RECURSE KHNUM_SOURCES
@@ -39,12 +41,12 @@ set_source_files_properties(${KHNUM_SOURCES} PROPERTIES COMPILE_FLAGS "-Wall -Wp
 add_compile_definitions(EIGEN_MALLOC_ALREADY_ALIGNED=0)
 add_compile_definitions(EIGEN_NO_DEBUG)
 add_library(khnum_lib ${KHNUM_SOURCES})
-target_link_libraries(khnum_lib eigen alglib glpk ${PTHREAD_LIBRARY})
+target_link_libraries(khnum_lib eigen alglib glpk ${PTHREAD_LIBRARY} ${PYTHON_LIBRARIES})
 target_include_directories(khnum_lib PUBLIC include)
 
 # Create khnum binary
 
-add_executable(khnum src/main.cpp)
+add_executable(khnum src/main.cpp include/parser/python_parser.h)
 target_link_libraries(khnum khnum_lib)
 target_include_directories(khnum PUBLIC include)
 

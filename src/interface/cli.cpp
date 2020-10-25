@@ -13,11 +13,13 @@
 #include "parser/open_flux_parser/open_flux_parser.h"
 #include "solver/solver.h"
 #include "clusterizer/clusterizer.h"
+#include "parser/python_parser.h"
 
 
 namespace khnum {
 void RunCli() {
     try {
+        Test();
         std::unique_ptr<IParser> parser(new ParserOpenFlux("../modelLast"));
         parser->ParseExcludedMetabolites();
         parser->ParseMeasuredIsotopes();
