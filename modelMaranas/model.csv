@@ -1975,6 +1975,6 @@ maps,startNodeSymbol,metabAbbreviation,ReactantProductFlag,OriginalEquation,rxnA
 "201,202,203,204,205,206,207,208,209,210",C,atp[c],reactant,[c] : 5mtr + atp --> 5mdr1p + adp + h,NADK,iAF1260
 "201,202,203,204,205,206,207,208,209,210",C,adp[c],product,[c] : 5mtr + atp --> 5mdr1p + adp + h,NADK,iAF1260
 "201,202,203,204,205,206,207,208,209,210",C,atp[c],reactant,[c] : 5mtr + atp --> 5mdr1p + adp + h,NADS1,iAF1260
-"201,202,203,204,205,206,207,208,209,210",C,amp[c],product,[c] : 5mtr + atp --> 5mdr1p + adp + h,NADS1,iAF1260
-"201,202,203,204,205,206,207,208,209,210",C,atp[c],reactant,[c] : atp[c] + h2o[c] --> adp[c] + pi[c] + h[c],biomass_out,iAF1260
-"201,202,203,204,205,206,207,208,209,210",C,adp[c],product,[c] : atp[c] + h2o[c] --> adp[c] + pi[c] + h[c],biomass_out,iAF1260
+"201,202,203,204,205,206,207,208,209,210",C,adp[c],product,[c] : 5mtr + atp --> 5mdr1p + adp + h,NADS1,iAF1260
+"201,202,203,204,205,206,207,208,209,210",C,atp[c],reactant,[c] : atp + h2o --> adp + pi + h,biomass_out,iAF1260
+"201,202,203,204,205,206,207,208,209,210",C,adp[c],product,[c] : atp + h2o --> adp + pi + h,biomass_out,iAF1260
