@@ -15,7 +15,7 @@ class Substrate:
         self.coefficient = 1.0
 
     def __str__(self):
-        return str(self.id) + ' ' + str(self.coefficient) + ' ' + self.name + ' '
+        return str(self.id) + ' ' + str(self.coefficient) + ' ' + self.name + ' ' + str(self.size) + ' '
 
 class AtomTransition:
     def __init__(self):
@@ -43,14 +43,18 @@ class Reaction:
 
     def __str__(self):
         res = ""
-        res += 'id: ' + str(self.id) + '\n'
-        res += 'name: ' + self.name + '\n'
-        res += 'is_reversed: ' + str(self.is_reversed) + '\n'
-        res += 'is_excluded: ' + str(self.is_excluded) + '\n'
+        res += str(self.id) + '\n'
+        res += self.name + '\n'
+
+        res += str(int(self.is_reversed)) + '\n'
+        res += str(int(self.is_excluded)) + '\n'
+        res += str(len(self.chemical_reaction.left)) + '\n'
         for sub in self.chemical_reaction.left:
             res += str(sub) + '\n'
+        res += str(len(self.chemical_reaction.right)) + '\n'
         for sub in self.chemical_reaction.right:
             res += str(sub) + '\n'
+        res += str(len(self.chemical_reaction.atom_transitions)) + '\n'
         for transition in self.chemical_reaction.atom_transitions:
             res += str(transition.substrate_pos) + ' '
             res += str(transition.substrate_atom) + ' '
@@ -225,66 +229,43 @@ class RawReaction():
         self.reaction = None
         self.atoms = []
 
-if __name__ == '__main__':
+def parse():
+    print('in parser')
+    import os
+    import sys
+    print(os.getcwd())
     raw_reactions = dict()
     reactions = dict()
-    with open('../../../modelMaranas/model.csv', newline='') as csvfile:
-        reader = csv.reader(csvfile, delimiter=',', quotechar='"')
-        next(reader, None)
-        for row in reader:
-            atoms = row[0].split(',')
-            substrate = row[2]
-            reaction = row[4]
-            name = row[5]
-            if name not in raw_reactions:
-                raw = RawReaction()
-                raw.name = name
-                raw.reaction = reaction
-                raw_reactions[name] = raw
+    if not os.path.exists('../modelMaranas/model.csv'):
+        print('NO')
+    else:
+        print('YES')
+    csvfile = open('../modelMaranas/model.csv', 'r', newline='')
+    reader = csv.reader(csvfile, delimiter=',', quotechar='"')
+    next(reader, None)
+    for row in reader:
+        atoms = row[0].split(',')
+        substrate = row[2]
+        reaction = row[4]
+        name = row[5]
+        if name not in raw_reactions:
+            raw = RawReaction()
+            raw.name = name
+            raw.reaction = reaction
+            raw_reactions[name] = raw
 
-            new_atoms = [substrate, atoms]
-            raw_reactions[name].atoms.append(new_atoms)
+        new_atoms = [substrate, atoms]
+        raw_reactions[name].atoms.append(new_atoms)
 
-        for raw in raw_reactions.values():
-            reaction = parse_reaction(raw)
-            print(reaction)
+    for raw in raw_reactions.values():
+        reactions[raw.name] = parse_reaction(raw)
 
-            """
-            parse_reaction(reaction, name)
-
-            substrate_pos = None
-            sub_in_left = [i for i, e in enumerate(reactions[name].chemical_reaction.left) if e.name == substrate]
-            sub_in_right = [i for i, e in enumerate(reactions[name].chemical_reaction.right) if e.name == substrate]
-            if sub_in_left:
-                side = 'reactant'
-            else:
-                side = 'product'
-            for atom in atoms:
-                if side == 'reactant':
-                    substrate_pos = [i for i, e in enumerate(reactions[name].chemical_reaction.left) if e.name == substrate][0]
-                    transition = [i for i in reactions[name].chemical_reaction.atom_transitions if i.product_atom == atom]
-                    if not transition:
-                        transition = AtomTransition()
-                        transition.substrate_pos = substrate_pos
-                        transition.substrate_atom = atom
-                        reactions[name].chemical_reaction.atom_transitions.append(transition)
-                    else:
-                        transition[0].substrate_pos = substrate_pos
-                        transition[0].substrate_atom = atom
-                elif side == 'product':
-                    substrate_pos = [i for i, e in enumerate(reactions[name].chemical_reaction.right) if e.name == substrate][0]
-                    transition = [i for i in reactions[name].chemical_reaction.atom_transitions if
-                                  i.substrate_atom == atom]
-                    if not transition:
-                        transition = AtomTransition()
-                        transition.product_pos = substrate_pos
-                        transition.product_atom = atom
-                        reactions[name].chemical_reaction.atom_transitions.append(transition)
-                    else:
-                        transition[0].product_pos = substrate_pos
-                        transition[0].product_atom = atom
-            """
+    str_res = str(len(reactions)) + '\n'
     for reaction in reactions.values():
-        print(reaction)
+        str_res += str(reaction) + '\n'
+    return str_res.encode('utf-8')
+
+if __name__=='__main__':
+    parse()
 
 

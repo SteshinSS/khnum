@@ -8,9 +8,9 @@ set(CMAKE_BUILD_TYPE=Release)
 #set(CMAKE_BUILD_TYPE Debug)
 # -shared-libgcc -fno-omit-frame-pointer -g
 if (CMAKE_BUILD_TYPE MATCHES Debug)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -march=native")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -g -march=native")
 ELSE()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -march=native")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -g -march=native")
 ENDIF()
 
 if(" ${CMAKE_SOURCE_DIR}" STREQUAL " ${CMAKE_BINARY_DIR}")
@@ -46,7 +46,7 @@ target_include_directories(khnum_lib PUBLIC include)
 
 # Create khnum binary
 
-add_executable(khnum src/main.cpp include/parser/python_parser.h)
+add_executable(khnum src/main.cpp include/parser/python_parser.h src/parser/maranas_parser/maranas_parser.cpp)
 target_link_libraries(khnum khnum_lib)
 target_include_directories(khnum PUBLIC include)
 

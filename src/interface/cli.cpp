@@ -19,8 +19,8 @@
 namespace khnum {
 void RunCli() {
     try {
-        Test();
-        std::unique_ptr<IParser> parser(new ParserOpenFlux("../modelLast"));
+        //std::unique_ptr<IParser> parser(new ParserOpenFlux("../modelLast"));
+        std::unique_ptr<IParser> parser(new ParserMaranas());
         parser->ParseExcludedMetabolites();
         parser->ParseMeasuredIsotopes();
         parser->ParseMeasurements();
