@@ -21,11 +21,12 @@ void RunCli() {
     try {
         //std::unique_ptr<IParser> parser(new ParserOpenFlux("../modelLast"));
         std::unique_ptr<IParser> parser(new ParserMaranas());
+        parser->ParseReactions();
         parser->ParseExcludedMetabolites();
         parser->ParseMeasuredIsotopes();
         parser->ParseMeasurements();
         parser->ParseCorrectionMatrices();
-        parser->ParseReactions();
+
         parser->ParseSubstrateInput();
 
         Modeller modeller(parser->GetResults());

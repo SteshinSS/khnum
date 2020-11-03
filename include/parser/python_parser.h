@@ -2,7 +2,9 @@
 
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
+#include <unordered_map>
 #include "parser/parser.h"
+
 
 namespace khnum {
 
@@ -26,7 +28,7 @@ class ParserMaranas : public IParser {
 
 
  private:
-
+  std::unordered_map<std::string, int> substrate_sizes_;
   Reaction ParseReaction(std::stringstream &stream);
 
   std::vector<Reaction> reactions_;

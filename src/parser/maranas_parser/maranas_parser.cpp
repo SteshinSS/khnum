@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include "utilities/reaction.h"
+#include "parser/open_flux_parser/open_flux_utills.h"
 
 namespace khnum {
 ParserResults ParserMaranas::GetResults() {
@@ -42,20 +43,39 @@ void ParserMaranas::ParseReactions() {
     std::stringstream stream(answer);
     int total_reactions = 0;
     stream >> total_reactions;
-    std::cout << total_reactions << std::endl;
-    std::cout << answer << std::endl;
     for (int i = 0; i < total_reactions; ++i) {
         reactions_.push_back(ParseReaction(stream));
     }
     for (int i = 0; i < total_reactions; ++i) {
         const Reaction &reaction = reactions_[i];
+        for (const Substrate &substrate : reaction.chemical_equation.left) {
+            substrate_sizes_[substrate.name] = substrate.size;
+        }
+        for (const Substrate &substrate : reaction.chemical_equation.right) {
+            substrate_sizes_[substrate.name] = substrate.size;
+        }
+
         if (reaction.type == ReactionType::Forward) {
             Reaction reversed(reaction);
             reversed.type = ReactionType::Backward;
             reversed.id = reactions_.size();
+            ChemicalEquationSide left = reversed.chemical_equation.left;
+            reversed.chemical_equation.left = reversed.chemical_equation.right;
+            reversed.chemical_equation.right = left;
+            for (AtomTransition &transition : reversed.chemical_equation.atom_transitions) {
+                int substrate_position = transition.substrate_pos;
+                int substrate_atom = transition.substrate_atom;
+
+                transition.substrate_pos = transition.product_pos;
+                transition.substrate_atom = transition.product_atom;
+
+                transition.product_pos = substrate_position;
+                transition.product_atom = substrate_atom;
+            }
             reactions_.push_back(reversed);
         }
     }
+
 }
 
 Reaction ParserMaranas::ParseReaction(std::stringstream &stream) {
@@ -119,7 +139,11 @@ Reaction ParserMaranas::ParseReaction(std::stringstream &stream) {
 }
 
 void ParserMaranas::ParseExcludedMetabolites() {
-
+    for (const Reaction& reaction : reactions_) {
+        if (reaction.type == ReactionType::MetaboliteBalance) {
+            excluded_metabolites_.push_back(reaction.chemical_equation.left[0].name);
+        }
+    }
 }
 
 void ParserMaranas::ParseMeasuredIsotopes() {
@@ -127,7 +151,40 @@ void ParserMaranas::ParseMeasuredIsotopes() {
 }
 
 void ParserMaranas::ParseMeasurements() {
+    const std::string measurements_path = "../modelMaranas/measurements.csv";
+    std::vector<std::string> raw_measurements = open_flux_parser::GetLines(measurements_path);
+    for (int i = 1; i < raw_measurements.size(); ++i) {
+        Measurement measurement;
+        std::stringstream line(raw_measurements[i]);
+        std::string formula;
+        getline(line, formula, '-');
+        measurement.emu.name = formula.substr(1) + "[d]"; // skip first " symbols
 
+        measurement.emu.atom_states = AtomStates(substrate_sizes_[measurement.emu.name], 0);
+        measurement.mid = Mid(substrate_sizes_[measurement.emu.name], 0);
+        std::string atoms;
+        getline(line, atoms, '"');
+        std::stringstream atoms_stream(atoms);
+        std::string atom;
+        getline(atoms_stream, atom, ',');
+        while (!atom.empty()) {
+            int atom_pos = std::stoi(atom);
+            measurement.emu.atom_states[atom_pos - 1] = 1;
+            if (atoms_stream.eof()) {
+                break;
+            }
+            getline(atoms_stream, atom, ',');
+        }
+        line.ignore(1); // skip ,
+        for (int i = 0; i < measurement.mid.size(); ++i) {
+            double mass = 0.0;
+            line >> mass;
+            measurement.mid[i] = mass;
+        }
+        measurement.errors = Errors(substrate_sizes_[measurement.emu.name], 0.005);
+        measurements_.push_back(measurement);
+        measured_isotopes_.push_back(measurement.emu);
+    }
 }
 
 void ParserMaranas::ParseCorrectionMatrices() {
@@ -136,6 +193,53 @@ void ParserMaranas::ParseCorrectionMatrices() {
 
 void ParserMaranas::ParseSubstrateInput() {
 
+    const std::string input_substrates_path = "../modelMaranas/substrate_input.csv";
+    const std::vector<std::string>& raw_substrates = open_flux_parser::GetLines(input_substrates_path);
+    std::vector<InputSubstrate> input_substrates;
+
+    for (size_t line_number = 1; line_number < raw_substrates.size(); ++line_number) {
+        std::stringstream line(raw_substrates.at(line_number));
+        std::string input_substrate_name;
+        getline(line, input_substrate_name, ',');
+
+        auto input_substrate_iterator = std::find_if(input_substrates.begin(),
+                                                     input_substrates.end(),
+                                                     [&input_substrate_name](InputSubstrate &input_substrate) {
+                                                       return input_substrate.name == input_substrate_name;
+                                                     });
+
+        if (input_substrate_iterator == input_substrates.end()) {
+            InputSubstrate new_input_substrate;
+            new_input_substrate.name = input_substrate_name;
+            input_substrates.push_back(new_input_substrate);
+
+            //move iterator back, so we can work with the new substrate
+            input_substrate_iterator = input_substrates.end();
+            --input_substrate_iterator;
+        }
+
+        std::string raw_labeling_pattern;
+        getline(line, raw_labeling_pattern, ',');
+        std::stringstream labeling_pattern(raw_labeling_pattern);
+
+        std::vector<Fraction> fractions;
+        Fraction new_fraction;
+        while (labeling_pattern >> new_fraction) {
+            fractions.push_back(new_fraction);
+        }
+
+        std::string raw_ratio;
+        getline(line, raw_ratio);
+        double ratio = std::stod(raw_ratio);
+
+        Mixture new_mixture;
+        new_mixture.fractions = fractions;
+        new_mixture.ratio = ratio;
+
+        input_substrate_iterator->mixtures.push_back(new_mixture);
+    }
+
+    input_substrates_ = input_substrates;
 }
 
 }
