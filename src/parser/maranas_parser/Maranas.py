@@ -1,11 +1,10 @@
-import csv
-
 def is_number(s):
     try:
         float(s)
         return True
     except ValueError:
         return False
+
 
 class Substrate:
     def __init__(self, id, name):
@@ -17,6 +16,7 @@ class Substrate:
     def __str__(self):
         return str(self.id) + ' ' + str(self.coefficient) + ' ' + self.name + ' ' + str(self.size) + ' '
 
+
 class AtomTransition:
     def __init__(self):
         self.substrate_pos = None
@@ -24,11 +24,13 @@ class AtomTransition:
         self.substrate_atom = None
         self.product_atom = None
 
+
 class ChemicalEquation:
     def __init__(self, left, right):
         self.left = left
         self.right = right
-        self.atom_transitions = []
+        self.atom_transitions = []  # contains AtomTransitions
+
 
 class Reaction:
     count = 0
@@ -39,9 +41,9 @@ class Reaction:
         self.name = name
         self.chemical_reaction = None
         self.is_reversed = None
-        self.is_excluded = None
+        self.is_excluded = None  # for reactions with 0* substrates
 
-    def __str__(self):
+    def __str__(self):  # is needed for string forming
         res = ""
         res += str(self.id) + '\n'
         res += self.name + '\n'
@@ -62,151 +64,125 @@ class Reaction:
             res += str(transition.product_atom) + '\n'
         return res
 
-def parse_chemical_equation_side(side, prefix=None, raw=None):
+
+def parse_chemical_equation_side(side, prefix=None, raw_atoms=None):
     result = []
     is_excluded = False
     last_coefficient = None
     for substance in side.split(' '):
-        if substance != '+' and substance:
-            if is_number(substance):
-                assert(last_coefficient is None)
-                last_coefficient = float(substance)
+        if substance == '+' or not substance:
+            continue
+
+        if is_number(substance):
+            assert(last_coefficient is None)  # two coefficients in a row
+            last_coefficient = float(substance)
+        else:
+            substance_name = substance
+            if substance.startswith('0*'):  # excluded metabolite
+                substance_name = substance_name[2:]
+                is_excluded = True
+            if prefix:
+                substance_name += prefix
+            atoms = [item for item in raw_atoms if item[0] == substance_name]
+            new_substance = Substrate(len(result), substance_name)
+            if last_coefficient:
+                new_substance.coefficient = last_coefficient
+
+            """ In case of several molecules of a substrate with a tracer's atoms are used in reaction, 
+            we will write each molecule as separate. So instead of 4 ATP we form reaction: ATP + ATP + ATP + ATP."""
+
+            if atoms:
+                if new_substance.size is None:
+                    new_substance.size = len(atoms[0][1])
+                else:
+                    assert new_substance.size == len(atoms[0][1])
+
+                new_substance.coefficient = 1.0
+                sub = new_substance
+                for i in range(len(atoms)):
+                    result.append(sub)
+                    sub = Substrate(len(result), substance_name)
+                    sub.size = len(atoms[0][1])
             else:
-                substance_name = substance
-                if substance.startswith('0*'): # excluded metabolite
-                    substance_name = substance_name[2:]
-                    is_excluded = True
-                if prefix:
-                    substance_name += prefix
-                atoms = [item for item in raw.atoms if item[0] == substance_name]
-                new_substance = Substrate(len(result), substance_name)
-                if atoms:
-                    if new_substance.size == None:
-                        new_substance.size = len(atoms[0][1])
-                    else:
-                        assert new_substance.size == len(atoms[0][1])
-                else:
-                    new_substance.size = 0
-
-
-
-                if last_coefficient:
-                    new_substance.coefficient = last_coefficient
-                if atoms:
-                    new_substance.coefficient = 1.0
-                    sub = new_substance
-                    for i in range(len(atoms)):
-                        result.append(sub)
-                        sub = Substrate(len(result), substance_name)
-                        sub.size = len(atoms[0][1])
-                else:
-                    result.append(new_substance)
-                last_coefficient = None
+                new_substance.size = 0
+                result.append(new_substance)
+            last_coefficient = None
     return result, is_excluded
 
 
-def parse_reaction(raw):
-    result = Reaction(raw.name)
-    reaction1 = raw.reaction
-
-    separator = reaction1.find('-->')
+def get_reaction_separator(reaction):
+    separator_pos = reaction.find('-->')
     separator_type = '-->'
-    if separator == -1:
-        separator = reaction1.find('->')
+    if separator_pos == -1:
+        separator_pos = reaction.find('->')
         separator_type = '->'
-        if separator == -1:
-            separator = reaction1.find('<==>')
+        if separator_pos == -1:
+            separator_pos = reaction.find('<==>')
             separator_type = '<==>'
-            assert(separator != -1)
+            assert (separator_pos != -1)
+    return separator_pos, separator_type
 
-    left = reaction1[0:separator]
-    right = reaction1[separator + len(separator_type):]
-    prefix = None
-    if left[0] == '[':
-        prefix = left.split(' ')[0]
-        prefix_end = left.find(':')
-        assert(prefix_end != -1)
-        left = left[prefix_end + 1:]
 
-    left_side, is_excluded = parse_chemical_equation_side(left, prefix, raw)
-    right_side, _ = parse_chemical_equation_side(right, prefix, raw)
-    is_reversed = (separator_type == '<==>')
-    result.is_reversed = is_reversed
-    result.is_excluded = is_excluded
-    result.chemical_reaction = ChemicalEquation(left_side, right_side)
+def find_substrate(side, substrate_name, pos_to_fill):
+    is_found = False
+    position = None
+    for sub_pos in range(len(side)):
+        if side[sub_pos].name == substrate_name:
+            # if we found any atom transitions before
+            if sub_pos in pos_to_fill:
+                # it's possible to have several substrates with the same name in reaction
+                # we will take first for which we don't know all atom transitions
+                if pos_to_fill[sub_pos] < side[sub_pos].size:
+                    is_found = True
+                    pos_to_fill[sub_pos] += 1
+                    position = sub_pos
+                    break
+            else:
+                pos_to_fill[sub_pos] = 1
+                is_found = True
+                position = sub_pos
+                break
+    return is_found, position
+
+
+def check_atom_transitions(side, pos_to_fill):
+    for pos in range(len(side)):
+        if side[pos].size > 0:
+            assert pos_to_fill[pos] == side[pos].size
+
+
+def get_atom_transitions(raw, left_side, right_side):
     atom_transitions = []
+
+    # Maps substrate position to number of already processed atom transitions for it
     left_pos_to_fill = dict()
     right_pos_to_fill = dict()
     while True:
         if not raw.atoms:
             break
-        sub, atoms = raw.atoms[0]
+        substrate, atoms = raw.atoms[0]
         if not atoms:
             raw.atoms.pop(0)
             continue
-
-        is_left = False
-        sub_position = None
-        for sub_pos in range(len(left_side)):
-            if left_side[sub_pos].name == sub:
-                if sub_pos in left_pos_to_fill:
-                    if left_pos_to_fill[sub_pos] < left_side[sub_pos].size:
-                        is_left = True
-                        left_pos_to_fill[sub_pos]+= 1
-                        sub_position = sub_pos
-                        break
-                else:
-                    left_pos_to_fill[sub_pos] = 1
-                    is_left = True
-                    sub_position = sub_pos
-                    break
-
+        is_left, sub_position = find_substrate(left_side, substrate, left_pos_to_fill)
         if not is_left:
-            for sub_pos in range(len(right_side)):
-                if right_side[sub_pos].name == sub:
-                    if sub_pos in right_pos_to_fill:
-                        if right_pos_to_fill[sub_pos] < right_side[sub_pos].size:
-                            right_pos_to_fill[sub_pos] += 1
-                            sub_position = sub_pos
-                            break
-                    else:
-                        right_pos_to_fill[sub_pos] = 1
-                        sub_position = sub_pos
-                        break
+            _, sub_position = find_substrate(right_side, substrate, right_pos_to_fill)
 
-
+        # looking for this atom transition
         atom = atoms.pop(0)
         this_atom = [pair for pair in raw.atoms if atom in pair[1]]
         assert len(this_atom) == 1
-        prod = this_atom[0][0]
+        product = this_atom[0][0]
         this_atom[0][1].pop(this_atom[0][1].index(atom))
 
         prod_position = None
 
         if is_left:
-            for prod_pos in range(len(right_side)):
-                if right_side[prod_pos].name == prod:
-                    if prod_pos in right_pos_to_fill:
-                        if right_pos_to_fill[prod_pos] < right_side[prod_pos].size:
-                            right_pos_to_fill[prod_pos] += 1
-                            prod_position = prod_pos
-                            break
-                    else:
-                        right_pos_to_fill[prod_pos] = 1
-                        prod_position = prod_pos
-                        break
+            is_found, prod_position = find_substrate(right_side, product, right_pos_to_fill)
         else:
-            for prod_pos in range(len(left_side)):
-                if left_side[prod_pos].name == prod:
-                    if prod_pos in left_pos_to_fill:
-                        if left_pos_to_fill[prod_pos] < left_side[prod_pos].size:
-                            left_pos_to_fill[prod_pos] += 1
-                            prod_position = prod_pos
-                            break
-                    else:
-                        left_pos_to_fill[prod_pos] = 1
-                        prod_position = prod_pos
-                        break
+            is_found, prod_position = find_substrate(left_side, product, left_pos_to_fill)
+        assert is_found
+
         transition = AtomTransition()
         transition.substrate_pos = sub_position
         if is_left:
@@ -219,7 +195,34 @@ def parse_reaction(raw):
         else:
             transition.product_atom = left_pos_to_fill[prod_position] - 1
         atom_transitions.append(transition)
-    result.chemical_reaction.atom_transitions = atom_transitions
+
+    check_atom_transitions(left_side, left_pos_to_fill)
+    check_atom_transitions(right_side, right_pos_to_fill)
+
+    return atom_transitions
+
+
+def parse_reaction(raw):
+    result = Reaction(raw.name)
+    reaction = raw.reaction
+    separator_pos, separator_type = get_reaction_separator(reaction)
+
+    left = reaction[0:separator_pos]
+    right = reaction[separator_pos + len(separator_type):]
+    prefix = None
+    if left[0] == '[':
+        prefix = left.split(' ')[0]
+        prefix_end = left.find(':')
+        assert(prefix_end != -1)
+        left = left[prefix_end + 1:]
+
+    left_side, is_excluded = parse_chemical_equation_side(left, prefix, raw.atoms)
+    right_side, _ = parse_chemical_equation_side(right, prefix, raw.atoms)
+    is_reversed = (separator_type == '<==>')
+    result.is_reversed = is_reversed
+    result.is_excluded = is_excluded
+    result.chemical_reaction = ChemicalEquation(left_side, right_side)
+    result.chemical_reaction.atom_transitions = get_atom_transitions(raw, left_side, right_side)
     return result
 
 
@@ -227,25 +230,34 @@ class RawReaction():
     def __init__(self):
         self.name = None
         self.reaction = None
-        self.atoms = []
+        self.atoms = []  # contains pairs [substrate name, it's atoms]
 
-def parse():
-    print('in parser')
+
+def check_path_exists(path):
     import os
-    import sys
-    print(os.getcwd())
+    return os.path.exists(path)
+
+
+# Forms a string which will be parsed by C++
+def print_reactions(reactions):
+    result = str(len(reactions)) + '\n'
+    for reaction in reactions.values():
+        result += str(reaction) + '\n'
+    return result.encode('utf-8')
+
+
+def parse(path):
+    assert check_path_exists(path)
+
     raw_reactions = dict()
     reactions = dict()
-    if not os.path.exists('../modelMaranas/model.csv'):
-        print('NO')
-    else:
-        print('YES')
-    csvfile = open('../modelMaranas/model.csv', 'r', newline='')
+    import csv
+    csvfile = open(path, 'r', newline='')
     reader = csv.reader(csvfile, delimiter=',', quotechar='"')
-    next(reader, None)
+    next(reader, None)  # skip header
+
+    # first collect all atom transitions in one structure
     for row in reader:
-        atoms = row[0].split(',')
-        substrate = row[2]
         reaction = row[4]
         name = row[5]
         if name not in raw_reactions:
@@ -254,18 +266,19 @@ def parse():
             raw.reaction = reaction
             raw_reactions[name] = raw
 
+        atoms = row[0].split(',')
+        substrate = row[2]
         new_atoms = [substrate, atoms]
         raw_reactions[name].atoms.append(new_atoms)
 
+    # now parse all atom transitions at once
     for raw in raw_reactions.values():
         reactions[raw.name] = parse_reaction(raw)
+    return print_reactions(reactions)
 
-    str_res = str(len(reactions)) + '\n'
-    for reaction in reactions.values():
-        str_res += str(reaction) + '\n'
-    return str_res.encode('utf-8')
 
 if __name__=='__main__':
-    parse()
+    result = parse('../../../modelMaranas/model.csv')
+    print(result.decode('utf-8'))
 
 
