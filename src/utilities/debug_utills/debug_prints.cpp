@@ -84,22 +84,6 @@ void PrintReaction(const Reaction& reaction) {
         }
     }
     std::cout << ", ";
-    size_t left_atom_counter = 0;
-    for (Substrate sub : reaction.chemical_equation.left) {
-        ++left_atom_counter;
-        if (left_atom_counter != reaction.chemical_equation.left.size()) {
-            std::cout << " + ";
-        }
-    }
-    std::cout << " = ";
-    size_t right_atom_counter = 0;
-    for (Substrate sub : reaction.chemical_equation.right) {
-        ++right_atom_counter;
-        if (right_atom_counter != reaction.chemical_equation.right.size()) {
-            std::cout << " + ";
-        }
-    }
-    std::cout << ", ";
     if (reaction.type == ReactionType::Irreversible) {
         std::cout << "F, ";
     }

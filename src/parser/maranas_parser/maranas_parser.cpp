@@ -5,6 +5,8 @@
 
 #include "utilities/reaction.h"
 #include "parser/open_flux_parser/open_flux_utills.h"
+#include "modeller/sort_reactions.h"
+#include "utilities/debug_utills/debug_prints.h"
 
 namespace khnum {
 
@@ -25,48 +27,42 @@ void ParserMaranas::Parse() {
     ParseExcludedMetabolites();
     ParseMeasurements();
     ParseSubstrateInput();
+    PrintReactions(reactions_);
+    reactions_ = modelling_utills::SortReactionsByType(reactions_);
 
 }
 
 void ParserMaranas::ParseReactions() {
     Py_Initialize();
+
+    // change current directory
     PyRun_SimpleString("import os");
     PyRun_SimpleString("import sys");
     PyRun_SimpleString("sys.path.append(os.getcwd() + \"/../src/parser/maranas_parser\")");
 
     PyObject *pName = PyUnicode_DecodeFSDefault("Maranas");
     PyObject *pModule = PyImport_Import(pName);
-    if (!pModule) {
-        exit(1);
-    }
     PyObject *pFunc = PyObject_GetAttrString(pModule, "parse");
-    if (!pFunc) {
-        exit(2);
-    }
     PyObject *pArgs = PyTuple_New(1);
     PyObject *path = Py_BuildValue("s", path_.c_str());
     PyTuple_SetItem(pArgs, 0, path);
     PyObject *pValue = PyObject_CallObject(pFunc, pArgs);
-    if (!pValue) {
-        exit(3);
-    }
     const char *command = PyBytes_AsString(pValue);
-
     std::string answer(command);
+
     std::stringstream stream(answer);
     int total_reactions = 0;
     stream >> total_reactions;
     for (int i = 0; i < total_reactions; ++i) {
         reactions_.push_back(ParseReaction(stream));
     }
+
+    // Add backward reactions for the reversible
     for (int i = 0; i < total_reactions; ++i) {
         const Reaction &reaction = reactions_[i];
-        for (const Substrate &substrate : reaction.chemical_equation.left) {
-            substrate_sizes_[substrate.name] = substrate.size;
-        }
-        for (const Substrate &substrate : reaction.chemical_equation.right) {
-            substrate_sizes_[substrate.name] = substrate.size;
-        }
+
+        CollectSubstrateSizes(reaction.chemical_equation.left);
+        CollectSubstrateSizes(reaction.chemical_equation.right);
 
         if (reaction.type == ReactionType::Forward) {
             Reaction reversed(reaction);
@@ -89,6 +85,28 @@ void ParserMaranas::ParseReactions() {
         }
     }
 
+}
+
+void ParserMaranas::CollectSubstrateSizes(const ChemicalEquationSide &side) {
+    for (const Substrate &substrate : side) {
+        if (substrate_sizes_.find(substrate.name) != substrate_sizes_.end()) {
+            if (substrate.size == 0) {
+                continue;
+            }
+
+            if (substrate_sizes_[substrate.name] == 0) {
+                substrate_sizes_[substrate.name] = substrate.size;
+            } else {
+                if (substrate_sizes_[substrate.name] != substrate.size) {
+                    throw std::runtime_error("There are contradictions in substrate " + substrate.name + " size.");
+                }
+            }
+
+        } else {
+            substrate_sizes_[substrate.name] = substrate.size;
+        }
+
+    }
 }
 
 Reaction ParserMaranas::ParseReaction(std::stringstream &stream) {
