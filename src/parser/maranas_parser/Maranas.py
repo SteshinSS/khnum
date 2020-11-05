@@ -235,7 +235,11 @@ class RawReaction():
 
 def check_path_exists(path):
     import os
-    return os.path.exists(path)
+    if not os.path.exists(path):
+        print("No file found on: " + path)
+        return False
+    else:
+        return True
 
 
 # Forms a string which will be parsed by C++
@@ -246,6 +250,20 @@ def print_reactions(reactions):
     return result.encode('utf-8')
 
 
+
+""" 
+The Parser itself. Gets path, return string for further parsing in such format:
+id
+name
+is reaction reversed?
+is there are excluded substrate? (eg 0*val-L[c] -> Val[d])
+number of substrates in the left side of reaction
+[id coefficient name number_of_atoms]
+number of substrates in the right side of reaction
+[id coefficient name number_of_atoms]
+number of atom transitions
+[substrate_position substrate_atom product_position product_atom]
+"""
 def parse(path):
     assert check_path_exists(path)
 

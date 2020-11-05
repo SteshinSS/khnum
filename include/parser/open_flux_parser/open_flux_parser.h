@@ -7,7 +7,7 @@
 
 namespace khnum {
 
-// Parse OpenFlux[2] input files
+// Parse OpenFlux(2) input files
 class ParserOpenFlux : public IParser {
 public:
     ParserOpenFlux(std::string path) : path_(std::move(path)) {
@@ -16,19 +16,9 @@ public:
         delimiters_.reaction_side_delimiter = "=";
     }
 
+    void Parse() override;
+
     ParserResults GetResults() override;
-
-    void ParseExcludedMetabolites() override;
-
-    void ParseMeasuredIsotopes() override;
-
-    void ParseMeasurements() override;
-
-    void ParseCorrectionMatrices() override;
-
-    void ParseSubstrateInput() override;
-
-    void ParseReactions() override;
 
     inline void SetCsvDelimeter(char delimiter) {
        delimiters_.csv_delimiter = delimiter;
@@ -44,7 +34,12 @@ public:
 
 
 private:
-    const std::string path_;
+    void ParseExcludedMetabolites();
+    void ParseMeasuredIsotopes();
+    void ParseMeasurements();
+    void ParseCorrectionMatrices();
+    void ParseSubstrateInput();
+    void ParseReactions();
 
     std::vector<Reaction> reactions_;
     std::vector<Emu> measured_isotopes_;
@@ -52,6 +47,7 @@ private:
     std::vector<InputSubstrate> input_substrates_;
     std::vector<std::string> excluded_metabolites_;
 
+    const std::string path_;
     open_flux_parser::Delimiters delimiters_;
 };
 

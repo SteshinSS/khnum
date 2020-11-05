@@ -13,21 +13,15 @@
 #include "parser/open_flux_parser/open_flux_parser.h"
 #include "solver/solver.h"
 #include "clusterizer/clusterizer.h"
-#include "parser/python_parser.h"
+#include "parser/maranas_parser.h"
 
 
 namespace khnum {
 void RunCli() {
     try {
-        //std::unique_ptr<IParser> parser(new ParserOpenFlux("../modelLast"));
-        std::unique_ptr<IParser> parser(new ParserMaranas());
-        parser->ParseReactions();
-        parser->ParseExcludedMetabolites();
-        parser->ParseMeasuredIsotopes();
-        parser->ParseMeasurements();
-        parser->ParseCorrectionMatrices();
-
-        parser->ParseSubstrateInput();
+        std::unique_ptr<IParser> parser(new ParserOpenFlux("../modelLast"));
+        //std::unique_ptr<IParser> parser(new ParserMaranas("../modelMaranas/model.csv"));
+        parser->Parse();
 
         Modeller modeller(parser->GetResults());
 

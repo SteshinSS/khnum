@@ -1,4 +1,4 @@
-#include "parser/python_parser.h"
+#include "parser/maranas_parser.h"
 
 #include <iostream>
 #include <sstream>
@@ -7,6 +7,8 @@
 #include "parser/open_flux_parser/open_flux_utills.h"
 
 namespace khnum {
+
+
 ParserResults ParserMaranas::GetResults() {
     ParserResults results;
     results.reactions = reactions_;
@@ -16,6 +18,14 @@ ParserResults ParserMaranas::GetResults() {
     results.excluded_metabolites = excluded_metabolites_;
 
     return results;
+}
+
+void ParserMaranas::Parse() {
+    ParseReactions();
+    ParseExcludedMetabolites();
+    ParseMeasurements();
+    ParseSubstrateInput();
+
 }
 
 void ParserMaranas::ParseReactions() {
@@ -33,7 +43,10 @@ void ParserMaranas::ParseReactions() {
     if (!pFunc) {
         exit(2);
     }
-    PyObject *pValue = PyObject_CallObject(pFunc, NULL);
+    PyObject *pArgs = PyTuple_New(1);
+    PyObject *path = Py_BuildValue("s", path_.c_str());
+    PyTuple_SetItem(pArgs, 0, path);
+    PyObject *pValue = PyObject_CallObject(pFunc, pArgs);
     if (!pValue) {
         exit(3);
     }
@@ -146,9 +159,6 @@ void ParserMaranas::ParseExcludedMetabolites() {
     }
 }
 
-void ParserMaranas::ParseMeasuredIsotopes() {
-
-}
 
 void ParserMaranas::ParseMeasurements() {
     const std::string measurements_path = "../modelMaranas/measurements.csv";
@@ -187,9 +197,6 @@ void ParserMaranas::ParseMeasurements() {
     }
 }
 
-void ParserMaranas::ParseCorrectionMatrices() {
-
-}
 
 void ParserMaranas::ParseSubstrateInput() {
 

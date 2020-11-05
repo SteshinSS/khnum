@@ -46,7 +46,7 @@ target_include_directories(khnum_lib PUBLIC include)
 
 # Create khnum binary
 
-add_executable(khnum src/main.cpp include/parser/python_parser.h src/parser/maranas_parser/maranas_parser.cpp)
+add_executable(khnum src/main.cpp include/parser/maranas_parser.h src/parser/maranas_parser/maranas_parser.cpp)
 target_link_libraries(khnum khnum_lib)
 target_include_directories(khnum PUBLIC include)
 

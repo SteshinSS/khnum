@@ -27,6 +27,16 @@ ParserResults ParserOpenFlux::GetResults() {
 }
 
 
+void ParserOpenFlux::Parse() {
+    ParseExcludedMetabolites();
+    ParseMeasuredIsotopes();
+    ParseMeasurements();
+    ParseCorrectionMatrices();
+    ParseSubstrateInput();
+    ParseReactions();
+}
+
+
 void ParserOpenFlux::ParseExcludedMetabolites() {
     const std::string excluded_metabolites_path = path_ + "/excluded_metabolites.txt";
     excluded_metabolites_ = open_flux_parser::GetLines(excluded_metabolites_path);

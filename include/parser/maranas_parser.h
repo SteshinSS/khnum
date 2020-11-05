@@ -10,24 +10,20 @@ namespace khnum {
 
 class ParserMaranas : public IParser {
  public:
+  ParserMaranas(const std::string& path) : path_{path} {
+
+  }
+
+  void Parse() override;
 
   ParserResults GetResults() override;
-
-  void ParseExcludedMetabolites() override;
-
-  void ParseMeasuredIsotopes() override;
-
-  void ParseMeasurements() override;
-
-  void ParseCorrectionMatrices() override;
-
-  void ParseSubstrateInput() override;
-
-  void ParseReactions() override;
-
-
-
  private:
+  void ParseExcludedMetabolites();
+  void ParseMeasurements();
+  void ParseSubstrateInput();
+  void ParseReactions();
+
+  const std::string path_;
   std::unordered_map<std::string, int> substrate_sizes_;
   Reaction ParseReaction(std::stringstream &stream);
 
