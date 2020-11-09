@@ -3,6 +3,8 @@
 #include "utilities/reaction.h"
 #include "utilities/matrix.h"
 
+#include "eigen/Dense"
+
 #include "iostream"
 
 
@@ -26,6 +28,9 @@ Matrix GetNullspace(const Matrix& original_matrix, std::vector<Reaction> &reacti
     // So below I use it as synonymous
     Matrix matrix = original_matrix;
 
+    std::cout << matrix.cols() << " " << matrix.rows() << std::endl;
+    Eigen::FullPivLU<Matrix> dec(matrix);
+    std::cout << dec.rank() << std::endl;
     const int metabolite_balance_reactions_total = reactions.size() - matrix.cols();
 
     for (int column = 0; column < matrix.rows(); ++column) {

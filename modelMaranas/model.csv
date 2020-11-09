@@ -1922,52 +1922,28 @@ maps,startNodeSymbol,metabAbbreviation,ReactantProductFlag,OriginalEquation,rxnA
 "1,2,3,4,5",C,glu-L[c],reactant,[c] : akg + val-L <==> 3mob + glu-L,VALTA,iAF1260
 "1,2,3",C,ala-L[c],reactant,0*ala-L[c] -> Ala[d],dil_1,iAF1260
 "1,2,3",C,Ala[d],product,0*ala-L[c] -> Ala[d],dil_1,iAF1260
-"1,2,3",C,Ala[x],reactant,Ala[x] -> Ala[d],dil_2,iAF1260
-"1,2,3",C,Ala[d],product,Ala[x] -> Ala[d],dil_2,iAF1260
 "1,2,3",C,ser-L[c],reactant,0*ser-L[c] -> Ser[d],dil_3,iAF1260
 "1,2,3",C,Ser[d],product,0*ser-L[c] -> Ser[d],dil_3,iAF1260
-"1,2,3",C,Ser[x],reactant,Ser[x] -> Ser[d],dil_4,iAF1260
-"1,2,3",C,Ser[d],product,Ser[x] -> Ser[d],dil_4,iAF1260
 "1,2,3,4",C,asp-L[c],reactant,0*asp-L[c] -> Asp[d],dil_5,iAF1260
 "1,2,3,4",C,Asp[d],product,0*asp-L[c] -> Asp[d],dil_5,iAF1260
-"1,2,3,4",C,Asp[x],reactant,Asp[x] -> Asp[d],dil_6,iAF1260
-"1,2,3,4",C,Asp[d],product,Asp[x] -> Asp[d],dil_6,iAF1260
 "1,2,3,4",C,thr-L[c],reactant,0*thr-L[c] -> Thr[d],dil_7,iAF1260
 "1,2,3,4",C,Thr[d],product,0*thr-L[c] -> Thr[d],dil_7,iAF1260
-"1,2,3,4",C,Thr[x],reactant,Thr[x] -> Thr[d],dil_8,iAF1260
-"1,2,3,4",C,Thr[d],product,Thr[x] -> Thr[d],dil_8,iAF1260
 "1,2",C,gly[c],reactant,0*gly[c] -> Gly[d],dil_9,iAF1260
 "1,2",C,Gly[d],product,0*gly[c] -> Gly[d],dil_9,iAF1260
-"1,2",C,Gly[x],reactant,Gly[x] -> Gly[d],dil_10,iAF1260
-"1,2",C,Gly[d],product,Gly[x] -> Gly[d],dil_10,iAF1260
 "1,2,3,4,5",C,glu-L[c],reactant,0*glu-L[c] -> Glu[d],dil_11,iAF1260
 "1,2,3,4,5",C,Glu[d],product,0*glu-L[c] -> Glu[d],dil_11,iAF1260
-"1,2,3,4,5",C,Glu[x],reactant,Glu[x] -> Glu[d],dil_12,iAF1260
-"1,2,3,4,5",C,Glu[d],product,Glu[x] -> Glu[d],dil_12,iAF1260
 "1,2,3,4,5",C,met-L[c],reactant,0*met-L[c] -> Met[d],dil_13,iAF1260
 "1,2,3,4,5",C,Met[d],product,0*met-L[c] -> Met[d],dil_13,iAF1260
-"1,2,3,4,5",C,Met[x],reactant,Met[x] -> Met[d],dil_14,iAF1260
-"1,2,3,4,5",C,Met[d],product,Met[x] -> Met[d],dil_14,iAF1260
 "1,2,3,4,5",C,val-L[c],reactant,0*val-L[c] -> Val[d],dil_15,iAF1260
 "1,2,3,4,5",C,Val[d],product,0*val-L[c] -> Val[d],dil_15,iAF1260
-"1,2,3,4,5",C,Val[x],reactant,Val[x] -> Val[d],dil_16,iAF1260
-"1,2,3,4,5",C,Val[d],product,Val[x] -> Val[d],dil_16,iAF1260
 "1,2,3,4,5,6",C,leu-L[c],reactant,0*leu-L[c] -> Leu[d],dil_19,iAF1260
 "1,2,3,4,5,6",C,Leu[d],product,0*leu-L[c] -> Leu[d],dil_19,iAF1260
-"1,2,3,4,5,6",C,Leu[x],reactant,Leu[x] -> Leu[d],dil_20,iAF1260
-"1,2,3,4,5,6",C,Leu[d],product,Leu[x] -> Leu[d],dil_20,iAF1260
 "1,2,3,4,5,6",C,ile-L[c],reactant,0*ile-L[c] -> Ile[d],dil_17,iAF1260
 "1,2,3,4,5,6",C,Ile[d],product,0*ile-L[c] -> Ile[d],dil_17,iAF1260
-"1,2,3,4,5,6",C,Ile[x],reactant,Ile[x] -> Ile[d],dil_18,iAF1260
-"1,2,3,4,5,6",C,Ile[d],product,Ile[x] -> Ile[d],dil_18,iAF1260
 "1,2,3,4,5,6,7,8,9",C,phe-L[c],reactant,0*phe-L[c] -> Phe[d],dil_21,iAF1260
 "1,2,3,4,5,6,7,8,9",C,Phe[d],product,0*phe-L[c] -> Phe[d],dil_21,iAF1260
-"1,2,3,4,5,6,7,8,9",C,Phe[x],reactant,Phe[x] -> Phe[d],dil_22,iAF1260
-"1,2,3,4,5,6,7,8,9",C,Phe[d],product,Phe[x] -> Phe[d],dil_22,iAF1260
 "1,2,3,4,5,6,7,8,9",C,tyr-L[c],reactant,0*tyr-L[c] -> Tyr[d],dil_23,iAF1260
 "1,2,3,4,5,6,7,8,9",C,Tyr[d],product,0*tyr-L[c] -> Tyr[d],dil_23,iAF1260
-"1,2,3,4,5,6,7,8,9",C,Tyr[x],reactant,Tyr[x] -> Tyr[d],dil_24,iAF1260
-"1,2,3,4,5,6,7,8,9",C,Tyr[d],product,Tyr[x] -> Tyr[d],dil_24,iAF1260
 1,C,co2[x],reactant,co2[x]--> co2[c] + cdil ,CO2_D,iAF1260
 1,C,co2[c],product,co2[x]--> co2[c] + cdil ,CO2_D,iAF1260
 "201,202,203,204,205,206,207,208,209,210",C,atp[c],reactant,[c] : atp + dhpt + glu-L --> adp + dhf + h + pi,DPCOAK,iAF1260

@@ -7,6 +7,7 @@
 
 #include "utilities/matrix.h"
 #include "utilities/reaction.h"
+#include "utilities/debug_utills/debug_prints.h"
 
 
 namespace khnum {
@@ -25,20 +26,44 @@ Matrix CreateStoichiometryMatrix(const std::vector<Reaction> &reactions,
     }
     Matrix stoichiometry_matrix = Matrix::Zero(metabolite_number, reaction_number);
 
+
     int stoichiometry_reaction_number = 0;
     for (const Reaction &reaction : reactions) {
+        bool is_present = false;
         if (reaction.type != ReactionType::IsotopomerBalance) {
             for (int metabolite = 0; metabolite < metabolite_number; ++metabolite) {
                 std::string current_metabolite_name = metabolite_list.at(metabolite);
-                stoichiometry_matrix(metabolite, stoichiometry_reaction_number) = GetTotalCoefficient(
-                    reaction.chemical_equation,
-                    current_metabolite_name);
+
+                double coefficient = GetTotalCoefficient(reaction.chemical_equation, current_metabolite_name);
+                if (coefficient < -0.001 || coefficient > 0.001) {
+                    is_present = true;
+                }
+                stoichiometry_matrix(metabolite, stoichiometry_reaction_number) = coefficient;
             }
             ++stoichiometry_reaction_number;
-
+        }
+        if (!is_present) {
+            std::cout << "Reaction with no coefficients: " << std::endl;
+            PrintReaction(reaction);
         }
     }
 
+    // Check for metabolites which doesn't have input and output together
+    for (int i = 0; i < stoichiometry_matrix.rows(); ++i) {
+        bool is_pos = false;
+        bool is_neg = false;
+        for (int j = 0; j < stoichiometry_matrix.cols(); ++j) {
+            if (stoichiometry_matrix(i, j) > 0.001) {
+                is_pos = true;
+            }
+            if (stoichiometry_matrix(i, j) < -0.001) {
+                is_neg = true;
+            }
+        }
+        if (!(is_neg && is_pos)) {
+            std::cout << "bad: " << metabolite_list[i] << std::endl;
+        }
+    }
 
     return stoichiometry_matrix;
 }

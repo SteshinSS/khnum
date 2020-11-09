@@ -1,3 +1,5 @@
+prefixes = set()
+
 def is_number(s):
     try:
         float(s)
@@ -78,6 +80,13 @@ def parse_chemical_equation_side(side, prefix=None, raw_atoms=None):
             last_coefficient = float(substance)
         else:
             substance_name = substance
+
+            if '[' in substance_name:
+                start = substance_name.index('[')
+                stop = substance_name.index(']')
+                pre = substance_name[start:stop + 1]
+                prefixes.add(pre)
+
             if substance.startswith('0*'):  # excluded metabolite
                 substance_name = substance_name[2:]
                 is_excluded = True
@@ -215,6 +224,7 @@ def parse_reaction(raw):
         prefix_end = left.find(':')
         assert(prefix_end != -1)
         left = left[prefix_end + 1:]
+    prefixes.add(prefix)
 
     left_side, is_excluded = parse_chemical_equation_side(left, prefix, raw.atoms)
     right_side, _ = parse_chemical_equation_side(right, prefix, raw.atoms)
@@ -297,6 +307,7 @@ def parse(path):
 
 if __name__=='__main__':
     result = parse('../../../modelMaranas/model.csv')
-    print(result.decode('utf-8'))
+    print(prefixes)
+    # print(result.decode('utf-8'))
 
 

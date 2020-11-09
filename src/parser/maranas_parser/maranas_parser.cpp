@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <unordered_set>
 
 #include "utilities/reaction.h"
 #include "parser/open_flux_parser/open_flux_utills.h"
@@ -27,7 +28,6 @@ void ParserMaranas::Parse() {
     ParseExcludedMetabolites();
     ParseMeasurements();
     ParseSubstrateInput();
-    PrintReactions(reactions_);
     reactions_ = modelling_utills::SortReactionsByType(reactions_);
 
 }
@@ -153,7 +153,8 @@ Reaction ParserMaranas::ParseReaction(std::stringstream &stream) {
         result.chemical_equation.atom_transitions.push_back(transition);
     }
 
-    if (is_excluded) {
+    // if (is_excluded) {
+    if (false) {
         result.type = ReactionType::MetaboliteBalance;
     } else {
         if (!is_reversed) {
@@ -170,11 +171,75 @@ Reaction ParserMaranas::ParseReaction(std::stringstream &stream) {
 }
 
 void ParserMaranas::ParseExcludedMetabolites() {
-    for (const Reaction& reaction : reactions_) {
-        if (reaction.type == ReactionType::MetaboliteBalance) {
-            excluded_metabolites_.push_back(reaction.chemical_equation.left[0].name);
+    // Find metabolites from special compartment
+    // Turned off, because we detect metabolites with no outputs or inputs below
+    std::vector<std::string> excluded_prefixes;//{"[out]", "[pre]", "[d]", "[x]"};
+
+
+    for (Reaction& reaction : reactions_) {
+        bool is_excluded = true;
+        for (const Substrate& substrate : reaction.chemical_equation.left) {
+            bool is_excluded_prefix = false;
+            for (const std::string& prefix : excluded_prefixes) {
+                if (substrate.name.find(prefix) != std::string::npos) {
+                    is_excluded_prefix = true;
+                    excluded_metabolites_.push_back(substrate.name);
+                    break;
+                }
+            }
+            if (!is_excluded_prefix) {
+                is_excluded = false;
+            }
+        }
+        for (const Substrate& substrate : reaction.chemical_equation.right) {
+            bool is_excluded_prefix = false;
+            for (const std::string& prefix : excluded_prefixes) {
+                if (substrate.name.find(prefix) != std::string::npos) {
+                    is_excluded_prefix = true;
+                    excluded_metabolites_.push_back(substrate.name);
+                    break;
+                }
+            }
+            if (!is_excluded_prefix) {
+                is_excluded = false;
+            }
+        }
+        if (is_excluded) {
+            reaction.type = ReactionType::IsotopomerBalance;
         }
     }
+
+    // Find metabolites that doesn't have input or output
+    std::unordered_set<std::string> left;
+    std::unordered_set<std::string> right;
+
+    for (const Reaction& reaction : reactions_) {
+        for (const Substrate& substrate : reaction.chemical_equation.left) {
+            if (std::find(excluded_metabolites_.begin(), excluded_metabolites_.end(), substrate.name) == excluded_metabolites_.end()) {
+                left.insert(substrate.name);
+            }
+
+        }
+        for (const Substrate& substrate : reaction.chemical_equation.right) {
+            if (std::find(excluded_metabolites_.begin(), excluded_metabolites_.end(), substrate.name) == excluded_metabolites_.end()) {
+                right.insert(substrate.name);
+            }
+        }
+    }
+
+    for (const std::string& substrate : left) {
+        if (right.find(substrate) == right.end()) {
+            excluded_metabolites_.push_back(substrate);
+        }
+    }
+    for (const std::string& substrate : right) {
+        if (left.find(substrate) == left.end()) {
+            excluded_metabolites_.push_back(substrate);
+        }
+    }
+
+    std::sort(excluded_metabolites_.begin(), excluded_metabolites_.end());
+    excluded_metabolites_.erase(unique(excluded_metabolites_.begin(), excluded_metabolites_.end()), excluded_metabolites_.end());
 }
 
 

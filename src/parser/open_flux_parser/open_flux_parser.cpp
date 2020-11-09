@@ -7,6 +7,7 @@
 #include <limits>
 #include <sstream>
 #include <tuple>
+#include <unordered_set>
 #include <utilities/debug_utills/debug_prints.h>
 
 #include "parser/open_flux_parser/open_flux_utills.h"
@@ -28,18 +29,50 @@ ParserResults ParserOpenFlux::GetResults() {
 
 
 void ParserOpenFlux::Parse() {
-    ParseExcludedMetabolites();
+
     ParseMeasuredIsotopes();
     ParseMeasurements();
     ParseCorrectionMatrices();
     ParseSubstrateInput();
     ParseReactions();
+    ParseExcludedMetabolites();
 }
 
 
 void ParserOpenFlux::ParseExcludedMetabolites() {
     const std::string excluded_metabolites_path = path_ + "/excluded_metabolites.txt";
     excluded_metabolites_ = open_flux_parser::GetLines(excluded_metabolites_path);
+
+    std::unordered_set<std::string> left;
+    std::unordered_set<std::string> right;
+
+    for (const Reaction& reaction : reactions_) {
+        for (const Substrate& substrate : reaction.chemical_equation.left) {
+            if (std::find(excluded_metabolites_.begin(), excluded_metabolites_.end(), substrate.name) == excluded_metabolites_.end()) {
+                left.insert(substrate.name);
+            }
+
+        }
+        for (const Substrate& substrate : reaction.chemical_equation.right) {
+            if (std::find(excluded_metabolites_.begin(), excluded_metabolites_.end(), substrate.name) == excluded_metabolites_.end()) {
+                right.insert(substrate.name);
+            }
+        }
+    }
+
+    for (const std::string& substrate : left) {
+        if (right.find(substrate) == right.end()) {
+            excluded_metabolites_.push_back(substrate);
+        }
+    }
+    for (const std::string& substrate : right) {
+        if (left.find(substrate) == left.end()) {
+            excluded_metabolites_.push_back(substrate);
+        }
+    }
+
+    std::sort(excluded_metabolites_.begin(), excluded_metabolites_.end());
+    excluded_metabolites_.erase(unique(excluded_metabolites_.begin(), excluded_metabolites_.end()), excluded_metabolites_.end());
 }
 
 
