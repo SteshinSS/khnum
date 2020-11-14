@@ -113,6 +113,8 @@ Reaction ParserMaranas::ParseReaction(std::stringstream &stream) {
     Reaction result;
     stream >> result.id;
     stream >> result.name;
+    bool is_flux_only = false;
+    stream >> is_flux_only;
     bool is_reversed = false;
     stream >> is_reversed;
     bool is_excluded = false;
@@ -153,7 +155,6 @@ Reaction ParserMaranas::ParseReaction(std::stringstream &stream) {
         result.chemical_equation.atom_transitions.push_back(transition);
     }
 
-    // if (is_excluded) {
     if (false) {
         result.type = ReactionType::MetaboliteBalance;
     } else {
@@ -164,6 +165,18 @@ Reaction ParserMaranas::ParseReaction(std::stringstream &stream) {
         }
     }
 
+    if (result.name == "gluc_up") {
+        result.basis = 100;
+        result.deviation = 0.02;
+        result.is_set_free = true;
+    } else {
+        result.basis = std::numeric_limits<double>::quiet_NaN();
+        result.deviation = std::numeric_limits<double>::quiet_NaN();
+        result.is_set_free = false;
+    }
+
+
+
     result.basis = std::numeric_limits<double>::quiet_NaN();
     result.is_set_free = false;
     result.deviation = std::numeric_limits<double>::quiet_NaN();
@@ -172,44 +185,31 @@ Reaction ParserMaranas::ParseReaction(std::stringstream &stream) {
 
 void ParserMaranas::ParseExcludedMetabolites() {
     // Find metabolites from special compartment
-    // Turned off, because we detect metabolites with no outputs or inputs below
-    std::vector<std::string> excluded_prefixes;//{"[out]", "[pre]", "[d]", "[x]"};
+    std::vector<std::string> excluded_prefixes {"[out]", "[pre]", "[d]", "[x]"};
 
 
     for (Reaction& reaction : reactions_) {
-        bool is_excluded = true;
         for (const Substrate& substrate : reaction.chemical_equation.left) {
-            bool is_excluded_prefix = false;
             for (const std::string& prefix : excluded_prefixes) {
                 if (substrate.name.find(prefix) != std::string::npos) {
-                    is_excluded_prefix = true;
                     excluded_metabolites_.push_back(substrate.name);
                     break;
                 }
-            }
-            if (!is_excluded_prefix) {
-                is_excluded = false;
             }
         }
         for (const Substrate& substrate : reaction.chemical_equation.right) {
-            bool is_excluded_prefix = false;
             for (const std::string& prefix : excluded_prefixes) {
                 if (substrate.name.find(prefix) != std::string::npos) {
-                    is_excluded_prefix = true;
                     excluded_metabolites_.push_back(substrate.name);
                     break;
                 }
             }
-            if (!is_excluded_prefix) {
-                is_excluded = false;
-            }
-        }
-        if (is_excluded) {
-            reaction.type = ReactionType::IsotopomerBalance;
         }
     }
 
     // Find metabolites that doesn't have input or output
+    // Turned off, because do nothin
+    /*
     std::unordered_set<std::string> left;
     std::unordered_set<std::string> right;
 
@@ -236,8 +236,9 @@ void ParserMaranas::ParseExcludedMetabolites() {
         if (left.find(substrate) == left.end()) {
             excluded_metabolites_.push_back(substrate);
         }
-    }
+    } */
 
+    excluded_metabolites_.insert(excluded_metabolites_.end(), {"sink_4hba[c]", "sink_hmfurn[c]"});
     std::sort(excluded_metabolites_.begin(), excluded_metabolites_.end());
     excluded_metabolites_.erase(unique(excluded_metabolites_.begin(), excluded_metabolites_.end()), excluded_metabolites_.end());
 }
@@ -330,6 +331,40 @@ void ParserMaranas::ParseSubstrateInput() {
     }
 
     input_substrates_ = input_substrates;
+}
+
+bool ParserMaranas::AreThereComplexConvolutions() {
+    bool is_there = false;
+    for (const Reaction reaction : reactions_) {
+        std::vector<std::vector<int>> left(50);
+        std::vector<std::vector<int>> right(50);
+
+        for (const AtomTransition transition : reaction.chemical_equation.atom_transitions) {
+            int sub_pos = transition.substrate_pos;
+            int prod_pos = transition.product_pos;
+            if (std::find(left[sub_pos].begin(), left[sub_pos].end(), prod_pos) == left[sub_pos].end()) {
+                left[sub_pos].push_back(prod_pos);
+            }
+            if (std::find(right[prod_pos].begin(), right[prod_pos].end(), sub_pos) == right[prod_pos].end()) {
+                right[prod_pos].push_back(sub_pos);
+            }
+        }
+        for (const std::vector<int>& source : left) {
+            if (source.size() > 2) {
+                is_there = true;
+                std::cout << "Left with more than 2 products" << std::endl;
+                PrintReaction(reaction);
+            }
+        }
+        for (const std::vector<int>& source : right) {
+            if (source.size() > 2) {
+                is_there = true;
+                std::cout << "Right with more than 2 sources" << std::endl;
+                PrintReaction(reaction);
+            }
+        }
+    }
+    return is_there;
 }
 
 }

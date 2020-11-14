@@ -23,6 +23,7 @@ class ParserMaranas : public IParser {
   void ParseSubstrateInput();
   void ParseReactions();
   void CollectSubstrateSizes(const ChemicalEquationSide &side);
+  bool AreThereComplexConvolutions();
 
   const std::string path_;
   std::unordered_map<std::string, int> substrate_sizes_;

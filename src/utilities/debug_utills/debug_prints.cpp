@@ -22,7 +22,7 @@ void PrintEmuReaction(const EmuReaction &reaction) {
     PrintEmuSubstrate(reaction.right);
     //std::cout << "    rate: " << reaction.rate;
     // std::cout << "    id: " << reaction.id;
-    std::cout << std::endl;
+    std::cout << " " << reaction.id << std::endl;
 }
 
 void PrintEmuSubstrate(const EmuSubstrate& emu) {
@@ -68,7 +68,13 @@ void PrintReaction(const Reaction& reaction) {
     std::cout << reaction.id << " " << reaction.name << " ";
     size_t left_counter = 0;
     for (Substrate sub : reaction.chemical_equation.left) {
-        std::cout << sub.substrate_coefficient_ << " " << sub.name;
+        int total_atoms = 0;
+        for (const AtomTransition& transition : reaction.chemical_equation.atom_transitions) {
+            if (transition.substrate_pos == left_counter) {
+                ++total_atoms;
+            }
+        }
+        std::cout << sub.substrate_coefficient_ << " " << sub.name << ":" << total_atoms;
         ++left_counter;
         if (left_counter != reaction.chemical_equation.left.size()) {
             std::cout << " + ";
@@ -77,7 +83,13 @@ void PrintReaction(const Reaction& reaction) {
     std::cout << " = ";
     size_t right_counter = 0;
     for (Substrate sub : reaction.chemical_equation.right) {
-        std::cout << sub.substrate_coefficient_ << " " << sub.name;
+        int total_atoms = 0;
+        for (const AtomTransition& transition : reaction.chemical_equation.atom_transitions) {
+            if (transition.product_pos == right_counter) {
+                ++total_atoms;
+            }
+        }
+        std::cout << sub.substrate_coefficient_ << " " << sub.name << ":" << total_atoms;
         ++right_counter;
         if (right_counter != reaction.chemical_equation.right.size()) {
             std::cout << " + ";

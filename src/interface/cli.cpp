@@ -19,8 +19,8 @@
 namespace khnum {
 void RunCli() {
     try {
-        std::unique_ptr<IParser> parser(new ParserOpenFlux("../modelLast"));
-        //std::unique_ptr<IParser> parser(new ParserMaranas("../modelMaranas/model.csv"));
+        //std::unique_ptr<IParser> parser(new ParserOpenFlux("../modelLast"));
+        std::unique_ptr<IParser> parser(new ParserMaranas("../modelMaranas/"));
         parser->Parse();
 
         Modeller modeller(parser->GetResults());

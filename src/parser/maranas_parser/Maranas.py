@@ -1,5 +1,3 @@
-prefixes = set()
-
 def is_number(s):
     try:
         float(s)
@@ -38,6 +36,7 @@ class Reaction:
     count = 0
 
     def __init__(self, name):
+        self.is_flux = False
         self.id = Reaction.count
         Reaction.count += 1
         self.name = name
@@ -50,6 +49,7 @@ class Reaction:
         res += str(self.id) + '\n'
         res += self.name + '\n'
 
+        res += str(int(self.is_flux)) + '\n'
         res += str(int(self.is_reversed)) + '\n'
         res += str(int(self.is_excluded)) + '\n'
         res += str(len(self.chemical_reaction.left)) + '\n'
@@ -66,6 +66,31 @@ class Reaction:
             res += str(transition.product_atom) + '\n'
         return res
 
+
+def is_sides_equals(first: [], second: []):
+    import math
+    if len(first) != len(second):
+        return False
+
+    is_found = [False] * len(second)
+    for sub in first:
+        here = False
+        for i in range(len(second)):
+            if not is_found[i]:
+                if second[i].name == sub.name and math.isclose(sub.coefficient, second[i].coefficient):
+                    is_found[i] = True
+                    here = True
+                    break
+        if not here:
+            return False
+    return True
+
+def is_reaсtions_equal(first: Reaction, second: Reaction):
+    normal = is_sides_equals(first.chemical_reaction.left, second.chemical_reaction.left) and is_sides_equals(first.chemical_reaction.right, second.chemical_reaction.right)
+    if normal:
+        return True
+    rev = is_sides_equals(first.chemical_reaction.left, second.chemical_reaction.right) and is_sides_equals(first.chemical_reaction.right, second.chemical_reaction.left)
+    return rev
 
 def parse_chemical_equation_side(side, prefix=None, raw_atoms=None):
     result = []
@@ -85,7 +110,6 @@ def parse_chemical_equation_side(side, prefix=None, raw_atoms=None):
                 start = substance_name.index('[')
                 stop = substance_name.index(']')
                 pre = substance_name[start:stop + 1]
-                prefixes.add(pre)
 
             if substance.startswith('0*'):  # excluded metabolite
                 substance_name = substance_name[2:]
@@ -224,7 +248,6 @@ def parse_reaction(raw):
         prefix_end = left.find(':')
         assert(prefix_end != -1)
         left = left[prefix_end + 1:]
-    prefixes.add(prefix)
 
     left_side, is_excluded = parse_chemical_equation_side(left, prefix, raw.atoms)
     right_side, _ = parse_chemical_equation_side(right, prefix, raw.atoms)
@@ -277,10 +300,12 @@ number of atom transitions
 def parse(path):
     assert check_path_exists(path)
 
+    emu_model = path + 'model.csv'
+
     raw_reactions = dict()
     reactions = dict()
     import csv
-    csvfile = open(path, 'r', newline='')
+    csvfile = open(emu_model, 'r', newline='')
     reader = csv.reader(csvfile, delimiter=',', quotechar='"')
     next(reader, None)  # skip header
 
@@ -302,12 +327,37 @@ def parse(path):
     # now parse all atom transitions at once
     for raw in raw_reactions.values():
         reactions[raw.name] = parse_reaction(raw)
+
+    flux_model = path + 'flux_model.csv'
+    OnlyFlux = ["PPA", "DPCOAK", "NADK", "NADS1", "SULRi", "DM_4HBA", "DM_HMFURN", "biomass_out", "EX_ca2(e)",
+                "EX_cl(e)", "EX_cobalt2(e)", "EX_cu2(e)", "EX_fe2(e)", "EX_h(e)", "EX_h2(e)", "EX_h2o(e)", "EX_k(e)",
+                "EX_mg2(e)", "EX_mn2(e)", "EX_mobd(e)", "EX_nh4(e)", "o2_in", "EX_pi(e)", "EX_so4(e)", "EX_zn2(e)",
+                "CAt6pp", "CLt3_2pp", "COBALT2tpp", "CU2tpp", "FE2tpp", "FEROpp", "Kt2pp", "MG2tpp", "MN2t3pp",
+                "MN2tpp", "NAt3_1p5pp", "NAt3_2pp", "NAt3pp", "NH4tpp", "NI2t3pp", "NI2tpp", "O2tpp", "PIt2rpp",
+                "ZN2t3pp", "ZN2tpp", "CYTBD2pp", "CYTBDpp", "CYTBO3_4pp", "NADH10", "NADH16pp", "NADH17pp", "NADH5",
+                "NADPHQR2", "NADPHQR3", "NADTRHD", "THD2pp", "TRDR", "H2Otpp", "H2tpp", "MNt2pp", "H2Otex", "CA2tex",
+                "CLtex", "COBALT2tex", "CU2tex", "FE2tex", "FE3tex", "H2tex", "Htex", "Ktex", "MG2tex", "MNtex",
+                "MOBDtex", "NH4tex", "O2tex", "PItex", "SO4tex", "Zn2tex", "CAT", ]
+
+    csvfile = open(flux_model, 'r', newline='')
+    reader = csv.reader(csvfile, delimiter=',', quotechar='"')
+    for row in reader:
+        name = row[0]
+        if name in OnlyFlux:
+            reaction = row[2]
+            raw = RawReaction()
+            raw.name = name + '_flux'
+            raw.reaction = reaction
+            flux = parse_reaction(raw)
+            flux.is_flux = True
+            reactions[name + '_flux'] = flux
     return print_reactions(reactions)
 
 
+
+
 if __name__=='__main__':
-    result = parse('../../../modelMaranas/model.csv')
-    print(prefixes)
+    result = parse('../../../modelMaranas/')
     # print(result.decode('utf-8'))
 
 

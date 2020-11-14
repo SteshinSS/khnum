@@ -53,10 +53,10 @@ Matrix CreateStoichiometryMatrix(const std::vector<Reaction> &reactions,
         bool is_pos = false;
         bool is_neg = false;
         for (int j = 0; j < stoichiometry_matrix.cols(); ++j) {
-            if (stoichiometry_matrix(i, j) > 0.001) {
+            if (stoichiometry_matrix(i, j) > 0.0) {
                 is_pos = true;
             }
-            if (stoichiometry_matrix(i, j) < -0.001) {
+            if (stoichiometry_matrix(i, j) < -0.0) {
                 is_neg = true;
             }
         }
