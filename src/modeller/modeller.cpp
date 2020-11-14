@@ -97,7 +97,7 @@ void Modeller::CalculateMeasurementsCount() {
 
 
 void Modeller::CheckModelForErrors() {
-    modelling_utills::CheckMeasurementsMID(measurements_);
+    modelling_utills::CheckMeasurementsMID(measurements_, true);
 }
 
 Problem Modeller::GetProblem() {

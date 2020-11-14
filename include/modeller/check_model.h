@@ -6,6 +6,6 @@
 
 namespace khnum {
 namespace modelling_utills {
-void CheckMeasurementsMID (std::vector<Measurement> measurements);
+void CheckMeasurementsMID (std::vector<Measurement>& measurements, bool fix_mids = true);
 }
 }
